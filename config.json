@@ -16,6 +16,15 @@
 
 	"project-settings": [
 		{
+			"key": "character",
+			"name": "Character",
+			"type": "dropdown",
+			"choices": [
+				{ "value": "Julie", "name": "Julie"},
+				{ "value": "Amy", "name": "Amy"}
+			]
+		},
+		{
 			"key": "voice",
 			"name": "Voice",
 			"type": "dropdown",
