@@ -35,7 +35,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		<script>
 			$(function(){
 				var voice = <?=json_encode(explode(',', $this->getProjectSetting('voice')))?>;
-				if(voice == ''){
+				if(!voice){
 					voice = [1,1]
 				}
 
@@ -56,7 +56,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 					}
 
 					var welcomeMessage = <?=json_encode($this->getProjectSetting('welcome-message'))?>;
-					if(welcomeMessage != ''){
+					if(welcomeMessage){
 						mySayText(welcomeMessage)
 					}
 
