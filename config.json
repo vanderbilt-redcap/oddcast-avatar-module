@@ -1,0 +1,44 @@
+{
+	"name": "Oddcast Avatar",
+	
+	"authors": [
+		{
+			"name": "Mark McEver",
+			"email": "mark.mcever@vanderbilt.edu"
+		}
+	],
+
+	"permissions": [
+		"hook_survey_page"
+	],
+
+	"description": "Enables an Oddcast Avatar on surveys.",
+
+	"project-settings": [
+		{
+			"key": "voice",
+			"name": "Voice",
+			"type": "dropdown",
+			"choices": [
+				{ "value": "2,7", "name": "Allison" },
+				{ "value": "3,6", "name": "Ashley" },
+				{ "value": "3,8", "name": "Beth" },
+				{ "value": "2,2", "name": "Dave" },
+				{ "value": "3,7", "name": "James" },
+				{ "value": "4,2", "name": "Jill" },
+				{ "value": "3,3", "name": "Julie" },
+				{ "value": "3,1", "name": "Kate" },
+				{ "value": "3,2", "name": "Paul" },
+				{ "value": "4,11", "name": "Samantha" },
+				{ "value": "2,8", "name": "Steve" },
+				{ "value": "2,1", "name": "Susan" },
+				{ "value": "4,3", "name": "Tom" }
+			]
+		},
+		{
+			"key": "welcome-message",
+			"name": "Welcome Message",
+			"type": "textarea"
+		}
+	]
+}
