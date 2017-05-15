@@ -42,8 +42,6 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				var engine = voice[0]
 				var person = voice[1]
 
-				console.log(voice)
-
 				var mySayText = function(text){
 					sayText(text, person, 1, engine)
 				}
