@@ -33,12 +33,12 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			$show = $this->getProjectSetting('character');
 			if($show == 'Amy'){
 				?>
-				<script type="text/javascript" src="//vhss-d.oddcast.com/vhost_embed_functions_v2.php?acc=6267283&js=1"></script><script type="text/javascript">AC_VHost_Embed(6267283,300,400,'',1,1, 2557406, 2865485,1,0,'19b9de5dfbb6523d8d0aa02e20f42102',0);</script>
+				<script type="text/javascript" src="//vhss-d.oddcast.com/vhost_embed_functions_v2.php?acc=6267283&js=1"></script><script type="text/javascript">AC_VHost_Embed(6267283,300,400,'',1,1, 2560294, 0,1,0,'709e320dba1a392fa4e863ef0809f9f1',0);</script>
 				<?php
 			}
 			else{
 				?>
-				<script type="text/javascript" src="//vhss-d.oddcast.com/vhost_embed_functions_v2.php?acc=6267283&js=1"></script><script type="text/javascript">AC_VHost_Embed(6267283,300,400,'',1,1, 2556887, 2864965,1,0,'c01a5c706842a2c4fb1d468701b73ff6',0);</script>
+				<script type="text/javascript" src="//vhss-d.oddcast.com/vhost_embed_functions_v2.php?acc=6267283&js=1"></script><script type="text/javascript">AC_VHost_Embed(6267283,300,400,'',1,1, 2560288, 0,1,0,'357ac6967e845ef95e8aed802148866f',0);</script>
 				<?php
 			}
 			?>
