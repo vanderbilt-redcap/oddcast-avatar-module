@@ -50,18 +50,21 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		</div>
 
 		<script>
+			var isFirstPage = <?php echo $_GET['__page__'] == 1 ? "true" : "false"; ?>;
+			var enableOddcastSpeech = false;
+
 			$(function(){
 				var voice = <?=json_encode(explode(',', $this->getProjectSetting('voice')))?>;
 				if(!voice){
-					voice = [1,1]
+					voice = [1,1];
 				}
 
-				var engine = voice[0]
-				var person = voice[1]
+				var engine = voice[0];
+				var person = voice[1];
 
 				var mySayText = function(text){
 					sayText(text, person, 1, engine)
-				}
+				};
 
 				var initialize = function(){
 					if(typeof sayText == 'undefined'){
@@ -71,12 +74,21 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 					}
 
 					var welcomeMessage = <?=json_encode($this->getProjectSetting('welcome-message'))?>;
-					if(welcomeMessage){
+					if(welcomeMessage && isFirstPage){
 						mySayText(welcomeMessage)
 					}
 
+					followCursor(0);
+					setIdleMovement(20,10);
+
 					$('input, select, textarea, .ui-slider-handle').focus(function(){
-						var row = $(this).closest('tr')
+						oddcastFocusSpeech(this)
+					})
+				};
+
+				var oddcastFocusSpeech = function(element) {
+					if(enableOddcastSpeech) {
+						var row = $(element).closest('tr');
 
 						if(row.closest('table').hasClass('sldrparent')){
 							row = row.parent().closest('tr')
@@ -86,8 +98,8 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 
 						stopSpeech()
 						mySayText('You just clicked the ' + text + ' field.')
-					})
-				}
+					}
+				};
 
 				initialize()
 			})
