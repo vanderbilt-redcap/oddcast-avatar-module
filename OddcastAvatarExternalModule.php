@@ -14,8 +14,9 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				right: 25px;
 				background: white;
 				border-radius: 5px;
+				border: 1px solid black;
 				width: 350px;
-				height: 300px;
+				height: 302px;
 			}
 
 			#oddcast-avatar .character{
@@ -25,6 +26,11 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 
 			#oddcast-avatar #_play{
 				display: none;
+			}
+
+			#oddcast-avatar.minimize{
+				width: 100px;
+				height:30px;
 			}
 		</style>
 
@@ -47,6 +53,8 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				<?php
 			}
 			?>
+			<img id='maximize-avatar' style='position:absolute;top:5px;left:5px;display:none' src='<?=APP_PATH_IMAGES?>plus.png' />
+			<img id='minimize-avatar' style='position:absolute;top:5px;left:5px;' src='<?=APP_PATH_IMAGES?>minus.png' />
 		</div>
 
 		<script>
@@ -85,6 +93,22 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 						oddcastFocusSpeech(this)
 					})
 				};
+
+				$('#minimize-avatar').click(function() {
+					freezeToggle();
+					$('#oddcast-avatar').addClass("minimize");
+					$('.character').hide();
+					$('#minimize-avatar').hide();
+					$('#maximize-avatar').show();
+				});
+
+				$('#maximize-avatar').click(function() {
+					$('#oddcast-avatar').removeClass("minimize");
+					$('.character').show();
+					$('#minimize-avatar').show();
+					$('#maximize-avatar').hide();
+					freezeToggle();
+				});
 
 				var oddcastFocusSpeech = function(element) {
 					if(enableOddcastSpeech) {
