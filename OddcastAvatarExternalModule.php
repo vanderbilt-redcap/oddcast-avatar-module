@@ -58,7 +58,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		</div>
 
 		<script>
-			var isFirstPage = <?php echo $_GET['__page__'] == 1 ? "true" : "false"; ?>;
+			var pageNumber = <?php echo $_GET['__page__'] != 0 ? $_GET['__page__'] : 0; ?>;
 			var enableOddcastSpeech = false;
 
 			$(function(){
@@ -82,8 +82,13 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 					}
 
 					var welcomeMessage = <?=json_encode($this->getProjectSetting('welcome-message'))?>;
-					if(welcomeMessage && isFirstPage){
-						mySayText(welcomeMessage)
+					var pageList = <?=json_encode($this->getProjectSetting('message-page'))?>;
+
+					for(var i = 0; i < pageList.length; i++) {
+						if(welcomeMessage[i] && (pageNumber == pageList[i])){
+							mySayText(welcomeMessage[i]);
+							break;
+						}
 					}
 
 					followCursor(0);

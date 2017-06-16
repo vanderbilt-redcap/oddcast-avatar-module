@@ -62,9 +62,28 @@
 			]
 		},
 		{
-			"key": "welcome-message",
-			"name": "Welcome Message",
-			"type": "textarea"
+			"key": "avatar-messages",
+			"name": "Avatar Messages",
+			"type": "sub_settings",
+			"repeatable": true,
+			"sub_settings":
+			[
+				{
+					"key": "welcome-message",
+					"name": "Message text",
+					"type": "textarea"
+				},
+				{
+					"key": "message-form",
+					"name": "Form Name",
+					"type": "form-list"
+				},
+				{
+					"key": "message-page",
+					"name": "Page Number",
+					"type": "text"
+				}
+			]
 		}
 	]
 }
