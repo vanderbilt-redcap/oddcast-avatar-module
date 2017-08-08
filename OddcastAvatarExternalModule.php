@@ -1,5 +1,8 @@
 <?php
-namespace ExternalModules;
+namespace Vanderbilt\OddcastAvatarExternalModule;
+
+use ExternalModules\AbstractExternalModule;
+use ExternalModules\ExternalModules;
 
 class OddcastAvatarExternalModule extends AbstractExternalModule
 {

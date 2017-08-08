@@ -1,6 +1,8 @@
 {
 	"name": "Oddcast Avatar",
-	
+
+	"namespace": "Vanderbilt\\OddcastAvatarExternalModule",
+
 	"authors": [
 		{
 			"name": "Mark McEver",
