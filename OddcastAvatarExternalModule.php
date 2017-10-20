@@ -63,18 +63,27 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			var pageNumber = <?php echo $_GET['__page__'] != 0 ? $_GET['__page__'] : 0; ?>;
 			var enableOddcastSpeech = false;
 
+			// This object is defined globally so it can be used in other modules (like Inline Descriptive Pop-ups).
+			var OddcastAvatarExternalModule = {
+				sayText: function(text){
+					if(!OddcastAvatarExternalModule.engine){
+						// The initialize function hasn't run yet.
+						return
+					}
+
+					stopSpeech()
+					sayText(text, OddcastAvatarExternalModule.person, 1, OddcastAvatarExternalModule.engine)
+				}
+			}
+
 			$(function(){
 				var voice = <?=json_encode(explode(',', $this->getProjectSetting('voice')))?>;
 				if(!voice){
 					voice = [1,1];
 				}
 
-				var engine = voice[0];
-				var person = voice[1];
-
-				var mySayText = function(text){
-					sayText(text, person, 1, engine)
-				};
+				OddcastAvatarExternalModule.engine = voice[0];
+				OddcastAvatarExternalModule.person = voice[1];
 
 				var initialize = function(){
 					if(typeof sayText == 'undefined'){
@@ -88,7 +97,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 
 					for(var i = 0; i < pageList.length; i++) {
 						if(welcomeMessage[i] && (pageNumber == pageList[i])){
-							mySayText(welcomeMessage[i]);
+							OddcastAvatarExternalModule.sayText(welcomeMessage[i]);
 							break;
 						}
 					}
@@ -127,8 +136,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 
 						var text = row.find('> td:nth-child(2)').text().trim()
 
-						stopSpeech()
-						mySayText('You just clicked the ' + text + ' field.')
+						OddcastAvatarExternalModule.sayText('You just clicked the ' + text + ' field.')
 					}
 				};
 
