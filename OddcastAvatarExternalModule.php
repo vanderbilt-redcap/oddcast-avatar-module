@@ -9,6 +9,8 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 	function hook_survey_page()
 	{
 		?>
+		<script src="//cdn.jsdelivr.net/npm/mobile-detect@1.4.1/mobile-detect.min.js"></script>
+
 		<style>
 			#oddcast-avatar{
 				position: fixed;
@@ -34,7 +36,29 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				width: 100px;
 				height:30px;
 			}
+
+			#oddcast-overlay{
+				display: none;
+			    position: fixed;
+			    height: 100vh;
+			    width: 100vw;
+			    background: rgba(239, 239, 239, 0.96);
+				top: 0px;
+				left: 0px;
+				z-index: 1;
+				text-align: center;
+				padding-top: 50%;
+				font-size: 40px;
+				font-weight: 700;
+				letter-spacing: 1px;
+				color: #4e4e4e;
+				font-family: sans-serif !important;
+			}
 		</style>
+
+		<div id="oddcast-overlay">
+			Please rotate the screen!
+		</div>
 
 		<div id='oddcast-avatar' >
 			<?php
@@ -141,6 +165,26 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				};
 
 				initialize()
+			})
+			
+			$(function(){
+				var checkOrientation = function(){
+					var md = new MobileDetect(window.navigator.userAgent);
+					if(!md.mobile() && !md.tablet()){
+						return
+					}
+
+					var overlay = $('#oddcast-overlay');
+					if(window.innerHeight > window.innerWidth){
+						overlay.fadeIn()
+					}
+					else{
+						overlay.fadeOut()
+					}
+				}
+
+				checkOrientation()
+				window.addEventListener('orientationchange', checkOrientation)
 			})
 		</script>
 		<?php
