@@ -29,17 +29,16 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 
 			#oddcast-avatar{
 				background: white;
-				width: 350px;
-				height: 302px;
+				width: 300px;
 			}
 
+			#oddcast-avatar ._html5Player,
 			#oddcast-avatar .character{
 				margin-left: -40px;
-				margin-top: 5px; /* hide the bottom of the avatar, since it has some rendering issues */
 			}
 
-			#oddcast-avatar #_play{
-				display: none;
+			#oddcast-avatar .button_holder{
+				display: none !important;
 			}
 
 			#oddcast-avatar.minimize{
