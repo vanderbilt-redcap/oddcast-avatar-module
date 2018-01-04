@@ -12,13 +12,23 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		<script src="//cdn.jsdelivr.net/npm/mobile-detect@1.4.1/mobile-detect.min.js"></script>
 
 		<style>
+			#oddcast-wrapper{
+				display: table;
+				margin: auto;
+			}
+
+			#oddcast-wrapper > *{
+				display: table-cell;
+			}
+
+			#pagecontainer{
+				height: 100vh;
+				overflow-y: scroll;
+				-webkit-overflow-scrolling: touch;
+			}
+
 			#oddcast-avatar{
-				position: fixed;
-				top: 25px;
-				right: 25px;
 				background: white;
-				border-radius: 5px;
-				border: 1px solid black;
 				width: 350px;
 				height: 302px;
 			}
@@ -60,27 +70,32 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			Please rotate the screen!
 		</div>
 
-		<div id='oddcast-avatar' >
-			<?php
-			$show = $this->getProjectSetting('character');
-			if($show == 'Amy'){
-				?>
-				<script type="text/javascript" src="//vhss-d.oddcast.com/vhost_embed_functions_v2.php?acc=6267283&js=1"></script><script type="text/javascript">AC_VHost_Embed(6267283,300,400,'',1,1, 2560294, 0,1,0,'709e320dba1a392fa4e863ef0809f9f1',0);</script>
-				<?php
-			}
-			else if($show == 'Paul'){
-				?>
-				<script type="text/javascript" src="//vhss-d.oddcast.com/vhost_embed_functions_v2.php?acc=6267283&js=1"></script><script type="text/javascript">AC_VHost_Embed(6267283,300,400,'',1,1, 2556887, 0,1,0,'1ecd277ef756782795cfe78231031c9a',0);</script>
-				<?php
-			}
-			else{
-				?>
-				<script type="text/javascript" src="//vhss-d.oddcast.com/vhost_embed_functions_v2.php?acc=6267283&js=1"></script><script type="text/javascript">AC_VHost_Embed(6267283,300,400,'',1,1, 2560288, 0,1,0,'357ac6967e845ef95e8aed802148866f',0);</script>
-				<?php
-			}
-			?>
-			<img id='maximize-avatar' style='position:absolute;top:5px;left:5px;display:none' src='<?=APP_PATH_IMAGES?>plus.png' />
-			<img id='minimize-avatar' style='position:absolute;top:5px;left:5px;' src='<?=APP_PATH_IMAGES?>minus.png' />
+		<div id="oddcast-wrapper">
+			<div id="oddcast-sidebar">
+				<div id='oddcast-avatar' >
+					<?php
+					$show = $this->getProjectSetting('character');
+					if($show == 'Amy'){
+						?>
+						<script type="text/javascript" src="//vhss-d.oddcast.com/vhost_embed_functions_v2.php?acc=6267283&js=1"></script><script type="text/javascript">AC_VHost_Embed(6267283,300,400,'',1,1, 2560294, 0,1,0,'709e320dba1a392fa4e863ef0809f9f1',0);</script>
+						<?php
+					}
+					else if($show == 'Paul'){
+						?>
+						<script type="text/javascript" src="//vhss-d.oddcast.com/vhost_embed_functions_v2.php?acc=6267283&js=1"></script><script type="text/javascript">AC_VHost_Embed(6267283,300,400,'',1,1, 2556887, 0,1,0,'1ecd277ef756782795cfe78231031c9a',0);</script>
+						<?php
+					}
+					else{
+						?>
+						<script type="text/javascript" src="//vhss-d.oddcast.com/vhost_embed_functions_v2.php?acc=6267283&js=1"></script><script type="text/javascript">AC_VHost_Embed(6267283,300,400,'',1,1, 2560288, 0,1,0,'357ac6967e845ef95e8aed802148866f',0);</script>
+						<?php
+					}
+					?>
+					<img id='maximize-avatar' style='position:absolute;top:5px;left:5px;display:none' src='<?=APP_PATH_IMAGES?>plus.png' />
+					<img id='minimize-avatar' style='position:absolute;top:5px;left:5px;' src='<?=APP_PATH_IMAGES?>minus.png' />
+				</div>
+			</div>
+			<div id="oddcast-content"></div>
 		</div>
 
 		<script>
@@ -185,6 +200,13 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 
 				checkOrientation()
 				window.addEventListener('orientationchange', checkOrientation)
+			})
+
+			$(function(){
+				var sidebar = $('#oddcast-sidebar');
+				$('body').prepend($('#oddcast-wrapper'))
+
+				$('#pagecontainer').appendTo($('#oddcast-content'))
 			})
 		</script>
 		<?php
