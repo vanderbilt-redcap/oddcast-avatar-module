@@ -256,26 +256,27 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 					freezeToggle();
 				});
 
+				var oddcastPlayer = $('._html5Player')
 				var characterPicker = $('#oddcast-character-picker')
 
 				var toggleCharacterPicker = function(){
-					var player = $('._html5Player')
 					if(characterPicker.is(':visible')){
 						characterPicker.fadeOut(100)
-						player.css('filter', '')
+						oddcastPlayer.css('filter', '')
 					}
 					else{
 						characterPicker.fadeIn(200)
-						player.css('filter', 'blur(5px)')
+						oddcastPlayer.css('filter', 'blur(5px)')
 					}
 				}
 
 				$('#choose-avatar').click(toggleCharacterPicker)
 
 				characterPicker.find('.character').click(function(link){
+					toggleCharacterPicker()
+					oddcastPlayer.find('.character').remove()
 					var id = $(this).data('show-id')
 					loadShow(id)
-					toggleCharacterPicker()
 				})
 
 				var oddcastFocusSpeech = function(element) {
