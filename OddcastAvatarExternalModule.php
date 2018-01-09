@@ -55,7 +55,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			    background: rgba(239, 239, 239, 0.96);
 				top: 0px;
 				left: 0px;
-				z-index: 1;
+				z-index: 9999; /* Above the avatar character */
 				text-align: center;
 				padding-top: 50%;
 				font-size: 40px;
@@ -65,10 +65,6 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				font-family: sans-serif !important;
 			}
 		</style>
-
-		<div id="oddcast-overlay">
-			Please rotate the screen!
-		</div>
 
 		<div id="oddcast-wrapper">
 			<div id="oddcast-sidebar">
@@ -96,6 +92,9 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				</div>
 			</div>
 			<div id="oddcast-content"></div>
+			<div id="oddcast-overlay">
+				Please rotate the screen!
+			</div>
 		</div>
 
 		<script>
