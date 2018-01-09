@@ -39,6 +39,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			#oddcast-wrapper{
 				display: table;
 				margin: auto;
+				background: #f3f3f3;
 			}
 
 			#oddcast-wrapper > *{
@@ -59,15 +60,21 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			#oddcast-avatar{
 				background: white;
 				width: 300px;
+				overflow: hidden;
+				border-bottom: 1px solid #cccccc;
 			}
 
 			#oddcast-avatar ._html5Player,
-			#oddcast-avatar .character{
+			#oddcast-avatar ._html5Player .character{
 				margin-left: -40px;
 			}
 
 			#oddcast-avatar .button_holder{
 				display: none !important;
+			}
+
+			#oddcast-sidebar{
+				width: 300px;
 			}
 
 			#oddcast-sidebar .fa{
@@ -80,9 +87,15 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				cursor: pointer;
 			}
 
+			#oddcast-controls{
+				z-index: 10000; /* Above the avatar character */
+				position: absolute;
+				width: 100%;
+			}
+
 			#oddcast-sidebar .fa-minus-circle,
 			#oddcast-sidebar .fa-plus-circle{
-				left: 5px;
+				left: 8px;
 			}
 
 			#oddcast-sidebar .fa-plus-circle{
@@ -110,6 +123,21 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				color: #4e4e4e;
 				font-family: sans-serif !important;
 			}
+
+			#oddcast-character-picker{
+				top: 50px;
+				left: 50px;
+				width: 200px;
+				border: 1px solid black;
+				position: absolute;
+				background: white;
+				display: none;
+			}
+
+			#oddcast-controls .character{
+				margin: 15px;
+				display: inline-block;
+			}
 		</style>
 
 		<div id="oddcast-wrapper">
@@ -117,7 +145,14 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				<i class="fa fa-minus-circle" id="minimize-avatar"></i>
 				<i class="fa fa-plus-circle" id="maximize-avatar"></i>
 				<div id='oddcast-avatar' >
-					<i class="fa fa-user"></i>
+					<div id="oddcast-controls">
+						<i class="fa fa-user" id="choose-avatar"></i>
+						<div id="oddcast-character-picker">
+							<a class="character" href="#" data-show-id="4">Character 1</a>
+							<a class="character" href="#" data-show-id="5">Character 2</a>
+						</div>
+					</div>
+
 					<?php
 					$show = $this->getProjectSetting('character');
 					if($show == 'Amy'){
@@ -198,18 +233,30 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				$('#minimize-avatar').click(function() {
 					freezeToggle();
 					$('#oddcast-avatar').addClass("minimize");
-					$('.character').hide();
+					$('#oddcast-avatar').hide();
 					$('#minimize-avatar').hide();
 					$('#maximize-avatar').show();
 				});
 
 				$('#maximize-avatar').click(function() {
 					$('#oddcast-avatar').removeClass("minimize");
-					$('.character').show();
+					$('#oddcast-avatar').show();
 					$('#minimize-avatar').show();
 					$('#maximize-avatar').hide();
 					freezeToggle();
 				});
+
+				var characterPicker = $('#oddcast-character-picker')
+
+				$('#choose-avatar').click(function() {
+					characterPicker.toggle()
+				})
+
+				characterPicker.find('a').click(function(link){
+					var id = $(this).data('show-id')
+					loadShow(id)
+					characterPicker.hide()
+				})
 
 				var oddcastFocusSpeech = function(element) {
 					if(enableOddcastSpeech) {

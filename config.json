@@ -20,7 +20,7 @@
 	"project-settings": [
 		{
 			"key": "character",
-			"name": "Character",
+			"name": "Default Character",
 			"type": "dropdown",
 			"choices": [
 				{ "value": "Julie", "name": "Julie"},
