@@ -125,18 +125,28 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			}
 
 			#oddcast-character-picker{
-				top: 50px;
-				left: 50px;
-				width: 200px;
-				border: 1px solid black;
+				top: 100px;
+				left: 67px;
+				box-shadow: 0px 0px 3px #bdb2b2;
 				position: absolute;
 				background: white;
 				display: none;
+				border-radius: 8px;
+				padding: 0px 10px;
 			}
 
 			#oddcast-controls .character{
-				margin: 15px;
+				width: 60px;
+				margin: 10px 5px;
 				display: inline-block;
+				border-bottom: 1px solid #f1eeee;
+				cursor: pointer;
+				transition: 200ms all;
+			}
+
+			#oddcast-controls .character:hover{
+				width: 65px;
+				margin: 7px 2.5px;
 			}
 		</style>
 
@@ -148,8 +158,8 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 					<div id="oddcast-controls">
 						<i class="fa fa-user" id="choose-avatar"></i>
 						<div id="oddcast-character-picker">
-							<a class="character" href="#" data-show-id="4">Character 1</a>
-							<a class="character" href="#" data-show-id="5">Character 2</a>
+							<img src="<?=$this->getUrl('images/4.png')?>" data-show-id="4" class="character" />
+							<img src="<?=$this->getUrl('images/5.png')?>" data-show-id="5" class="character" />
 						</div>
 					</div>
 
@@ -248,14 +258,24 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 
 				var characterPicker = $('#oddcast-character-picker')
 
-				$('#choose-avatar').click(function() {
-					characterPicker.toggle()
-				})
+				var toggleCharacterPicker = function(){
+					var player = $('._html5Player')
+					if(characterPicker.is(':visible')){
+						characterPicker.fadeOut(100)
+						player.css('filter', '')
+					}
+					else{
+						characterPicker.fadeIn(200)
+						player.css('filter', 'blur(5px)')
+					}
+				}
 
-				characterPicker.find('a').click(function(link){
+				$('#choose-avatar').click(toggleCharacterPicker)
+
+				characterPicker.find('.character').click(function(link){
 					var id = $(this).data('show-id')
 					loadShow(id)
-					characterPicker.hide()
+					toggleCharacterPicker()
 				})
 
 				var oddcastFocusSpeech = function(element) {
