@@ -17,6 +17,12 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		</style>
 
 		<script src="//cdn.jsdelivr.net/npm/mobile-detect@1.4.1/mobile-detect.min.js"></script>
+		<?php
+			$vorlonIPAddress = '10.151.18.178';
+			if($_SERVER['HTTP_HOST'] == $vorlonIPAddress){
+				?><script src="http://<?=$vorlonIPAddress?>:1337/vorlon.js"></script><?php
+			}
+		?>
 
 		<style>
 			#oddcast-wrapper{
