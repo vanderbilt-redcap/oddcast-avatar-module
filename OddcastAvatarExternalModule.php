@@ -9,12 +9,20 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 	function hook_survey_page()
 	{
 		?>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" integrity="sha256-NuCn4IvuZXdBaFKJOAcsU2Q3ZpwbdFisd5dux4jkQ5w=" crossorigin="anonymous" />
+		<style>
+			.fa{
+				font-family: FontAwesome !important; /* Override the REDCap style that prevents FontAwesome from working */
+			}
+		</style>
+
 		<script src="//cdn.jsdelivr.net/npm/mobile-detect@1.4.1/mobile-detect.min.js"></script>
 
 		<style>
 			#oddcast-wrapper{
 				display: table;
 				margin: auto;
+				position: fixed; /* prevents the user from attemping to scroll the sidebar area */
 			}
 
 			#oddcast-wrapper > *{
@@ -42,9 +50,27 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				display: none !important;
 			}
 
-			#oddcast-avatar.minimize{
-				width: 100px;
-				height:30px;
+			#oddcast-sidebar .fa{
+				position: absolute;
+				font-size: 25px;
+				color: #ececec;
+				text-shadow: 0px 0px 2px black;
+				top: 5px;
+				z-index: 10000; /* Above the avatar character */
+				cursor: pointer;
+			}
+
+			#oddcast-sidebar .fa-minus-circle,
+			#oddcast-sidebar .fa-plus-circle{
+				left: 5px;
+			}
+
+			#oddcast-sidebar .fa-plus-circle{
+				display: none;
+			}
+
+			#oddcast-sidebar .fa-user{
+				left: 276px;
 			}
 
 			#oddcast-overlay{
@@ -68,7 +94,10 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 
 		<div id="oddcast-wrapper">
 			<div id="oddcast-sidebar">
+				<i class="fa fa-minus-circle" id="minimize-avatar"></i>
+				<i class="fa fa-plus-circle" id="maximize-avatar"></i>
 				<div id='oddcast-avatar' >
+					<i class="fa fa-user"></i>
 					<?php
 					$show = $this->getProjectSetting('character');
 					if($show == 'Amy'){
@@ -87,8 +116,6 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 						<?php
 					}
 					?>
-					<img id='maximize-avatar' style='position:absolute;top:5px;left:5px;display:none' src='<?=APP_PATH_IMAGES?>plus.png' />
-					<img id='minimize-avatar' style='position:absolute;top:5px;left:5px;' src='<?=APP_PATH_IMAGES?>minus.png' />
 				</div>
 			</div>
 			<div id="oddcast-content"></div>
