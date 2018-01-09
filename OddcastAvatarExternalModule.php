@@ -19,6 +19,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 
 			#oddcast-wrapper > *{
 				display: table-cell;
+				vertical-align: top;
 			}
 
 			#pagecontainer{
