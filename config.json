@@ -19,6 +19,11 @@
 
 	"project-settings": [
 		{
+			"key": "disable",
+			"name": "Disable Avatar",
+			"type": "checkbox"
+		},
+		{
 			"key": "character",
 			"name": "Default Character",
 			"type": "dropdown",

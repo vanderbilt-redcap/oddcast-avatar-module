@@ -190,6 +190,12 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		</div>
 
 		<script>
+			<?php
+			if($this->getProjectSetting('disable')){
+				echo 'return';
+			}
+			?>
+
 			var pageNumber = <?php echo $_GET['__page__'] != 0 ? $_GET['__page__'] : 0; ?>;
 			var enableOddcastSpeech = false;
 
