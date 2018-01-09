@@ -46,6 +46,10 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				vertical-align: top;
 			}
 
+			#oddcast-sidebar{
+				position: relative;
+			}
+
 			#pagecontainer{
 				height: 100vh;
 				overflow-y: scroll;
