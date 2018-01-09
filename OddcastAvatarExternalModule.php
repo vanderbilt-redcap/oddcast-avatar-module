@@ -25,10 +25,20 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		?>
 
 		<style>
+			/* The following two blocks prevent the user from attempting to scroll the sidebar area on iPad. */
+			html {
+				position: fixed;
+				height: 100%;
+				overflow: hidden;
+			}
+			body {
+				width: 100vw;
+				height: 100vh;
+			}
+
 			#oddcast-wrapper{
 				display: table;
 				margin: auto;
-				position: fixed; /* prevents the user from attemping to scroll the sidebar area */
 			}
 
 			#oddcast-wrapper > *{
