@@ -239,6 +239,9 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 
 					var welcomeMessage = <?=json_encode($this->getProjectSetting('welcome-message'))?>;
 					var pageList = <?=json_encode($this->getProjectSetting('message-page'))?>;
+					if(!pageList){
+						pageList = []
+					}
 
 					for(var i = 0; i < pageList.length; i++) {
 						if(welcomeMessage[i] && (pageNumber == pageList[i])){
