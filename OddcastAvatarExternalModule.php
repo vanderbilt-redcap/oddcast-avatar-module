@@ -73,10 +73,6 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				display: none !important;
 			}
 
-			#oddcast-sidebar{
-				width: 300px;
-			}
-
 			#oddcast-sidebar .fa{
 				position: absolute;
 				font-size: 25px;
