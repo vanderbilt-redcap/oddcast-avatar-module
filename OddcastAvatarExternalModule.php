@@ -59,7 +59,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				height: 100vh;
 				overflow-y: scroll;
 				-webkit-overflow-scrolling: touch;
-				min-width: 724px; /* After adding the width of the avatar, this will fill the screen of a landscape ipad. */
+				min-width: 721px; /* After adding the width of the avatar (and borders), this will fill the screen of a landscape ipad. */
 			}
 
 			#container{
