@@ -40,6 +40,8 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				display: table;
 				margin: auto;
 				background: #f3f3f3;
+				border-left: 1px solid #ddd;
+				border-right: 1px solid #ddd;
 			}
 
 			#oddcast-wrapper > *{
@@ -49,6 +51,8 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 
 			#oddcast-sidebar{
 				position: relative;
+				border-right: 1px solid #ccc;
+				overflow: hidden; /* Prevent main_container from invisibly bleeding over into the survey. */
 			}
 
 			#pagecontainer{
@@ -58,15 +62,19 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				min-width: 724px; /* After adding the width of the avatar, this will fill the screen of a landscape ipad. */
 			}
 
-			#oddcast-sidebar,
-			#oddcast-avatar {
-				width: 300px; /* This must be set on the sidebar too, so that it doesn't collapse if the avatar is hidden */
+			#container{
+				border-left: none;
+			}
+
+			#oddcast-sidebar{
+				min-width: 301px; /* The width must be set on the sidebar too, so that it doesn't collapse if the avatar is hidden. */
 			}
 
 			#oddcast-avatar{
 				background: white;
 				overflow: hidden;
 				border-bottom: 1px solid #cccccc;
+				width: 300px;
 			}
 
 			#oddcast-avatar ._html5Player,
