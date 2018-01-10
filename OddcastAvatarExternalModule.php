@@ -148,6 +148,10 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				width: 65px;
 				margin: 7px 2.5px;
 			}
+
+			#changeFont{
+				padding-right: 10px; /* Move it away from the scrollbar a bit. */
+			}
 		</style>
 
 		<div id="oddcast-wrapper">
