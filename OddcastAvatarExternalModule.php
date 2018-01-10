@@ -192,7 +192,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		<script>
 			<?php
 			if($this->getProjectSetting('disable')){
-				echo 'return';
+//				echo 'return';
 			}
 			?>
 
