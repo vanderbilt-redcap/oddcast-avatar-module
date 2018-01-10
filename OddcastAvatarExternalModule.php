@@ -246,20 +246,20 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 					})
 				};
 
+				var fadeDuration = 200
+
 				$('#minimize-avatar').click(function() {
-					freezeToggle();
-					$('#oddcast-avatar').addClass("minimize");
-					$('#oddcast-avatar').hide();
+					freezeToggle(); // freeze the avatar
+					$('#oddcast-avatar').fadeOut(fadeDuration);
 					$('#minimize-avatar').hide();
 					$('#maximize-avatar').show();
 				});
 
 				$('#maximize-avatar').click(function() {
-					$('#oddcast-avatar').removeClass("minimize");
-					$('#oddcast-avatar').show();
+					$('#oddcast-avatar').fadeIn(fadeDuration);
 					$('#minimize-avatar').show();
 					$('#maximize-avatar').hide();
-					freezeToggle();
+					freezeToggle(); // unfreeze the avatar
 				});
 
 				var oddcastPlayer = $('._html5Player')
@@ -267,11 +267,11 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 
 				var toggleCharacterPicker = function(){
 					if(characterPicker.is(':visible')){
-						characterPicker.fadeOut(100)
+						characterPicker.fadeOut(fadeDuration)
 						oddcastPlayer.css('filter', '')
 					}
 					else{
-						characterPicker.fadeIn(200)
+						characterPicker.fadeIn(fadeDuration)
 						oddcastPlayer.css('filter', 'blur(5px)')
 					}
 				}
