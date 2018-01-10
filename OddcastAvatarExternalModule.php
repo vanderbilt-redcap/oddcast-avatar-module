@@ -263,8 +263,13 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				});
 
 				var oddcastPlayer = $('._html5Player')
-				var characterPicker = $('#oddcast-character-picker')
+				oddcastPlayer.click(function(e){
+					// Oddcast sets a touch start handler that prevents our controls from working consistently, and causes exceptions in the mobile Safari console.
+					// Luckily we don't need this touch event, so we can just remove it.
+					oddcastPlayer.find('.main_container').removeAttr('ontouchstart')
+				})
 
+				var characterPicker = $('#oddcast-character-picker')
 				var toggleCharacterPicker = function(){
 					if(characterPicker.is(':visible')){
 						characterPicker.fadeOut(fadeDuration)
