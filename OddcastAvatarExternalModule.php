@@ -57,7 +57,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				-webkit-overflow-scrolling: touch;
 				min-width: 724px; /* After adding the width of the avatar, this will fill the screen of a landscape ipad. */
 			}
-			
+
 			#oddcast-sidebar,
 			#oddcast-avatar {
 				width: 300px; /* This must be set on the sidebar too, so that it doesn't collapse if the avatar is hidden */
@@ -74,6 +74,10 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				margin-left: -40px;
 			}
 
+			#oddcast-avatar ._html5Player .main_container{
+				z-index: 0; /* Make sure the avatar appears below REDCap popups (like required field messages). */
+			}
+
 			#oddcast-avatar .button_holder{
 				display: none !important;
 			}
@@ -84,12 +88,12 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				color: #ececec;
 				text-shadow: 0px 0px 2px black;
 				top: 5px;
-				z-index: 10000; /* Above the avatar character */
+				z-index: 1; /* Above the avatar */
 				cursor: pointer;
 			}
 
 			#oddcast-controls{
-				z-index: 10000; /* Above the avatar character */
+				z-index: 1; /* Above the avatar */
 				position: absolute;
 				width: 100%;
 			}
