@@ -40,8 +40,8 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				display: table;
 				margin: auto;
 				background: #f3f3f3;
-				border-left: 1px solid #ddd;
-				border-right: 1px solid #ddd;
+				border-left: 1px solid #ccc;
+				border-right: 1px solid #ccc;
 			}
 
 			#oddcast-wrapper > *{
