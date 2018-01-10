@@ -57,10 +57,14 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				-webkit-overflow-scrolling: touch;
 				min-width: 724px; /* After adding the width of the avatar, this will fill the screen of a landscape ipad. */
 			}
+			
+			#oddcast-sidebar,
+			#oddcast-avatar {
+				width: 300px; /* This must be set on the sidebar too, so that it doesn't collapse if the avatar is hidden */
+			}
 
 			#oddcast-avatar{
 				background: white;
-				width: 300px;
 				overflow: hidden;
 				border-bottom: 1px solid #cccccc;
 			}
