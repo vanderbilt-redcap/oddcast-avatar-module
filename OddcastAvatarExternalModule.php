@@ -119,7 +119,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			    background: rgba(239, 239, 239, 0.96);
 				top: 0px;
 				left: 0px;
-				z-index: 9999; /* Above the avatar character */
+				z-index: 2;
 				text-align: center;
 				padding-top: 50%;
 				font-size: 40px;
