@@ -245,6 +245,8 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 						return
 					}
 
+					window.mobile_events = 1 // Required for sayText() to work on iOS/Android
+
 					var welcomeMessage = <?=json_encode($this->getProjectSetting('welcome-message'))?>;
 					var pageList = <?=json_encode($this->getProjectSetting('message-page'))?>;
 					if(!pageList){
