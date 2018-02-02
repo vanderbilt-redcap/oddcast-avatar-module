@@ -1,8 +1,10 @@
 // This object is defined globally so it can be used in other modules (like Inline Descriptive Pop-ups).
 var OddcastAvatarExternalModule = {
+	scenedLoaded: false,
 	initialize: function(settings){
 		var wrapper = $('#oddcast-wrapper')
 		var sidebar = $('#oddcast-sidebar')
+		var avatar = OddcastAvatarExternalModule.getAvatar()
 		var textIntroModal = wrapper.find('.modal.text-intro')
 
 		$(function(){
@@ -14,32 +16,36 @@ var OddcastAvatarExternalModule = {
 			OddcastAvatarExternalModule.engine = voice[0];
 			OddcastAvatarExternalModule.person = voice[1];
 
-			var initialize = function(){
-				if(typeof sayText == 'undefined'){
-					// The oddcast code hasn't been loaded yet.
-					setTimeout(initialize, 100)
-					return
-				}
-
-				window.mobile_events = 1 // Required for sayText() to work on iOS/Android
-
-				followCursor(0);
-				setIdleMovement(0,0);
-			};
-
 			var fadeDuration = 200
 
 			$('#oddcast-minimize-avatar').click(function() {
 				stopSpeech();
-				$('#oddcast-avatar').fadeOut(fadeDuration);
+				avatar.fadeOut(fadeDuration);
 				$('#oddcast-minimize-avatar').hide();
 				$('#oddcast-maximize-avatar').show();
 			});
 
+			var firstMaximize = true
 			var maximizeAvatar = function() {
-				$('#oddcast-avatar').fadeIn(fadeDuration);
+				avatar.fadeIn(fadeDuration);
 				$('#oddcast-minimize-avatar').show();
 				$('#oddcast-maximize-avatar').hide();
+
+				if(firstMaximize){
+					var sayWelcomeMessage = function(){
+						if(!OddcastAvatarExternalModule.scenedLoaded){
+							setTimeout(sayWelcomeMessage, 100)
+							return
+						}
+
+						// This call MUST be made from within a timeout scheduled by the click event, since Android and iOS require a user event to trigger media playback.
+						OddcastAvatarExternalModule.sayText(settings.welcomeMessage)
+					}
+
+					sayWelcomeMessage()
+				}
+
+				firstMaximize = false
 			}
 
 			$('#oddcast-maximize-avatar').click(maximizeAvatar);
@@ -62,12 +68,10 @@ var OddcastAvatarExternalModule = {
 			$('.oddcast-character').click(function(link){
 				oddcastPlayer.find('.character').remove()
 				var id = $(this).data('show-id')
-				loadShow(id)
+				OddcastAvatarExternalModule.loadShow(id)
 				textIntroModal.modal('hide')
 				maximizeAvatar()
 			})
-
-			initialize()
 		})
 
 		$(function(){
@@ -110,5 +114,26 @@ var OddcastAvatarExternalModule = {
 
 		stopSpeech()
 		sayText(text, OddcastAvatarExternalModule.person, 1, OddcastAvatarExternalModule.engine)
+	},
+	loadShow: function(id){
+		OddcastAvatarExternalModule.scenedLoaded = false
+		loadShow(id)
+	},
+	onSceneLoaded: function(){
+		window.mobile_events = 1 // Required for sayText() to work on iOS/Android
+
+		followCursor(0)
+		setIdleMovement(0,0)
+
+		var avatar = OddcastAvatarExternalModule.getAvatar()
+		OddcastAvatarExternalModule.scenedLoaded = true
+	},
+	getAvatar: function(){
+		return $('#oddcast-avatar')
 	}
+}
+
+// Defining a global function is the standard Oddcast way of hooking into the scene loaded event...
+function vh_sceneLoaded(){
+	OddcastAvatarExternalModule.onSceneLoaded()
 }

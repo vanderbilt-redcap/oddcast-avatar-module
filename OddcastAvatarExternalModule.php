@@ -91,7 +91,8 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				?>
 
 				OddcastAvatarExternalModule.initialize({
-					voice: <?=json_encode(explode(',', $this->getProjectSetting('voice')))?>
+					voice: <?=json_encode(explode(',', $this->getProjectSetting('voice')))?>,
+					welcomeMessage: <?=json_encode($this->getProjectSetting('welcome-message'))?>
 				})
 			})
 		</script>
