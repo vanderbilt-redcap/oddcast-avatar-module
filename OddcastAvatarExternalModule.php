@@ -112,7 +112,15 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				left: 8px;
 			}
 
-			#minimize-avatar{
+			#oddcast-minimize-avatar,
+			#oddcast-maximize-avatar{
+				position: absolute;
+				top: 7px;
+				left: 8px;
+				z-index: 1;
+			}
+
+			#oddcast-minimize-avatar{
 				display: none;
 			}
 
@@ -208,7 +216,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 							<div class="text-center">
 								<?php $getCharacters(); ?>
 							</div>
-							<p>If you don't want eStaff help, click the button below.  If you decide later that you want to use eStaff, you can press the <b>Enable eStaff</b> button to bring them back.</p>
+							<p>If you don't want eStaff help, click the button below.  If you decide later that you want to use eStaff, you can press the <b>Enable eStaff</b> button in the top left corner to bring them back.</p>
 							<div class="text-center">
 								<button>No thanks, I don’t want eStaff help.</button>
 							</div>
@@ -217,8 +225,8 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				</div><!-- /.modal-dialog -->
 			</div><!-- /.modal -->
 			<div id="oddcast-sidebar">
-				<i class="fa fa-minus-circle" id="minimize-avatar"></i>
-				<i class="fa fa-plus-circle" id="maximize-avatar"></i>
+				<button id="oddcast-minimize-avatar">Disable eStaff</button>
+				<button id="oddcast-maximize-avatar">Enable eStaff</button>
 				<div id='oddcast-avatar' >
 					<div id="oddcast-controls">
 						<i class="fa fa-user" id="choose-avatar"></i>
@@ -321,20 +329,20 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 
 				var fadeDuration = 200
 
-				$('#minimize-avatar').click(function() {
+				$('#oddcast-minimize-avatar').click(function() {
 					stopSpeech();
 					$('#oddcast-avatar').fadeOut(fadeDuration);
-					$('#minimize-avatar').hide();
-					$('#maximize-avatar').show();
+					$('#oddcast-minimize-avatar').hide();
+					$('#oddcast-maximize-avatar').show();
 				});
 
 				var maximizeAvatar = function() {
 					$('#oddcast-avatar').fadeIn(fadeDuration);
-					$('#minimize-avatar').show();
-					$('#maximize-avatar').hide();
+					$('#oddcast-minimize-avatar').show();
+					$('#oddcast-maximize-avatar').hide();
 				}
 
-				$('#maximize-avatar').click(maximizeAvatar);
+				$('#oddcast-maximize-avatar').click(maximizeAvatar);
 
 				var oddcastPlayer = $('._html5Player')
 				oddcastPlayer.click(function(e){
