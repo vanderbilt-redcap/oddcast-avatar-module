@@ -70,18 +70,9 @@
 			]
 		},
 		{
-			"key": "avatar-messages",
-			"name": "Avatar Messages",
-			"type": "sub_settings",
-			"repeatable": true,
-			"sub_settings":
-			[
-				{
-					"key": "welcome-message",
-					"name": "Message text",
-					"type": "textarea"
-				}
-			]
+			"key": "welcome-message",
+			"name": "Message text",
+			"type": "textarea"
 		}
 	]
 }
