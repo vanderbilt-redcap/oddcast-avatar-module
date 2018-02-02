@@ -35,6 +35,10 @@ body {
 	min-width: 721px; /* After adding the width of the avatar (and borders), this will fill the screen of a landscape ipad. */
 }
 
+body.modal-open #pagecontainer{
+    overflow: hidden; /* prevent touches in bootstrap dialogs from scrolling the background on mobile */
+}
+
 #container{
 	border-left: none;
 }
