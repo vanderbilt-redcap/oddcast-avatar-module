@@ -24,7 +24,7 @@ var OddcastAvatarExternalModule = {
 				window.mobile_events = 1 // Required for sayText() to work on iOS/Android
 
 				followCursor(0);
-				setIdleMovement(20,10);
+				setIdleMovement(0,0);
 			};
 
 			var fadeDuration = 200
