@@ -146,17 +146,6 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				font-family: sans-serif !important;
 			}
 
-			#oddcast-character-picker{
-				top: 100px;
-				left: 67px;
-				box-shadow: 0px 0px 3px #bdb2b2;
-				position: absolute;
-				background: white;
-				display: none;
-				border-radius: 8px;
-				padding: 0px 10px;
-			}
-
 			.oddcast-character{
 				width: 125px;
 				margin: 10px 5px;
@@ -165,20 +154,10 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				cursor: pointer;
 			}
 
-			#oddcast-character-picker .oddcast-character{
-				width: 60px;
-				margin: 10px 5px;
-			}
-
 			.oddcast-character:hover{
 				width: 135px;
 				margin: 0px 0px;
 				transition: 200ms all;
-			}
-
-			#oddcast-character-picker .oddcast-character:hover{
-				width: 65px;
-				margin: 7px 2.5px;
 			}
 
 			#oddcast-wrapper .modal,
@@ -190,35 +169,30 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			#oddcast-wrapper .modal-body{
 				padding-left: 25px;
 				padding-right: 25px;
+				padding-bottom: 25px;
 			}
 
 			#oddcast-wrapper .modal button{
-				margin: 10px;
+				margin-top: 10px;
 				padding: 3px 10px;
 			}
 		</style>
-
-		<?php
-		$getCharacters = function(){
-			?>
-			<img src="<?=$this->getUrl('images/4.png')?>" data-show-id="4" class="oddcast-character" />
-			<img src="<?=$this->getUrl('images/5.png')?>" data-show-id="5" class="oddcast-character" />
-			<?php
-		};
-		?>
 
 		<div id="oddcast-wrapper">
 			<div class="modal fade text-intro" data-backdrop="static">
 				<div class="modal-dialog" role="document">
 					<div class="modal-content">
 						<div class="modal-body">
-							<p>Hello!  Thank you for your interest in volunteering for a research study.  At any time during the consent you can ask a study coordinator for help.  We also have our eStaff team members to guide you through the consent.  Please select an eStaff team member to take you through the consent:<p>
-							<div class="text-center">
-								<?php $getCharacters(); ?>
+							<p class="top-section">Hello!  Thank you for your interest in volunteering for a research study.  At any time during the consent you can ask a study coordinator for help.  We also have our eStaff team members to guide you through the consent.  Please select an eStaff team member to take you through the consent:<p>
+							<div id="oddcast-character-list" class="text-center">
+								<img src="<?=$this->getUrl('images/4.png')?>" data-show-id="4" class="oddcast-character" />
+								<img src="<?=$this->getUrl('images/5.png')?>" data-show-id="5" class="oddcast-character" />
 							</div>
-							<p>If you don't want eStaff help, click the button below.  If you decide later that you want to use eStaff, you can press the <b>Enable eStaff</b> button in the top left corner to bring them back.</p>
-							<div class="text-center">
-								<button>No thanks, I don’t want eStaff help.</button>
+							<div class="bottom-section">
+								<p>If you don't want eStaff help, click the button below.  If you decide later that you want to use eStaff, you can press the <b>Enable eStaff</b> button in the top left corner to bring them back.</p>
+								<div class="text-center">
+									<button>No thanks, I don’t want eStaff help.</button>
+								</div>
 							</div>
 						</div>
 					</div><!-- /.modal-content -->
@@ -230,9 +204,6 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				<div id='oddcast-avatar' >
 					<div id="oddcast-controls">
 						<i class="fa fa-user" id="choose-avatar"></i>
-						<div id="oddcast-character-picker">
-							<?php $getCharacters(); ?>
-						</div>
 					</div>
 
 					<?php
@@ -351,27 +322,15 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 					oddcastPlayer.find('.main_container').removeAttr('ontouchstart')
 				})
 
-				var characterPicker = $('#oddcast-character-picker')
+				$('#choose-avatar').click(function(){
+					textIntroModal.find('.top-section').html('Select an eStaff member:').css('font-weight', 'bold')
+					textIntroModal.find('.bottom-section').hide()
+					textIntroModal.find('.modal-dialog').width('350px')
 
-				var hideCharacterPicker = function(){
-					characterPicker.fadeOut(fadeDuration)
-					oddcastPlayer.css('filter', '')
-				}
-
-				var toggleCharacterPicker = function(){
-					if(characterPicker.is(':visible')){
-						hideCharacterPicker()
-					}
-					else{
-						characterPicker.fadeIn(fadeDuration)
-						oddcastPlayer.css('filter', 'blur(5px)')
-					}
-				}
-
-				$('#choose-avatar').click(toggleCharacterPicker)
+					textIntroModal.modal('show')
+				})
 
 				$('.oddcast-character').click(function(link){
-					hideCharacterPicker()
 					oddcastPlayer.find('.character').remove()
 					var id = $(this).data('show-id')
 					loadShow(id)
