@@ -80,16 +80,6 @@
 					"key": "welcome-message",
 					"name": "Message text",
 					"type": "textarea"
-				},
-				{
-					"key": "message-form",
-					"name": "Form Name",
-					"type": "form-list"
-				},
-				{
-					"key": "message-page",
-					"name": "Page Number",
-					"type": "text"
 				}
 			]
 		}

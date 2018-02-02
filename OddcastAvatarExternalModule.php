@@ -80,158 +80,18 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			</div>
 		</div>
 
+		<script type="text/javascript" src="<?=$this->getUrl('js/OddcastAvatarExternalModule.js')?>"></script>
+
 		<script>
-			<?php
-			if($this->getProjectSetting('disable')){
-//				echo 'return';
-			}
-			?>
-
-			var wrapper = $('#oddcast-wrapper')
-			var sidebar = $('#oddcast-sidebar')
-			var textIntroModal = wrapper.find('.modal.text-intro')
-
-			var pageNumber = <?php echo $_GET['__page__'] != 0 ? $_GET['__page__'] : 0; ?>;
-			var enableOddcastSpeech = false;
-
-			// This object is defined globally so it can be used in other modules (like Inline Descriptive Pop-ups).
-			var OddcastAvatarExternalModule = {
-				sayText: function(text){
-					if(!OddcastAvatarExternalModule.engine){
-						// The initialize function hasn't run yet.
-						return
-					}
-
-					stopSpeech()
-					sayText(text, OddcastAvatarExternalModule.person, 1, OddcastAvatarExternalModule.engine)
-				}
-			}
-
 			$(function(){
-				var voice = <?=json_encode(explode(',', $this->getProjectSetting('voice')))?>;
-				if(!voice){
-					voice = [1,1];
+				<?php
+				if($this->getProjectSetting('disable')){
+					echo 'return';
 				}
+				?>
 
-				OddcastAvatarExternalModule.engine = voice[0];
-				OddcastAvatarExternalModule.person = voice[1];
-
-				var initialize = function(){
-					if(typeof sayText == 'undefined'){
-						// The oddcast code hasn't been loaded yet.
-						setTimeout(initialize, 100)
-						return
-					}
-
-					window.mobile_events = 1 // Required for sayText() to work on iOS/Android
-
-					var welcomeMessage = <?=json_encode($this->getProjectSetting('welcome-message'))?>;
-					var pageList = <?=json_encode($this->getProjectSetting('message-page'))?>;
-					if(!pageList){
-						pageList = []
-					}
-
-					for(var i = 0; i < pageList.length; i++) {
-						if(welcomeMessage[i] && (pageNumber == pageList[i])){
-							OddcastAvatarExternalModule.sayText(welcomeMessage[i]);
-							break;
-						}
-					}
-
-					followCursor(0);
-					setIdleMovement(20,10);
-
-					$('input, select, textarea, .ui-slider-handle').focus(function(){
-						oddcastFocusSpeech(this)
-					})
-				};
-
-				var fadeDuration = 200
-
-				$('#oddcast-minimize-avatar').click(function() {
-					stopSpeech();
-					$('#oddcast-avatar').fadeOut(fadeDuration);
-					$('#oddcast-minimize-avatar').hide();
-					$('#oddcast-maximize-avatar').show();
-				});
-
-				var maximizeAvatar = function() {
-					$('#oddcast-avatar').fadeIn(fadeDuration);
-					$('#oddcast-minimize-avatar').show();
-					$('#oddcast-maximize-avatar').hide();
-				}
-
-				$('#oddcast-maximize-avatar').click(maximizeAvatar);
-
-				var oddcastPlayer = $('._html5Player')
-				oddcastPlayer.click(function(e){
-					// Oddcast sets a touch start handler that prevents our controls from working consistently, and causes exceptions in the mobile Safari console.
-					// Luckily we don't need this touch event, so we can just remove it.
-					oddcastPlayer.find('.main_container').removeAttr('ontouchstart')
-				})
-
-				$('#choose-avatar').click(function(){
-					textIntroModal.find('.top-section').html('Select an eStaff member:').css('font-weight', 'bold')
-					textIntroModal.find('.bottom-section').hide()
-					textIntroModal.find('.modal-dialog').width('350px')
-
-					textIntroModal.modal('show')
-				})
-
-				$('.oddcast-character').click(function(link){
-					oddcastPlayer.find('.character').remove()
-					var id = $(this).data('show-id')
-					loadShow(id)
-					textIntroModal.modal('hide')
-					maximizeAvatar()
-				})
-
-				var oddcastFocusSpeech = function(element) {
-					if(enableOddcastSpeech) {
-						var row = $(element).closest('tr');
-
-						if(row.closest('table').hasClass('sldrparent')){
-							row = row.parent().closest('tr')
-						}
-
-						var text = row.find('> td:nth-child(2)').text().trim()
-
-						OddcastAvatarExternalModule.sayText('You just clicked the ' + text + ' field.')
-					}
-				};
-
-				initialize()
-			})
-			
-			$(function(){
-				var checkOrientation = function(){
-					var md = new MobileDetect(window.navigator.userAgent);
-					if(!md.mobile() && !md.tablet()){
-						return
-					}
-
-					var overlay = $('#oddcast-overlay');
-					if(window.innerHeight > window.innerWidth){
-						overlay.fadeIn()
-					}
-					else{
-						overlay.fadeOut()
-					}
-				}
-
-				checkOrientation()
-				window.addEventListener('orientationchange', checkOrientation)
-			})
-
-			$(function(){
-				$('body').prepend(wrapper)
-
-				$('#pagecontainer').appendTo($('#oddcast-content'))
-
-				textIntroModal.modal('show')
-
-				textIntroModal.find('button').click(function(){
-					textIntroModal.modal('hide')
+				OddcastAvatarExternalModule.initialize({
+					voice: <?=json_encode(explode(',', $this->getProjectSetting('voice')))?>
 				})
 			})
 		</script>
