@@ -1,0 +1,151 @@
+/* The following two blocks prevent the user from attempting to scroll the sidebar area on iPad. */
+html {
+	position: fixed;
+	height: 100%;
+	overflow: hidden;
+}
+body {
+	width: 100vw;
+	height: 100vh;
+}
+
+#oddcast-wrapper{
+	display: table;
+	margin: auto;
+	background: #f3f3f3;
+	border-left: 1px solid #ccc;
+	border-right: 1px solid #ccc;
+}
+
+#oddcast-wrapper > *{
+	display: table-cell;
+	vertical-align: top;
+}
+
+#oddcast-sidebar{
+	position: relative;
+	border-right: 1px solid #ccc;
+	overflow: hidden; /* Prevent main_container from invisibly bleeding over into the survey. */
+}
+
+#pagecontainer{
+	height: 100vh;
+	overflow-y: scroll;
+	-webkit-overflow-scrolling: touch;
+	min-width: 721px; /* After adding the width of the avatar (and borders), this will fill the screen of a landscape ipad. */
+}
+
+#container{
+	border-left: none;
+}
+
+#oddcast-sidebar{
+	min-width: 301px; /* The width must be set on the sidebar too, so that it doesn't collapse if the avatar is hidden. */
+}
+
+#oddcast-avatar{
+	background: white;
+	overflow: hidden;
+	border-bottom: 1px solid #cccccc;
+	width: 300px;
+	display: none;
+}
+
+#oddcast-avatar ._html5Player,
+#oddcast-avatar ._html5Player .character{
+	margin-left: -40px;
+}
+
+#oddcast-avatar ._html5Player .main_container{
+	z-index: 0; /* Make sure the avatar appears below REDCap popups (like required field messages). */
+}
+
+#oddcast-avatar .button_holder{
+	display: none !important;
+}
+
+#oddcast-sidebar .fa{
+	position: absolute;
+	font-size: 25px;
+	color: #ececec;
+	text-shadow: 0px 0px 2px black;
+	top: 5px;
+	z-index: 1; /* Above the avatar */
+	cursor: pointer;
+}
+
+#oddcast-controls{
+	z-index: 1; /* Above the avatar */
+	position: absolute;
+	width: 100%;
+}
+
+#oddcast-sidebar .fa-minus-circle,
+#oddcast-sidebar .fa-plus-circle{
+	left: 8px;
+}
+
+#oddcast-minimize-avatar,
+#oddcast-maximize-avatar{
+	position: absolute;
+	top: 7px;
+	left: 8px;
+	z-index: 1;
+}
+
+#oddcast-minimize-avatar{
+	display: none;
+}
+
+#oddcast-sidebar .fa-user{
+	left: 276px;
+}
+
+#oddcast-overlay{
+	display: none;
+	position: fixed;
+	height: 100vh;
+	width: 100vw;
+	background: rgba(239, 239, 239, 0.96);
+	top: 0px;
+	left: 0px;
+	z-index: 2;
+	text-align: center;
+	padding-top: 50%;
+	font-size: 40px;
+	font-weight: 700;
+	letter-spacing: 1px;
+	color: #4e4e4e;
+	font-family: sans-serif !important;
+}
+
+.oddcast-character{
+	width: 125px;
+	margin: 10px 5px;
+	display: inline-block;
+	border-bottom: 1px solid #f7ebeb;
+	cursor: pointer;
+}
+
+.oddcast-character:hover{
+	width: 135px;
+	margin: 0px 0px;
+	transition: 200ms all;
+}
+
+#oddcast-wrapper .modal,
+#oddcast-wrapper .modal p{
+	font-size: 14px;
+	line-height: 1.7;
+}
+
+#oddcast-wrapper .modal-body{
+	padding-left: 25px;
+	padding-right: 25px;
+	padding-bottom: 25px;
+}
+
+#oddcast-wrapper .modal button{
+	margin-top: 10px;
+	padding: 3px 10px;
+}
