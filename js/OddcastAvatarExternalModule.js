@@ -100,27 +100,28 @@ var OddcastAvatarExternalModule = {
 			else{
 				$('#oddcast-maximize-avatar').show()
 			}
+
+			OddcastAvatarExternalModule.initPortraitDialog()
 		})
-
-		$(function(){
-			var checkOrientation = function(){
-				var md = new MobileDetect(window.navigator.userAgent);
-				if(!md.mobile() && !md.tablet()){
-					return
-				}
-
-				var overlay = $('#oddcast-overlay');
-				if(window.innerHeight > window.innerWidth){
-					overlay.fadeIn()
-				}
-				else{
-					overlay.fadeOut()
-				}
+	},
+	initPortraitDialog: function(){
+		var checkOrientation = function(){
+			var md = new MobileDetect(window.navigator.userAgent);
+			if(!md.mobile() && !md.tablet()){
+				return
 			}
 
-			checkOrientation()
-			window.addEventListener('orientationchange', checkOrientation)
-		})
+			var overlay = $('#oddcast-overlay');
+			if(window.innerHeight > window.innerWidth){
+				overlay.fadeIn()
+			}
+			else{
+				overlay.fadeOut()
+			}
+		}
+
+		checkOrientation()
+		window.addEventListener('orientationchange', checkOrientation)
 	},
 	stopSpeech: function(){
 		// Only respsect this request if the Oddcast libraries have already loaded.
