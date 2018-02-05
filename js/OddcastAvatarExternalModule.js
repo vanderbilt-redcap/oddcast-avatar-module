@@ -29,28 +29,31 @@ var OddcastAvatarExternalModule = {
 
 			var firstMaximize = true
 			var maximizeAvatar = function() {
-				oddcastPlayer.find('.character').remove()
-
-				var showIndex = Cookies.get('oddcast-show-index')
-				OddcastAvatarExternalModule.afterSceneLoaded(function() {
-					OddcastAvatarExternalModule.loadShow(showIndex)
-				})
-
 				textIntroModal.modal('hide')
-				avatar.fadeIn(fadeDuration);
-				$('#oddcast-minimize-avatar').show();
-				$('#oddcast-maximize-avatar').hide();
+				
+				// Wait until the avatar is loaded in the background initially, or we could see a flash of the wrong character.
+				OddcastAvatarExternalModule.afterSceneLoaded(function () {
+					oddcastPlayer.find('.character').remove()
 
-				if(settings.isInitialLoad && firstMaximize){
-					// This call MUST be made from within a timeout scheduled by the click event, since Android and iOS require a user event to trigger media playback.
-					OddcastAvatarExternalModule.afterSceneLoaded(function() {
-						OddcastAvatarExternalModule.sayText(settings.welcomeMessage)
-					})
-				}
+					var showIndex = Cookies.get('oddcast-show-index')
+					OddcastAvatarExternalModule.loadShow(showIndex)
 
-				firstMaximize = false
+					avatar.fadeIn(fadeDuration);
+					$('#oddcast-minimize-avatar').show();
+					$('#oddcast-maximize-avatar').hide();
 
-				Cookies.set('oddcast-avatar-maximized', 'true')
+					if (settings.isInitialLoad && firstMaximize) {
+						// This call MUST be made from within a timeout scheduled by the click event, since Android and iOS require a user event to trigger media playback.
+						// We call afterSceneLoaded() again to make sure the call loadShow() above has completed first.
+						OddcastAvatarExternalModule.afterSceneLoaded(function () {
+							OddcastAvatarExternalModule.sayText(settings.welcomeMessage)
+						})
+					}
+
+					firstMaximize = false
+
+					Cookies.set('oddcast-avatar-maximized', 'true')
+				})
 			}
 
 			$('#oddcast-maximize-avatar').click(maximizeAvatar)
