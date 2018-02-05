@@ -18,12 +18,14 @@ var OddcastAvatarExternalModule = {
 
 			var fadeDuration = 200
 
-			$('#oddcast-minimize-avatar').click(function() {
+			var minimizeAvatar = function() {
 				stopSpeech();
 				avatar.fadeOut(fadeDuration);
 				$('#oddcast-minimize-avatar').hide();
 				$('#oddcast-maximize-avatar').show();
-			});
+
+				Cookies.set('oddcast-avatar-maximized', 'false')
+			}
 
 			var firstMaximize = true
 			var maximizeAvatar = function() {
@@ -31,7 +33,7 @@ var OddcastAvatarExternalModule = {
 				$('#oddcast-minimize-avatar').show();
 				$('#oddcast-maximize-avatar').hide();
 
-				if(firstMaximize){
+				if(settings.isInitialLoad && firstMaximize){
 					var sayWelcomeMessage = function(){
 						if(!OddcastAvatarExternalModule.scenedLoaded){
 							setTimeout(sayWelcomeMessage, 100)
@@ -46,9 +48,12 @@ var OddcastAvatarExternalModule = {
 				}
 
 				firstMaximize = false
+
+				Cookies.set('oddcast-avatar-maximized', 'true')
 			}
 
-			$('#oddcast-maximize-avatar').click(maximizeAvatar);
+			$('#oddcast-maximize-avatar').click(maximizeAvatar)
+			$('#oddcast-minimize-avatar').click(minimizeAvatar)
 
 			var oddcastPlayer = $('._html5Player')
 			oddcastPlayer.click(function(e){
@@ -72,6 +77,21 @@ var OddcastAvatarExternalModule = {
 				textIntroModal.modal('hide')
 				maximizeAvatar()
 			})
+
+			textIntroModal.find('button').click(function(){
+				textIntroModal.modal('hide')
+				Cookies.set('oddcast-avatar-maximized', 'false')
+			})
+
+			$('body').prepend(wrapper)
+			$('#pagecontainer').appendTo($('#oddcast-content'))
+
+			if(settings.isInitialLoad){
+				textIntroModal.modal('show')
+			}
+			else if (Cookies.get('oddcast-avatar-maximized') === 'true'){
+				maximizeAvatar()
+			}
 		})
 
 		$(function(){
@@ -92,18 +112,6 @@ var OddcastAvatarExternalModule = {
 
 			checkOrientation()
 			window.addEventListener('orientationchange', checkOrientation)
-		})
-
-		$(function(){
-			$('body').prepend(wrapper)
-
-			$('#pagecontainer').appendTo($('#oddcast-content'))
-
-			textIntroModal.modal('show')
-
-			textIntroModal.find('button').click(function(){
-				textIntroModal.modal('hide')
-			})
 		})
 	},
 	sayText: function(text){

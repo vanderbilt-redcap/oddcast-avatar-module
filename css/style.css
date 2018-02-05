@@ -137,6 +137,10 @@ body.modal-open #pagecontainer{
 	transition: 200ms all;
 }
 
+#oddcast-wrapper .modal{
+	display: none;
+}
+
 #oddcast-wrapper .modal,
 #oddcast-wrapper .modal p{
 	font-size: 14px;

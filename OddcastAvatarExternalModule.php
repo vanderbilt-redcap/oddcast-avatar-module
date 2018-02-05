@@ -17,6 +17,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		</style>
 
 		<script src="//cdn.jsdelivr.net/npm/mobile-detect@1.4.1/mobile-detect.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.2.0/js.cookie.min.js" integrity="sha256-9Nt2r+tJnSd2A2CRUvnjgsD+ES1ExvjbjBNqidm9doI=" crossorigin="anonymous"></script>
 		<?php
 			$vorlonIPAddress = '10.151.18.178';
 			if($_SERVER['HTTP_HOST'] == $vorlonIPAddress){
@@ -92,6 +93,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 
 				OddcastAvatarExternalModule.initialize({
 					voice: <?=json_encode(explode(',', $this->getProjectSetting('voice')))?>,
+					isInitialLoad: <?=json_encode($_SERVER['REQUEST_METHOD'] == 'GET')?>,
 					welcomeMessage: <?=json_encode($this->getProjectSetting('welcome-message'))?>
 				})
 			})
