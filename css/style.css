@@ -91,14 +91,11 @@ body.modal-open #pagecontainer{
 
 #oddcast-minimize-avatar,
 #oddcast-maximize-avatar{
+	display: none;
 	position: absolute;
 	top: 7px;
 	left: 8px;
 	z-index: 1;
-}
-
-#oddcast-minimize-avatar{
-	display: none;
 }
 
 #oddcast-sidebar .fa-user{

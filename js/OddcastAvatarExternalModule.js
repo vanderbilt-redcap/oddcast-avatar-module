@@ -29,27 +29,27 @@ var OddcastAvatarExternalModule = {
 
 			var firstMaximize = true
 			var maximizeAvatar = function() {
-				avatar.fadeIn(fadeDuration);
-				$('#oddcast-minimize-avatar').show();
-				$('#oddcast-maximize-avatar').hide();
+				OddcastAvatarExternalModule.afterSceneLoaded(function(){
 
-				if(settings.isInitialLoad && firstMaximize){
-					var sayWelcomeMessage = function(){
-						if(!OddcastAvatarExternalModule.scenedLoaded){
-							setTimeout(sayWelcomeMessage, 100)
-							return
-						}
+					oddcastPlayer.find('.character').remove()
 
+					var showIndex = Cookies.get('oddcast-show-index')
+					OddcastAvatarExternalModule.loadShow(showIndex)
+
+					textIntroModal.modal('hide')
+					avatar.fadeIn(fadeDuration);
+					$('#oddcast-minimize-avatar').show();
+					$('#oddcast-maximize-avatar').hide();
+
+					if(settings.isInitialLoad && firstMaximize){
 						// This call MUST be made from within a timeout scheduled by the click event, since Android and iOS require a user event to trigger media playback.
 						OddcastAvatarExternalModule.sayText(settings.welcomeMessage)
 					}
 
-					sayWelcomeMessage()
-				}
+					firstMaximize = false
 
-				firstMaximize = false
-
-				Cookies.set('oddcast-avatar-maximized', 'true')
+					Cookies.set('oddcast-avatar-maximized', 'true')
+				})
 			}
 
 			$('#oddcast-maximize-avatar').click(maximizeAvatar)
@@ -70,11 +70,9 @@ var OddcastAvatarExternalModule = {
 				textIntroModal.modal('show')
 			})
 
-			$('.oddcast-character').click(function(link){
-				oddcastPlayer.find('.character').remove()
-				var id = $(this).data('show-id')
-				OddcastAvatarExternalModule.loadShow(id)
-				textIntroModal.modal('hide')
+			$('.oddcast-character').click(function(){
+				var showIndex = $(this).data('show-index')
+				Cookies.set('oddcast-show-index', showIndex)
 				maximizeAvatar()
 			})
 
@@ -89,8 +87,11 @@ var OddcastAvatarExternalModule = {
 			if(settings.isInitialLoad){
 				textIntroModal.modal('show')
 			}
-			else if (Cookies.get('oddcast-avatar-maximized') === 'true'){
+			else if(Cookies.get('oddcast-avatar-maximized') === 'true'){
 				maximizeAvatar()
+			}
+			else{
+				$('#oddcast-maximize-avatar').show()
 			}
 		})
 
@@ -114,6 +115,26 @@ var OddcastAvatarExternalModule = {
 			window.addEventListener('orientationchange', checkOrientation)
 		})
 	},
+	until: function(condition, then){
+		var timeoutFunction = function(){
+			if(!condition()){
+				setTimeout(timeoutFunction, 100)
+				return
+			}
+
+			then()
+		}
+
+		timeoutFunction()
+	},
+	afterSceneLoaded: function(callback){
+		OddcastAvatarExternalModule.until(
+			function(){
+				return OddcastAvatarExternalModule.scenedLoaded
+			},
+			callback
+		)
+	},
 	sayText: function(text){
 		if(!OddcastAvatarExternalModule.engine){
 			// The initialize function hasn't run yet.
@@ -123,9 +144,9 @@ var OddcastAvatarExternalModule = {
 		stopSpeech()
 		sayText(text, OddcastAvatarExternalModule.person, 1, OddcastAvatarExternalModule.engine)
 	},
-	loadShow: function(id){
+	loadShow: function(showIndex){
 		OddcastAvatarExternalModule.scenedLoaded = false
-		loadShow(id)
+		loadShow(showIndex)
 	},
 	onSceneLoaded: function(){
 		window.mobile_events = 1 // Required for sayText() to work on iOS/Android
