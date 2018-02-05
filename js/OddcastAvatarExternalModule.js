@@ -19,7 +19,7 @@ var OddcastAvatarExternalModule = {
 			var fadeDuration = 200
 
 			var minimizeAvatar = function() {
-				stopSpeech();
+				OddcastAvatarExternalModule.stopSpeech();
 				avatar.fadeOut(fadeDuration);
 				$('#oddcast-minimize-avatar').hide();
 				$('#oddcast-maximize-avatar').show();
@@ -29,27 +29,28 @@ var OddcastAvatarExternalModule = {
 
 			var firstMaximize = true
 			var maximizeAvatar = function() {
-				OddcastAvatarExternalModule.afterSceneLoaded(function(){
+				oddcastPlayer.find('.character').remove()
 
-					oddcastPlayer.find('.character').remove()
-
-					var showIndex = Cookies.get('oddcast-show-index')
+				var showIndex = Cookies.get('oddcast-show-index')
+				OddcastAvatarExternalModule.afterSceneLoaded(function() {
 					OddcastAvatarExternalModule.loadShow(showIndex)
-
-					textIntroModal.modal('hide')
-					avatar.fadeIn(fadeDuration);
-					$('#oddcast-minimize-avatar').show();
-					$('#oddcast-maximize-avatar').hide();
-
-					if(settings.isInitialLoad && firstMaximize){
-						// This call MUST be made from within a timeout scheduled by the click event, since Android and iOS require a user event to trigger media playback.
-						OddcastAvatarExternalModule.sayText(settings.welcomeMessage)
-					}
-
-					firstMaximize = false
-
-					Cookies.set('oddcast-avatar-maximized', 'true')
 				})
+
+				textIntroModal.modal('hide')
+				avatar.fadeIn(fadeDuration);
+				$('#oddcast-minimize-avatar').show();
+				$('#oddcast-maximize-avatar').hide();
+
+				if(settings.isInitialLoad && firstMaximize){
+					// This call MUST be made from within a timeout scheduled by the click event, since Android and iOS require a user event to trigger media playback.
+					OddcastAvatarExternalModule.afterSceneLoaded(function() {
+						OddcastAvatarExternalModule.sayText(settings.welcomeMessage)
+					})
+				}
+
+				firstMaximize = false
+
+				Cookies.set('oddcast-avatar-maximized', 'true')
 			}
 
 			$('#oddcast-maximize-avatar').click(maximizeAvatar)
@@ -78,13 +79,16 @@ var OddcastAvatarExternalModule = {
 
 			textIntroModal.find('button').click(function(){
 				textIntroModal.modal('hide')
-				Cookies.set('oddcast-avatar-maximized', 'false')
+				minimizeAvatar()
 			})
 
 			$('body').prepend(wrapper)
 			$('#pagecontainer').appendTo($('#oddcast-content'))
 
 			if(settings.isInitialLoad){
+				// Forget the show/character chosen from the last survey
+				Cookies.remove('oddcast-show-index')
+
 				textIntroModal.modal('show')
 			}
 			else if(Cookies.get('oddcast-avatar-maximized') === 'true'){
@@ -114,6 +118,12 @@ var OddcastAvatarExternalModule = {
 			checkOrientation()
 			window.addEventListener('orientationchange', checkOrientation)
 		})
+	},
+	stopSpeech: function(){
+		// Only respsect this request if the Oddcast libraries have already loaded.
+		if(typeof stopSpeech != 'undefined'){
+			stopSpeech()
+		}
 	},
 	until: function(condition, then){
 		var timeoutFunction = function(){
