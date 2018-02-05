@@ -9,6 +9,10 @@ body {
 	height: 100vh;
 }
 
+#changeFont {
+	padding-right: 10px; /* Move the font controls away from the scrollbar added by the oddcast wrapper. */
+}
+
 #oddcast-wrapper{
 	display: table;
 	margin: auto;
