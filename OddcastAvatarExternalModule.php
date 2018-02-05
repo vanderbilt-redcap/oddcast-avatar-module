@@ -6,7 +6,7 @@ use ExternalModules\ExternalModules;
 
 class OddcastAvatarExternalModule extends AbstractExternalModule
 {
-	function hook_survey_page()
+	function redcap_survey_page()
 	{
 		?>
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" integrity="sha256-NuCn4IvuZXdBaFKJOAcsU2Q3ZpwbdFisd5dux4jkQ5w=" crossorigin="anonymous" />

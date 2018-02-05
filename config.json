@@ -12,7 +12,7 @@
 	],
 
 	"permissions": [
-		"hook_survey_page"
+		"redcap_survey_page"
 	],
 
 	"description": "Enables an Oddcast Avatar on surveys.",
