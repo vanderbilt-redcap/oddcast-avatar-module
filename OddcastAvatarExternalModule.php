@@ -32,7 +32,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				<div class="modal-dialog" role="document">
 					<div class="modal-content">
 						<div class="modal-body">
-							<p class="top-section">Hello!  Thank you for your interest in volunteering for a research study.  At any time during the consent you can ask a study coordinator for help.  We also have our eStaff team members to guide you through the consent.  Please select an eStaff team member to take you through the consent:<p>
+							<p class="top-section">Hello!  Thank you for your interest in volunteering for a research study.  At any time during the consent you can ask a study coordinator for help.  We also have our eStaff team members to guide you through the consent.  Please select an eStaff team member to take you through the consent:</p>
 							<div id="oddcast-character-list" class="text-center">
 								<img src="<?=$this->getUrl('images/4.png')?>" data-show-index="4" class="oddcast-character" />
 								<img src="<?=$this->getUrl('images/5.png')?>" data-show-index="5" class="oddcast-character" />
