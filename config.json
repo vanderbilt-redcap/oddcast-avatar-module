@@ -73,6 +73,29 @@
 			"key": "welcome-message",
 			"name": "Message text",
 			"type": "textarea"
+		},
+		{
+			"key": "messages-for-field-values",
+			"name" : "Message for field value",
+			"type" : "sub_settings",
+			"repeatable" : true,
+			"sub_settings" : [
+				{
+					"key" : "field",
+					"name" : "Field",
+					"type" : "field-list"
+				},
+				{
+					"key" : "value",
+					"name" : "Value",
+					"type" : "text"
+				},
+				{
+					"key" : "message",
+					"name" : "Message",
+					"type" : "text"
+				}
+			]
 		}
 	]
 }

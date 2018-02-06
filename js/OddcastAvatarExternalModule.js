@@ -102,6 +102,7 @@ var OddcastAvatarExternalModule = {
 			}
 
 			OddcastAvatarExternalModule.initPortraitDialog()
+			OddcastAvatarExternalModule.initMessagesForValues(settings.messagesForValues)
 		})
 	},
 	initPortraitDialog: function(){
@@ -122,6 +123,50 @@ var OddcastAvatarExternalModule = {
 
 		checkOrientation()
 		window.addEventListener('orientationchange', checkOrientation)
+	},
+	initMessagesForValues: function(messagesForValues){
+		var fieldMap = {}
+		$.each(messagesForValues, function(i, item){
+			if(fieldMap[item.field] == undefined){
+				fieldMap[item.field] = {}
+			}
+
+			fieldMap[item.field][item.value.toLowerCase()] = item.message
+		})
+
+		$.each(fieldMap, function(fieldName, valueMap){
+			var fields = $('[name=' + fieldName + ']')
+			if(fields.length == 0){
+				// Assume this is a set of checkbox fields.
+				fields = $('[name=__chkn__' + fieldName + ']')
+			}
+			else if(fields.hasClass('hiddenradio')){
+				fields = $('[name=' + fieldName + '___radio]')
+			}
+
+			fields.change(function(){
+				var field = $(this)
+				var type = field.attr('type')
+				if($.inArray(type, ['checkbox', 'radio']) !== -1){
+					if(!field.is(':checked')){
+						return
+					}
+				}
+
+				var value
+				if(type == 'checkbox'){
+					value = field.attr('code')
+				}
+				else{
+					value = field.val().toLowerCase()
+				}
+
+				var message = valueMap[value]
+				if(message){
+					OddcastAvatarExternalModule.sayText(message)
+				}
+			})
+		})
 	},
 	stopSpeech: function(){
 		// Only respsect this request if the Oddcast libraries have already loaded.
