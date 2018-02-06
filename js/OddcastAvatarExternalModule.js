@@ -27,7 +27,6 @@ var OddcastAvatarExternalModule = {
 				Cookies.set('oddcast-avatar-maximized', 'false')
 			}
 
-			var firstMaximize = true
 			var maximizeAvatar = function() {
 				textIntroModal.modal('hide')
 				
@@ -41,16 +40,6 @@ var OddcastAvatarExternalModule = {
 					avatar.fadeIn(fadeDuration);
 					$('#oddcast-minimize-avatar').show();
 					$('#oddcast-maximize-avatar').hide();
-
-					if (settings.isInitialLoad && firstMaximize) {
-						// This call MUST be made from within a timeout scheduled by the click event, since Android and iOS require a user event to trigger media playback.
-						// We call afterSceneLoaded() again to make sure the call loadShow() above has completed first.
-						OddcastAvatarExternalModule.afterSceneLoaded(function () {
-							OddcastAvatarExternalModule.sayText(settings.welcomeMessage)
-						})
-					}
-
-					firstMaximize = false
 
 					Cookies.set('oddcast-avatar-maximized', 'true')
 				})
@@ -66,12 +55,18 @@ var OddcastAvatarExternalModule = {
 				oddcastPlayer.find('.main_container').removeAttr('ontouchstart')
 			})
 
-			$('#choose-avatar').click(function(){
+			$('#oddcast-controls .fa-user').click(function(){
 				textIntroModal.find('.top-section').html('Select an eStaff member:').css('font-weight', 'bold')
 				textIntroModal.find('.bottom-section').hide()
 				textIntroModal.find('.modal-dialog').width('350px')
 
 				textIntroModal.modal('show')
+			})
+
+			$('#oddcast-controls .fa-play-circle').click(function(){
+				OddcastAvatarExternalModule.afterSceneLoaded(function () {
+					OddcastAvatarExternalModule.sayText(settings.welcomeMessage)
+				})
 			})
 
 			$('.oddcast-character').click(function(){

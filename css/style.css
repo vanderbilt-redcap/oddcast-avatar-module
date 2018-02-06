@@ -72,20 +72,21 @@ body.modal-open #pagecontainer{
 	display: none !important;
 }
 
-#oddcast-sidebar .fa{
-	position: absolute;
-	font-size: 25px;
-	color: #ececec;
-	text-shadow: 0px 0px 2px black;
-	top: 5px;
-	z-index: 1; /* Above the avatar */
-	cursor: pointer;
-}
-
 #oddcast-controls{
 	z-index: 1; /* Above the avatar */
 	position: absolute;
 	width: 100%;
+	text-align: right;
+	padding-right: 7px;
+}
+
+#oddcast-controls .fa{
+	margin: 5px;
+	font-size: 28px;
+	color: #ececec;
+	text-shadow: 0px 0px 3px black;
+	z-index: 1; /* Above the avatar */
+	cursor: pointer;
 }
 
 #oddcast-sidebar .fa-minus-circle,
@@ -99,11 +100,7 @@ body.modal-open #pagecontainer{
 	position: absolute;
 	top: 7px;
 	left: 8px;
-	z-index: 1;
-}
-
-#oddcast-sidebar .fa-user{
-	left: 276px;
+	z-index: 2;
 }
 
 #oddcast-overlay{

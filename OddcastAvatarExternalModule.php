@@ -52,7 +52,8 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				<button id="oddcast-maximize-avatar">Enable eStaff</button>
 				<div id='oddcast-avatar' >
 					<div id="oddcast-controls">
-						<i class="fa fa-user" id="choose-avatar"></i>
+						<i class="fa fa-play-circle"></i>
+						<i class="fa fa-user"></i>
 					</div>
 
 					<?php
@@ -93,7 +94,6 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 
 				OddcastAvatarExternalModule.initialize({
 					voice: <?=json_encode(explode(',', $this->getProjectSetting('voice')))?>,
-					isInitialLoad: <?=json_encode($_SERVER['REQUEST_METHOD'] == 'GET')?>,
 					welcomeMessage: <?=json_encode($this->getProjectSetting('welcome-message'))?>,
 					messagesForValues: <?=json_encode($this->getSubSettings('messages-for-field-values'))?>
 				})
