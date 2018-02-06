@@ -94,6 +94,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 
 				OddcastAvatarExternalModule.initialize({
 					voice: <?=json_encode(explode(',', $this->getProjectSetting('voice')))?>,
+					isInitialLoad: <?=json_encode($_SERVER['REQUEST_METHOD'] == 'GET')?>,
 					welcomeMessage: <?=json_encode($this->getProjectSetting('welcome-message'))?>,
 					messagesForValues: <?=json_encode($this->getSubSettings('messages-for-field-values'))?>
 				})
