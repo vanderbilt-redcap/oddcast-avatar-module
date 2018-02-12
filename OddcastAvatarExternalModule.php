@@ -6,7 +6,7 @@ use ExternalModules\ExternalModules;
 
 class OddcastAvatarExternalModule extends AbstractExternalModule
 {
-	function redcap_survey_page()
+	function redcap_survey_page($project_id, $record)
 	{
 		?>
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" integrity="sha256-NuCn4IvuZXdBaFKJOAcsU2Q3ZpwbdFisd5dux4jkQ5w=" crossorigin="anonymous" />
@@ -18,6 +18,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 
 		<script src="//cdn.jsdelivr.net/npm/mobile-detect@1.4.1/mobile-detect.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.2.0/js.cookie.min.js" integrity="sha256-9Nt2r+tJnSd2A2CRUvnjgsD+ES1ExvjbjBNqidm9doI=" crossorigin="anonymous"></script>
+		<script src="https://cdn.jsdelivr.net/npm/jquery.idle@1.2.6/jquery.idle.min.js" integrity="sha256-RFOvLffDBWTRL2yzD1Atxv6t+G3Rd73IYdbmGO3IOzM=" crossorigin="anonymous"></script>
 		<?php
 			$vorlonIPAddress = '10.151.18.178';
 			if($_SERVER['HTTP_HOST'] == $vorlonIPAddress){
@@ -42,6 +43,23 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 								<div class="text-center">
 									<button>No thanks, I don’t want eStaff help.</button>
 								</div>
+							</div>
+						</div>
+					</div><!-- /.modal-content -->
+				</div><!-- /.modal-dialog -->
+			</div><!-- /.modal -->
+			<div class="modal fade timeout" data-backdrop="static">
+				<div class="modal-dialog" role="document">
+					<div class="modal-content">
+						<div class="modal-body">
+							<p>Do you want to continue?  If so, please re-enter the following:</p>
+							<div class="text-center">
+								<label></label>
+								<input>
+							</div>
+							<div>
+								<button class="restart">Open a New Survey</button>
+								<button class="continue">Continue</button>
 							</div>
 						</div>
 					</div><!-- /.modal-content -->
@@ -92,14 +110,33 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				}
 				?>
 
-				OddcastAvatarExternalModule.initialize({
-					voice: <?=json_encode(explode(',', $this->getProjectSetting('voice')))?>,
-					isInitialLoad: <?=json_encode($_SERVER['REQUEST_METHOD'] == 'GET')?>,
-					welcomeMessage: <?=json_encode($this->getProjectSetting('welcome-message'))?>,
-					messagesForValues: <?=json_encode($this->getSubSettings('messages-for-field-values'))?>
-				})
+				OddcastAvatarExternalModule.initialize(<?=json_encode([
+					'voice' => explode(',', $this->getProjectSetting('voice')),
+					'isInitialLoad' => $_SERVER['REQUEST_METHOD'] == 'GET',
+					'welcomeMessage' => $this->getProjectSetting('welcome-message'),
+					'messagesForValues' => $this->getSubSettings('messages-for-field-values'),
+					'publicSurveyUrl' => $this->getPublicSurveyUrl(),
+					'timeout' => $this->getProjectSetting('timeout'),
+					'restartTimeout' => $this->getProjectSetting('restart-timeout'),
+					'timeoutVerificationLabel' => $this->getTimeoutVerificationLabel($project_id),
+					'timeoutVerificationValue' => $this->getTimeoutVerificationValue($project_id, $record)
+				])?>)
 			})
 		</script>
 		<?php
+	}
+
+	private function getTimeoutVerificationFieldName(){
+		return $this->getProjectSetting('timeout-verification-field');
+	}
+
+	private function getTimeoutVerificationLabel($project_id){
+		$fieldName = $this->getTimeoutVerificationFieldName();
+		return $this->getFieldLabel($fieldName);
+	}
+
+	private function getTimeoutVerificationValue($project_id, $record){
+		$fieldName = $this->getTimeoutVerificationFieldName();
+		return @json_decode(\REDCap::getData($project_id, 'json', [$record], [$fieldName]), true)[0][$fieldName];
 	}
 }

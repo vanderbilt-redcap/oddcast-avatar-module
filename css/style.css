@@ -155,3 +155,13 @@ body.modal-open #pagecontainer{
 	margin-top: 10px;
 	padding: 3px 10px;
 }
+
+#oddcast-wrapper .modal.timeout label{
+	margin-right: 10px;
+	margin-top: 10px;
+	margin-bottom: 15px;
+}
+
+#oddcast-wrapper .modal.timeout button:last-child{
+	float: right;
+}

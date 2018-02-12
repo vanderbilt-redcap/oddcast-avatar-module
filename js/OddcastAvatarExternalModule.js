@@ -2,10 +2,10 @@
 var OddcastAvatarExternalModule = {
 	scenedLoaded: false,
 	initialize: function(settings){
-		var wrapper = $('#oddcast-wrapper')
+		var wrapper = OddcastAvatarExternalModule.getWrapper()
 		var sidebar = $('#oddcast-sidebar')
 		var avatar = OddcastAvatarExternalModule.getAvatar()
-		var textIntroModal = wrapper.find('.modal.text-intro')
+		var textIntroModal = OddcastAvatarExternalModule.getTextIntroModal()
 
 		$(function(){
 			var voice = settings.voice
@@ -98,7 +98,14 @@ var OddcastAvatarExternalModule = {
 
 			OddcastAvatarExternalModule.initPortraitDialog()
 			OddcastAvatarExternalModule.initMessagesForValues(settings.messagesForValues)
+			OddcastAvatarExternalModule.initTimeout(settings)
 		})
+	},
+	getWrapper: function(){
+		return $('#oddcast-wrapper')
+	},
+	getTextIntroModal: function(){
+		return OddcastAvatarExternalModule.getWrapper().find('.modal.text-intro')
 	},
 	initPortraitDialog: function(){
 		var checkOrientation = function(){
@@ -162,6 +169,94 @@ var OddcastAvatarExternalModule = {
 				}
 			})
 		})
+	},
+	initTimeout: function(settings){
+		var modal = OddcastAvatarExternalModule.getWrapper().find('.modal.timeout')
+		var input = modal.find('input')
+		var expectedValue = settings.timeoutVerificationValue
+		if(!expectedValue){
+			expectedValue = ''
+		}
+
+		var timeoutVerificationValue = expectedValue.trim().toLowerCase()
+
+		var openNewPublicSurvey = function(){
+			window.location.href = settings.publicSurveyUrl
+		}
+
+		var isTimeoutModalDisplayed = function(){
+			return OddcastAvatarExternalModule.isModalDisplayed(modal)
+		}
+
+		modal.find('label').html(settings.timeoutVerificationLabel)
+
+		var millisPerMinute = 60*1000
+
+		var redcapDialog
+		$(document).idle({
+			idle: settings.timeout * millisPerMinute,
+			onIdle: function(){
+				var isIntroTextDisplayed = OddcastAvatarExternalModule.isModalDisplayed(OddcastAvatarExternalModule.getTextIntroModal())
+				if(isIntroTextDisplayed || isTimeoutModalDisplayed()){
+					return
+				}
+
+				if(timeoutVerificationValue == ''){
+					// There's nothing to verify, so just restart the survey.
+					openNewPublicSurvey()
+					return
+				}
+
+				$('.modal').modal('hide') // hide any other modals
+
+				modal.modal('show')
+				redcapDialog = $('.ui-dialog:visible')
+				if(redcapDialog.length > 0){
+					// Hide any REDCap dialogs (like required fields messages) because they steal focus from inputs in bootstrap dialogs.
+					redcapDialog.hide()
+				}
+			}
+		})
+
+		$(document).idle({
+			idle: settings.restartTimeout * millisPerMinute,
+			onIdle: function(){
+				if(isTimeoutModalDisplayed()){
+					openNewPublicSurvey()
+				}
+			}
+		})
+
+		modal.find('button.restart').click(openNewPublicSurvey)
+
+		var triesRemaining = 5
+		modal.find('button.continue').click(function(){
+			var enteredValue = input.val().toLowerCase()
+			if(enteredValue == timeoutVerificationValue){
+				modal.modal('hide')
+
+				// Clear the value entered, in case the timeout modal is displayed again.
+				input.val('')
+
+				// If we had to hide a REDCap dialog (like a required fields message), re-dislpay it.
+				if(redcapDialog.length > 0){
+					redcapDialog.show()
+				}
+			}
+			else{
+				triesRemaining--
+				if(triesRemaining > 0){
+					alert("You did not enter the correct value.  You have " + triesRemaining + " tries left.")
+				}
+				else{
+					alert("You did not enter the correct value.  You must start the survey from the beginning.")
+					openNewPublicSurvey()
+				}
+			}
+		})
+	},
+	isModalDisplayed: function(modal){
+		return modal.hasClass('in')
 	},
 	stopSpeech: function(){
 		// Only respsect this request if the Oddcast libraries have already loaded.

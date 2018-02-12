@@ -75,6 +75,23 @@
 			"type": "textarea"
 		},
 		{
+			"key": "timeout",
+			"name": "<b>Survey Timeout</b> - The idle time in minutes before requiring verification in order to continue",
+			"type": "text",
+			"default": "5"
+		},
+		{
+			"key": "restart-timeout",
+			"name": "<b>Survey Restart Timeout</b> - The idle time in minutes before the survey will automatically restart after the verification dialog is displayed",
+			"type": "text",
+			"default": "60"
+		},
+		{
+			"key": "timeout-verification-field",
+			"name": "<b>Timeout Verification Field</b> - The field that the participant is required to re-enter in order to continue.  This should be a last name or full name field",
+			"type": "field-list"
+		},
+		{
 			"key": "messages-for-field-values",
 			"name" : "Message for field value",
 			"type" : "sub_settings",
