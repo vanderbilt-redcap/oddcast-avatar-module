@@ -41,6 +41,7 @@ body {
 
 body.modal-open #pagecontainer{
     overflow: hidden; /* prevent touches in bootstrap dialogs from scrolling the background on mobile */
+	filter: blur(5px); /* obscure fields, important when the timeout dialog is open */
 }
 
 #container{
