@@ -193,12 +193,8 @@ var OddcastAvatarExternalModule = {
 
 		modal.find('label').html(settings.timeoutVerificationLabel)
 
-		var showTimeoutDialog = function(){
-			var isIntroTextDisplayed = OddcastAvatarExternalModule.isModalDisplayed(OddcastAvatarExternalModule.getTextIntroModal())
-			if(isIntroTextDisplayed || isTimeoutModalDisplayed()){
-				return
-			}
-
+		var redcapDialog
+		var showTimeoutModal = function(){
 			if(timeoutVerificationValue == ''){
 				// There's nothing to verify, so just restart the survey.
 				openNewPublicSurvey()
@@ -219,24 +215,33 @@ var OddcastAvatarExternalModule = {
 
 		if(Cookies.get('timeout-active')){
 			// setTimeout() was required here to make sure this happened AFTER any REDCap dialogs were displayed (like required field messages).
-			setTimeout(showTimeoutDialog, 0)
+			setTimeout(showTimeoutModal, 0)
 		}
 
-		var millisPerMinute = 60*1000
-
-		var redcapDialog
+		var lastActive = Date.now()
 		$(document).idle({
-			idle: settings.timeout * millisPerMinute,
-			onIdle: showTimeoutDialog
-		})
-
-		$(document).idle({
-			idle: settings.restartTimeout * millisPerMinute,
+			idle: 1000,
+			recurIdleCall: true,
 			onIdle: function(){
-				if(isTimeoutModalDisplayed()){
+				if(OddcastAvatarExternalModule.isModalDisplayed(OddcastAvatarExternalModule.getTextIntroModal())){
+					return
+				}
+
+				var minutesIdle = (Date.now() - lastActive)/1000/60
+				if(!isTimeoutModalDisplayed()){
+					if(minutesIdle >= settings.timeout){
+						showTimeoutModal()
+						lastActive = Date.now()
+					}
+				}
+				else if(minutesIdle >= settings.restartTimeout){
+					// The timeout modal is displayed.
 					openNewPublicSurvey()
 				}
-			}
+			},
+			onActive: function(){
+				lastActive = Date.now()
+			},
 		})
 
 		modal.find('button.restart').click(openNewPublicSurvey)
