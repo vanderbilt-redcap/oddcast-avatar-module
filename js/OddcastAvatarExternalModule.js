@@ -87,6 +87,9 @@ var OddcastAvatarExternalModule = {
 				// Forget the show/character chosen from the last survey
 				Cookies.remove('oddcast-show-index')
 
+				// If a timeout was active, remove it.
+				Cookies.remove('timeout-active')
+
 				textIntroModal.modal('show')
 			}
 			else if(Cookies.get('oddcast-avatar-maximized') === 'true'){
@@ -190,32 +193,41 @@ var OddcastAvatarExternalModule = {
 
 		modal.find('label').html(settings.timeoutVerificationLabel)
 
+		var showTimeoutDialog = function(){
+			var isIntroTextDisplayed = OddcastAvatarExternalModule.isModalDisplayed(OddcastAvatarExternalModule.getTextIntroModal())
+			if(isIntroTextDisplayed || isTimeoutModalDisplayed()){
+				return
+			}
+
+			if(timeoutVerificationValue == ''){
+				// There's nothing to verify, so just restart the survey.
+				openNewPublicSurvey()
+				return
+			}
+
+			$('.modal').modal('hide') // hide any other modals
+
+			modal.modal('show')
+			redcapDialog = $('.ui-dialog:visible')
+			if(redcapDialog.length > 0){
+				// Hide any REDCap dialogs (like required fields messages) because they steal focus from inputs in bootstrap dialogs.
+				redcapDialog.hide()
+			}
+
+			Cookies.set('timeout-active', true)
+		}
+
+		if(Cookies.get('timeout-active')){
+			// setTimeout() was required here to make sure this happened AFTER any REDCap dialogs were displayed (like required field messages).
+			setTimeout(showTimeoutDialog, 0)
+		}
+
 		var millisPerMinute = 60*1000
 
 		var redcapDialog
 		$(document).idle({
 			idle: settings.timeout * millisPerMinute,
-			onIdle: function(){
-				var isIntroTextDisplayed = OddcastAvatarExternalModule.isModalDisplayed(OddcastAvatarExternalModule.getTextIntroModal())
-				if(isIntroTextDisplayed || isTimeoutModalDisplayed()){
-					return
-				}
-
-				if(timeoutVerificationValue == ''){
-					// There's nothing to verify, so just restart the survey.
-					openNewPublicSurvey()
-					return
-				}
-
-				$('.modal').modal('hide') // hide any other modals
-
-				modal.modal('show')
-				redcapDialog = $('.ui-dialog:visible')
-				if(redcapDialog.length > 0){
-					// Hide any REDCap dialogs (like required fields messages) because they steal focus from inputs in bootstrap dialogs.
-					redcapDialog.hide()
-				}
-			}
+			onIdle: showTimeoutDialog
 		})
 
 		$(document).idle({
@@ -242,6 +254,8 @@ var OddcastAvatarExternalModule = {
 				if(redcapDialog.length > 0){
 					redcapDialog.show()
 				}
+
+				Cookies.remove('timeout-active')
 			}
 			else{
 				triesRemaining--
