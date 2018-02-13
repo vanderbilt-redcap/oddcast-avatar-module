@@ -68,7 +68,7 @@ body.modal-open #pagecontainer{
 	z-index: 0; /* Make sure the avatar appears below REDCap popups (like required field messages). */
 }
 
-#oddcast-avatar #_play{
+#oddcast-avatar .vhsshtml5_button_holder{
 	display: none !important; /* Prevent Oddcast's play button from displaying */
 }
 
