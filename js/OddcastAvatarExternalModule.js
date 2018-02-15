@@ -176,12 +176,6 @@ var OddcastAvatarExternalModule = {
 	initTimeout: function(settings){
 		var modal = OddcastAvatarExternalModule.getWrapper().find('.modal.timeout')
 		var input = modal.find('input')
-		var expectedValue = settings.timeoutVerificationValue
-		if(!expectedValue){
-			expectedValue = ''
-		}
-
-		var timeoutVerificationValue = expectedValue.trim().toLowerCase()
 
 		var openNewPublicSurvey = function(){
 			window.location.href = settings.publicSurveyUrl
@@ -191,10 +185,10 @@ var OddcastAvatarExternalModule = {
 			return OddcastAvatarExternalModule.isModalDisplayed(modal)
 		}
 
-		modal.find('label').html(settings.timeoutVerificationLabel)
-
 		var redcapDialog
+		var timeoutVerificationValue
 		var showTimeoutModal = function(){
+			timeoutVerificationValue = OddcastAvatarExternalModule.getTimeoutVerificationValue(settings)
 			if(timeoutVerificationValue == ''){
 				// There's nothing to verify, so just restart the survey.
 				openNewPublicSurvey()
@@ -248,7 +242,7 @@ var OddcastAvatarExternalModule = {
 
 		var triesRemaining = 5
 		modal.find('button.continue').click(function(){
-			var enteredValue = input.val().toLowerCase()
+			var enteredValue = input.val().trim().toLowerCase()
 			if(enteredValue == timeoutVerificationValue){
 				modal.modal('hide')
 
@@ -273,6 +267,22 @@ var OddcastAvatarExternalModule = {
 				}
 			}
 		})
+	},
+	getTimeoutVerificationValue: function(settings){
+		var value
+
+		var verificationField = $('input[name=' + settings.timeoutVerification.fieldName + ']')
+		if(verificationField.length > 0){
+			value = verificationField.val()
+		}
+		else{
+			value = settings.timeoutVerification.value
+			if(!value){
+				value = ''
+			}
+		}
+
+		return value.trim().toLowerCase()
 	},
 	isModalDisplayed: function(modal){
 		return modal.hasClass('in')

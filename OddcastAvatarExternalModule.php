@@ -54,7 +54,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 						<div class="modal-body">
 							<p>Do you want to continue?  If so, please re-enter the following:</p>
 							<div class="text-center">
-								<label></label>
+								<label><?=$this->getTimeoutVerificationLabel($project_id)?></label>
 								<input>
 							</div>
 							<div>
@@ -118,8 +118,10 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 					'publicSurveyUrl' => $this->getPublicSurveyUrl(),
 					'timeout' => $this->getProjectSetting('timeout'),
 					'restartTimeout' => $this->getProjectSetting('restart-timeout'),
-					'timeoutVerificationLabel' => $this->getTimeoutVerificationLabel($project_id),
-					'timeoutVerificationValue' => $this->getTimeoutVerificationValue($project_id, $record)
+					'timeoutVerification' => [
+						'fieldName' => $this->getTimeoutVerificationFieldName(),
+						'value' => $this->getTimeoutVerificationValue($project_id, $record)
+					]
 				])?>)
 			})
 		</script>
