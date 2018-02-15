@@ -170,3 +170,7 @@ body.modal-open #pagecontainer{
 #oddcast-wrapper .modal.timeout button:last-child{
 	float: right;
 }
+
+.tippy-content{
+	font-size: 15px;
+}

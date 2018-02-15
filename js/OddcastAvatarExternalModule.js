@@ -27,7 +27,7 @@ var OddcastAvatarExternalModule = {
 				Cookies.set('oddcast-avatar-maximized', 'false')
 			}
 
-			var maximizeAvatar = function() {
+			var maximizeAvatar = function(displayWelcomeTooltip) {
 				textIntroModal.modal('hide')
 				
 				// Wait until the avatar is loaded in the background initially, or we could see a flash of the wrong character.
@@ -42,6 +42,15 @@ var OddcastAvatarExternalModule = {
 					$('#oddcast-maximize-avatar').hide();
 
 					Cookies.set('oddcast-avatar-maximized', 'true')
+
+					if(displayWelcomeTooltip){
+						// This is the first time a character was picked.  Show the play button tooltip.
+						OddcastAvatarExternalModule.afterSceneLoaded(function(){
+							var playButton = $('.fa-play-circle')[0]
+							tippy(playButton)
+							playButton._tippy.show()
+						})
+					}
 				})
 			}
 
@@ -71,8 +80,9 @@ var OddcastAvatarExternalModule = {
 
 			$('.oddcast-character').click(function(){
 				var showIndex = $(this).data('show-index')
+				var displayWelcomeTooltip = Cookies.get('oddcast-show-index') == null
 				Cookies.set('oddcast-show-index', showIndex)
-				maximizeAvatar()
+				maximizeAvatar(displayWelcomeTooltip)
 			})
 
 			textIntroModal.find('button').click(function(){
