@@ -24,16 +24,6 @@
 			"type": "checkbox"
 		},
 		{
-			"key": "character",
-			"name": "Default Character",
-			"type": "dropdown",
-			"choices": [
-				{ "value": "Julie", "name": "Julie"},
-				{ "value": "Amy", "name": "Amy"},
-				{ "value": "Paul", "name": "Paul"}
-			]
-		},
-		{
 			"key": "voice",
 			"name": "Voice",
 			"type": "dropdown",
