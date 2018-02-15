@@ -186,8 +186,10 @@ var OddcastAvatarExternalModule = {
 		}
 
 		var redcapDialog
+		var triesRemaining
 		var timeoutVerificationValue
 		var showTimeoutModal = function(){
+			triesRemaining = 5
 			timeoutVerificationValue = OddcastAvatarExternalModule.getTimeoutVerificationValue(settings)
 			if(timeoutVerificationValue == ''){
 				// There's nothing to verify, so just restart the survey.
@@ -240,7 +242,6 @@ var OddcastAvatarExternalModule = {
 
 		modal.find('button.restart').click(openNewPublicSurvey)
 
-		var triesRemaining = 5
 		modal.find('button.continue').click(function(){
 			var enteredValue = input.val().trim().toLowerCase()
 			if(enteredValue == timeoutVerificationValue){
