@@ -61,7 +61,7 @@
 		},
 		{
 			"key": "welcome-message",
-			"name": "Message text",
+			"name": "Welcome Message",
 			"type": "textarea"
 		},
 		{

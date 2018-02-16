@@ -7,6 +7,10 @@ var OddcastAvatarExternalModule = {
 		var avatar = OddcastAvatarExternalModule.getAvatar()
 		var textIntroModal = OddcastAvatarExternalModule.getTextIntroModal()
 
+		if(settings.welcomeMessage == ''){
+			OddcastAvatarExternalModule.getPlayButton().hide()
+		}
+
 		$(function(){
 			var voice = settings.voice
 			if(!voice){
@@ -46,9 +50,12 @@ var OddcastAvatarExternalModule = {
 					if(displayWelcomeTooltip){
 						// This is the first time a character was picked.  Show the play button tooltip.
 						OddcastAvatarExternalModule.afterSceneLoaded(function(){
-							var playButton = $('.fa-play-circle')[0]
-							tippy(playButton)
-							playButton._tippy.show()
+							var playButton = OddcastAvatarExternalModule.getPlayButton()
+							if(playButton.is(':visible')){
+								playButton = playButton[0]
+								tippy(playButton)
+								playButton._tippy.show()
+							}
 						})
 					}
 				})
@@ -72,7 +79,7 @@ var OddcastAvatarExternalModule = {
 				textIntroModal.modal('show')
 			})
 
-			$('#oddcast-controls .fa-play-circle').click(function(){
+			OddcastAvatarExternalModule.getPlayButton().click(function(){
 				OddcastAvatarExternalModule.afterSceneLoaded(function () {
 					OddcastAvatarExternalModule.sayText(settings.welcomeMessage)
 				})
@@ -351,6 +358,9 @@ var OddcastAvatarExternalModule = {
 	},
 	isEnabled: function(){ // This function is used by the inline popups module.
 		return OddcastAvatarExternalModule.getAvatar().is(':visible')
+	},
+	getPlayButton: function(){
+		return $('#oddcast-controls .fa-play-circle')
 	}
 }
 

@@ -99,7 +99,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				OddcastAvatarExternalModule.initialize(<?=json_encode([
 					'voice' => explode(',', $this->getProjectSetting('voice')),
 					'isInitialLoad' => $_SERVER['REQUEST_METHOD'] == 'GET',
-					'welcomeMessage' => $this->getProjectSetting('welcome-message'),
+					'welcomeMessage' => trim($this->getProjectSetting('welcome-message')),
 					'messagesForValues' => $this->getSubSettings('messages-for-field-values'),
 					'publicSurveyUrl' => $this->getPublicSurveyUrl(),
 					'timeout' => $this->getProjectSetting('timeout'),
