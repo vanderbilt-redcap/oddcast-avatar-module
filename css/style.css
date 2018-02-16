@@ -171,6 +171,12 @@ body.modal-open #pagecontainer{
 	float: right;
 }
 
-.tippy-content{
+.tippy-tooltip.inline-popups-theme {
 	font-size: 15px;
+	background-color: #f5f6f7;
+	box-shadow: 0 0px 50px 6px rgba(36, 40, 47, 0.21);
+}
+
+.tippy-popper[x-placement^=bottom] .tippy-tooltip.inline-popups-theme .tippy-arrow{
+	border-bottom: 7px solid #f5f6f7;
 }
