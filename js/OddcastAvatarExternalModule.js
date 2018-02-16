@@ -348,6 +348,9 @@ var OddcastAvatarExternalModule = {
 	},
 	getAvatar: function(){
 		return $('#oddcast-avatar')
+	},
+	isEnabled: function(){ // This function is used by the inline popups module.
+		return OddcastAvatarExternalModule.getAvatar().is(':visible')
 	}
 }
 
