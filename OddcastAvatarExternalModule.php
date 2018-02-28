@@ -8,6 +8,8 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 {
 	function redcap_survey_page($project_id, $record)
 	{
+		$showIds = [2560288, 2560294];
+
 		?>
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" integrity="sha256-NuCn4IvuZXdBaFKJOAcsU2Q3ZpwbdFisd5dux4jkQ5w=" crossorigin="anonymous" />
 		<style>
@@ -39,8 +41,11 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 						<div class="modal-body">
 							<p class="top-section">Hello!  Thank you for your interest in volunteering for a research study.  At any time during the consent you can ask a study coordinator for help.  We also have our eStaff team members to guide you through the consent.  Please select an eStaff team member to take you through the consent:</p>
 							<div id="oddcast-character-list" class="text-center">
-								<img src="<?=$this->getUrl('images/4.png')?>" data-show-index="4" class="oddcast-character" />
-								<img src="<?=$this->getUrl('images/5.png')?>" data-show-index="5" class="oddcast-character" />
+								<?php
+								foreach($showIds as $id){
+									?><img src="<?=$this->getUrl("images/$id.png")?>" data-show-id="<?=$id?>" class="oddcast-character" /><?php
+								}
+								?>
 							</div>
 							<div class="bottom-section">
 								<p>If you don't want eStaff help, click the button below.  If you decide later that you want to use eStaff, you can press the <b>Enable eStaff</b> button in the top left corner to bring them back.</p>
@@ -77,7 +82,8 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 						<i class="fa fa-play-circle tippy" title="Click this icon to play<br>a welcome message." data-tippy-arrow="true" data-tippy-trigger="manual" data-tippy-offset="-50, 0" data-tippy-theme="light inline-popups"></i>
 						<i class="fa fa-user"></i>
 					</div>
-					<script type="text/javascript" src="//vhss-d.oddcast.com/vhost_embed_functions_v2.php?acc=6267283&js=1"></script><script type="text/javascript">AC_VHost_Embed(6267283,300,400,'',1,1, 2560294, 0,1,0,'709e320dba1a392fa4e863ef0809f9f1',0);</script>
+					<script type="text/javascript" src="//vhss-d.oddcast.com/vhost_embed_functions_v2.php?acc=6267283&js=1"></script>
+					<script type="text/javascript">AC_VHost_Embed(6267283,300,400,'',1,1, <?=$showIds[0]?>, 0,1,0,'709e320dba1a392fa4e863ef0809f9f1',0);</script>
 				</div>
 			</div>
 			<div id="oddcast-content"></div>

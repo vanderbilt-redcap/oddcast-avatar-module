@@ -38,8 +38,8 @@ var OddcastAvatarExternalModule = {
 				OddcastAvatarExternalModule.afterSceneLoaded(function () {
 					oddcastPlayer.find('.character').remove()
 
-					var showIndex = Cookies.get('oddcast-show-index')
-					OddcastAvatarExternalModule.loadShow(showIndex)
+					var showId = Cookies.get('oddcast-show-id')
+					OddcastAvatarExternalModule.loadShowByID(showId)
 
 					avatar.fadeIn(fadeDuration);
 					$('#oddcast-minimize-avatar').show();
@@ -86,9 +86,9 @@ var OddcastAvatarExternalModule = {
 			})
 
 			$('.oddcast-character').click(function(){
-				var showIndex = $(this).data('show-index')
-				var displayWelcomeTooltip = Cookies.get('oddcast-show-index') == null
-				Cookies.set('oddcast-show-index', showIndex)
+				var showId = $(this).data('show-id')
+				var displayWelcomeTooltip = Cookies.get('oddcast-show-id') == null
+				Cookies.set('oddcast-show-id', showId)
 				maximizeAvatar(displayWelcomeTooltip)
 			})
 
@@ -102,7 +102,7 @@ var OddcastAvatarExternalModule = {
 
 			if(settings.isInitialLoad){
 				// Forget the show/character chosen from the last survey
-				Cookies.remove('oddcast-show-index')
+				Cookies.remove('oddcast-show-id')
 
 				// If a timeout was active, remove it.
 				Cookies.remove('timeout-active')
@@ -343,9 +343,14 @@ var OddcastAvatarExternalModule = {
 		stopSpeech()
 		sayText(text, OddcastAvatarExternalModule.person, 1, OddcastAvatarExternalModule.engine)
 	},
-	loadShow: function(showIndex){
+	loadShowByID: function(showId){
+		console.log('showId', showId)
 		OddcastAvatarExternalModule.scenedLoaded = false
-		loadShow(showIndex)
+
+		// loadShow() is designed to load by index, but we don't want to do that since index is affected by adding/removing shows in the list.
+		// Setting this window var then omitting the show index parameter will effectively load by show ID instead of index.
+		window.vhsshtml5_ss_var = showId
+		loadShow()
 	},
 	onSceneLoaded: function(){
 		window.mobile_events = 1 // Required for sayText() to work on iOS/Android
