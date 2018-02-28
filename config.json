@@ -61,7 +61,7 @@
 		},
 		{
 			"key": "welcome-message",
-			"name": "Welcome Message",
+			"name": "<b>Welcome Message</b> - This message will be read when the play button above the avatar is clicked.",
 			"type": "textarea"
 		},
 		{
