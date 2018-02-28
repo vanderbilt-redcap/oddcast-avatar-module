@@ -336,6 +336,9 @@ var OddcastAvatarExternalModule = {
 			// The initialize function hasn't run yet.
 			return
 		}
+		else if(!OddcastAvatarExternalModule.isEnabled()){
+			return
+		}
 
 		stopSpeech()
 		sayText(text, OddcastAvatarExternalModule.person, 1, OddcastAvatarExternalModule.engine)
