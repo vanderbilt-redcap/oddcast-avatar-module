@@ -94,7 +94,7 @@
 				},
 				{
 					"key" : "value",
-					"name" : "Value",
+					"name" : "Value - For checkboxes and radio buttons, enter the numerical value (ex: 0, 1, etc.).",
 					"type" : "text"
 				},
 				{
