@@ -7,6 +7,13 @@ var OddcastAvatarExternalModule = {
 		var avatar = OddcastAvatarExternalModule.getAvatar()
 		var textIntroModal = OddcastAvatarExternalModule.getTextIntroModal()
 
+		var fades = $('[id=fade]')
+		if(fades.length == 2){
+			// A quirk of e-Consent and the oddcast-wrapper cause two fade divs to be created on the e-Consent preview/confirmation page.
+			// We replace the inner one with the outer one to make sure it covers the oddcast-sidebar.
+			$(fades[1]).replaceWith($(fades[0]))
+		}
+
 		if(settings.welcomeMessage == ''){
 			OddcastAvatarExternalModule.getPlayButton().hide()
 		}
