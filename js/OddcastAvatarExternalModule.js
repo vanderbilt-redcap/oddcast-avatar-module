@@ -30,6 +30,8 @@ var OddcastAvatarExternalModule = {
 			var fadeDuration = 200
 
 			var minimizeAvatar = function() {
+				OddcastAvatarExternalModule.log('minimizeAvatar()')
+
 				OddcastAvatarExternalModule.stopSpeech();
 				avatar.fadeOut(fadeDuration);
 				$('#oddcast-minimize-avatar').hide();
@@ -39,6 +41,8 @@ var OddcastAvatarExternalModule = {
 			}
 
 			var maximizeAvatar = function(displayWelcomeTooltip) {
+				OddcastAvatarExternalModule.log('maximizeAvatar()')
+
 				textIntroModal.modal('hide')
 				
 				// Wait until the avatar is loaded in the background initially, or we could see a flash of the wrong character.
@@ -93,6 +97,8 @@ var OddcastAvatarExternalModule = {
 			})
 
 			$('.oddcast-character').click(function(){
+				OddcastAvatarExternalModule.log('character clicked')
+
 				var showId = $(this).data('show-id')
 				var displayWelcomeTooltip = Cookies.get('oddcast-show-id') == null
 				Cookies.set('oddcast-show-id', showId)
@@ -108,6 +114,8 @@ var OddcastAvatarExternalModule = {
 			$('#pagecontainer').appendTo($('#oddcast-content'))
 
 			if(settings.isInitialLoad){
+				OddcastAvatarExternalModule.log('initial load')
+
 				// Forget the show/character chosen from the last survey
 				Cookies.remove('oddcast-show-id')
 
@@ -117,9 +125,11 @@ var OddcastAvatarExternalModule = {
 				textIntroModal.modal('show')
 			}
 			else if(Cookies.get('oddcast-avatar-maximized') === 'true'){
+				OddcastAvatarExternalModule.log('subsequent load, avatar shown')
 				maximizeAvatar()
 			}
 			else{
+				OddcastAvatarExternalModule.log('subsequent load, avatar hidden')
 				$('#oddcast-maximize-avatar').show()
 			}
 
@@ -360,6 +370,7 @@ var OddcastAvatarExternalModule = {
 		loadShow()
 	},
 	onSceneLoaded: function(){
+		OddcastAvatarExternalModule.log('onSceneLoaded()')
 		window.mobile_events = 1 // Required for sayText() to work on iOS/Android
 
 		followCursor(0)
@@ -376,6 +387,9 @@ var OddcastAvatarExternalModule = {
 	},
 	getPlayButton: function(){
 		return $('#oddcast-controls .fa-play-circle')
+	},
+	log: function(message){
+		console.log('AVATAR LOG:', message)
 	}
 }
 

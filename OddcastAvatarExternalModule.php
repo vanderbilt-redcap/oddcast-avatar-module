@@ -95,12 +95,18 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		<script type="text/javascript" src="<?=$this->getUrl('js/OddcastAvatarExternalModule.js')?>"></script>
 
 		<script>
+			OddcastAvatarExternalModule.log('main script block')
+
 			$(function(){
+				OddcastAvatarExternalModule.log('before disable setting check')
+
 				<?php
 				if($this->getProjectSetting('disable')){
 					echo 'return';
 				}
 				?>
+
+				OddcastAvatarExternalModule.log('before initialize()')
 
 				OddcastAvatarExternalModule.initialize(<?=json_encode([
 					'voice' => explode(',', $this->getProjectSetting('voice')),
