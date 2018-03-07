@@ -3,7 +3,6 @@ var OddcastAvatarExternalModule = {
 	scenedLoaded: false,
 	initialize: function(settings){
 		var wrapper = OddcastAvatarExternalModule.getWrapper()
-		var sidebar = $('#oddcast-sidebar')
 		var avatar = OddcastAvatarExternalModule.getAvatar()
 		var textIntroModal = OddcastAvatarExternalModule.getTextIntroModal()
 
