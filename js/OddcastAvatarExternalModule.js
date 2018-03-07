@@ -45,6 +45,12 @@ var OddcastAvatarExternalModule = {
 					oddcastPlayer.find('.character').remove()
 
 					var showId = Cookies.get('oddcast-show-id')
+					if(!showId){
+						// The user has not yet selected a character. Show the intro modal again instead.
+						textIntroModal.modal('show')
+						return
+					}
+
 					OddcastAvatarExternalModule.loadShowByID(showId)
 
 					avatar.fadeIn(fadeDuration);
