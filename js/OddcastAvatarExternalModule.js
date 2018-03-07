@@ -203,6 +203,14 @@ var OddcastAvatarExternalModule = {
 		})
 	},
 	initTimeout: function(settings){
+		if(!settings.timeout){
+			settings.timeout = 5
+		}
+
+		if(!settings.restartTimeout){
+			settings.restartTimeout = 60
+		}
+
 		var modal = OddcastAvatarExternalModule.getWrapper().find('.modal.timeout')
 		var input = modal.find('input')
 
