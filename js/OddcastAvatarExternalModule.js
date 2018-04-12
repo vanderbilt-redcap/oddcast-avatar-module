@@ -38,6 +38,8 @@ var OddcastAvatarExternalModule = {
 			}
 
 			var maximizeAvatar = function() {
+				textIntroModal.modal('hide')
+
 				// Wait until the avatar is loaded in the background initially, or we could see a flash of the wrong character.
 				OddcastAvatarExternalModule.afterSceneLoaded(function () {
 					oddcastPlayer.find('.character').remove()
