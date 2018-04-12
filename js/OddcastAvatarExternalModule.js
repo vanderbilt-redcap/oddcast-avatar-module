@@ -37,9 +37,7 @@ var OddcastAvatarExternalModule = {
 				Cookies.set('oddcast-avatar-maximized', 'false')
 			}
 
-			var maximizeAvatar = function(displayWelcomeTooltip) {
-				textIntroModal.modal('hide')
-				
+			var maximizeAvatar = function() {
 				// Wait until the avatar is loaded in the background initially, or we could see a flash of the wrong character.
 				OddcastAvatarExternalModule.afterSceneLoaded(function () {
 					oddcastPlayer.find('.character').remove()
@@ -59,7 +57,7 @@ var OddcastAvatarExternalModule = {
 
 					Cookies.set('oddcast-avatar-maximized', 'true')
 
-					if(displayWelcomeTooltip){
+					if(OddcastAvatarExternalModule.getPlayButton().is(':visible')){
 						// This is the first time a character was picked.  Show the play button tooltip.
 						OddcastAvatarExternalModule.afterSceneLoaded(function(){
 							var playButton = OddcastAvatarExternalModule.getPlayButton()
@@ -99,9 +97,8 @@ var OddcastAvatarExternalModule = {
 
 			$('.oddcast-character').click(function(){
 				var showId = $(this).data('show-id')
-				var displayWelcomeTooltip = Cookies.get('oddcast-show-id') == null
 				Cookies.set('oddcast-show-id', showId)
-				maximizeAvatar(displayWelcomeTooltip)
+				maximizeAvatar()
 			})
 
 			textIntroModal.find('button').click(function(){
