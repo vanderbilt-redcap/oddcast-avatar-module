@@ -60,11 +60,6 @@
 			]
 		},
 		{
-			"key": "welcome-message",
-			"name": "<b>Welcome Message</b> - This message will be read when the play button above the avatar is clicked.",
-			"type": "textarea"
-		},
-		{
 			"key": "timeout",
 			"name": "<b>Survey Timeout</b> - The idle time in minutes before requiring verification in order to continue",
 			"type": "text",
@@ -80,6 +75,24 @@
 			"key": "timeout-verification-field",
 			"name": "<b>Timeout Verification Field</b> - The field that the participant is required to re-enter in order to continue.  This should be a last name or full name field",
 			"type": "field-list"
+		},
+		{
+			"key": "page-messages",
+			"name": "<b>Page Messages</b> - These messages will be read when the play button above the avatar is clicked on the specified page",
+			"type": "sub_settings",
+			"repeatable" : true,
+			"sub_settings" : [
+				{
+					"key": "page-number",
+					"name": "Page Number",
+					"type": "text"
+				},
+				{
+					"key" : "page-message",
+					"name" : "Page Message",
+					"type" : "textarea"
+				}
+			]
 		},
 		{
 			"key": "messages-for-field-values",

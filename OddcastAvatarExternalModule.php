@@ -79,7 +79,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				<button id="oddcast-maximize-avatar">Enable eStaff</button>
 				<div id='oddcast-avatar' >
 					<div id="oddcast-controls">
-						<i class="fa fa-play-circle tippy" title="Click this icon to play<br>a welcome message." data-tippy-arrow="true" data-tippy-trigger="manual" data-tippy-offset="-50, 0" data-tippy-theme="light inline-popups"></i>
+						<i class="fa fa-play-circle tippy" title="Click this icon to play the<br>message for this page." data-tippy-arrow="true" data-tippy-trigger="manual" data-tippy-offset="-50, 0" data-tippy-theme="light inline-popups"></i>
 						<i class="fa fa-user"></i>
 					</div>
 					<script type="text/javascript" src="//vhss-d.oddcast.com/vhost_embed_functions_v2.php?acc=6267283&js=1"></script>
@@ -100,12 +100,21 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				if($this->getProjectSetting('disable')){
 					echo 'return';
 				}
+
+				$pageMessage = '';
+				foreach($this->getSubSettings('page-messages') as $settingGroup){
+					if($settingGroup['page-number'] == $_GET['__page__']){
+						$pageMessage = $settingGroup['page-message'];
+						break;
+					}
+				}
+
 				?>
 
 				OddcastAvatarExternalModule.initialize(<?=json_encode([
 					'voice' => explode(',', $this->getProjectSetting('voice')),
 					'isInitialLoad' => $_SERVER['REQUEST_METHOD'] == 'GET',
-					'welcomeMessage' => trim($this->getProjectSetting('welcome-message')),
+					'pageMessage' => $pageMessage,
 					'messagesForValues' => $this->getSubSettings('messages-for-field-values'),
 					'publicSurveyUrl' => $this->getPublicSurveyUrl(),
 					'timeout' => $this->getProjectSetting('timeout'),
@@ -155,5 +164,14 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		$hash = @$row['hash'];
 
 		return APP_PATH_SURVEY_FULL . "?s=$hash";
-	 }
+	}
+
+	public function validateSettings($settings){
+		$pageNumbers = $settings['page-number'];
+		$uniquePageNumbers = array_unique($pageNumbers);
+
+		if(count($pageNumbers) != count($uniquePageNumbers)){
+			return "Multiple page messages for the same page number are not currently supported.";
+		}
+	}
 }

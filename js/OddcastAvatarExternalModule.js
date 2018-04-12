@@ -13,7 +13,7 @@ var OddcastAvatarExternalModule = {
 			$(fades[1]).replaceWith($(fades[0]))
 		}
 
-		if(settings.welcomeMessage == ''){
+		if(settings.pageMessage == ''){
 			OddcastAvatarExternalModule.getPlayButton().hide()
 		}
 
@@ -93,7 +93,7 @@ var OddcastAvatarExternalModule = {
 
 			OddcastAvatarExternalModule.getPlayButton().click(function(){
 				OddcastAvatarExternalModule.afterSceneLoaded(function () {
-					OddcastAvatarExternalModule.sayText(settings.welcomeMessage)
+					OddcastAvatarExternalModule.sayText(settings.pageMessage)
 				})
 			})
 
