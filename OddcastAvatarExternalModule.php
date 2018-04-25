@@ -4,6 +4,9 @@ namespace Vanderbilt\OddcastAvatarExternalModule;
 use ExternalModules\AbstractExternalModule;
 use ExternalModules\ExternalModules;
 
+const REVIEW_MODE = 'review-mode';
+const TURNING_OFF = 'turning-off';
+
 class OddcastAvatarExternalModule extends AbstractExternalModule
 {
 	function redcap_survey_page($project_id, $record)
@@ -127,6 +130,105 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			})
 		</script>
 		<?php
+
+		$this->getReviewModeHtml();
+	}
+
+	private function getReviewModeHtml()
+	{
+		if (empty($this->getProjectSetting('enable-review-mode'))) {
+			return;
+		}
+
+		?>
+		<style>
+			#review-mode-footer {
+				margin-top: 45px;
+				text-align: center;
+			}
+
+			#review-mode-footer button {
+				margin-top: 10px;
+				padding: 5px 10px;
+				font-weight: bold;
+				font-size: 13px;
+			}
+		</style>
+		<script>
+			$(function () {
+				var cookieName = <?=json_encode(REVIEW_MODE)?>;
+				var onValue = 'on'
+				var turningOffValue = <?=json_encode(TURNING_OFF)?>;
+
+				<?php
+				if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+					?>Cookies.set(cookieName, onValue)<?php
+				}
+				?>
+
+				var clickPreviousButton = function () {
+					var previousButton = $('button[name=submit-btn-saveprevpage]')
+					if (previousButton.length == 0) {
+						Cookies.remove(cookieName)
+						$('body').css('visibility', 'visible') // poor man's loading indicator
+					}
+					else {
+						previousButton.click()
+					}
+				}
+
+				var value = Cookies.get(cookieName)
+				if (value == onValue) {
+					var reviewModeFooter = $('<div id="review-mode-footer">You are currently in Review Mode.<br><button	>Click here to begin consent</button></div>')
+					reviewModeFooter.insertBefore($('#footer'))
+					reviewModeFooter.find('button').click(function () {
+						Cookies.set(cookieName, turningOffValue)
+						reviewModeFooter.remove()
+						clickPreviousButton()
+					})
+				}
+				else if (value == turningOffValue) {
+					clickPreviousButton()
+				}
+			})
+		</script>
+		<?php
+	}
+
+	function redcap_every_page_before_render()
+	{
+		if (!$this->isSurveyPage()) {
+			return false;
+		}
+
+		$reviewMode = @$_COOKIE[REVIEW_MODE];
+		if (is_null($reviewMode)) {
+			return;
+		}
+
+		global $Proj;
+		foreach ($_POST as $fieldName => $value) {
+			if (!isset($Proj->metadata[$fieldName])) {
+				continue;
+			}
+
+			$field = &$Proj->metadata[$fieldName];
+			if ($field) {
+				// Trick REDCap into thinking this field is hidden, just for this request.
+				// This will allow us the skip required fields and navigate freely between pages.
+				$field['misc'] = '@HIDDEN';
+			}
+		}
+
+		if ($reviewMode === TURNING_OFF) {
+			?>
+			<style>
+				body {
+					visibility: hidden; /* poor man's loading indicator */
+				}
+			</style>
+			<?php
+		}
 	}
 
 	private function getTimeoutVerificationFieldName(){
@@ -173,5 +275,13 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		if(count($pageNumbers) != count($uniquePageNumbers)){
 			return "Multiple page messages for the same page number are not currently supported.";
 		}
+	}
+
+	public function isSurveyPage()
+	{
+		$url = $_SERVER['REQUEST_URI'];
+
+		return strpos($url, '/surveys/') === 0 &&
+			strpos($url, '__passthru=DataEntry%2Fimage_view.php') === false; // Prevent hooks from firing for survey logo URLs (and breaking them).
 	}
 }

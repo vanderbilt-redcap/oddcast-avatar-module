@@ -12,7 +12,8 @@
 	],
 
 	"permissions": [
-		"redcap_survey_page"
+		"redcap_survey_page",
+		"redcap_every_page_before_render"
 	],
 
 	"description": "Enables an Oddcast Avatar on surveys.",
@@ -21,6 +22,11 @@
 		{
 			"key": "disable",
 			"name": "Disable Avatar",
+			"type": "checkbox"
+		},
+		{
+			"key": "enable-review-mode",
+			"name": "Enable Review Mode",
 			"type": "checkbox"
 		},
 		{
