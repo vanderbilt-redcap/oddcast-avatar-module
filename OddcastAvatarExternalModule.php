@@ -208,6 +208,15 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 
 		global $Proj;
 		foreach ($_POST as $fieldName => $value) {
+			$checkboxPrefix = '__chk__';
+			if (strpos($fieldName, $checkboxPrefix) === 0) {
+				$fieldName = substr($fieldName, strlen($checkboxPrefix));
+
+				$parts = explode('_', $fieldName);
+				$parts = array_slice($parts, 0, -2);  // Remove the "_RC_#" suffix
+				$fieldName = implode('_', $parts);
+			}
+
 			if (!isset($Proj->metadata[$fieldName])) {
 				continue;
 			}
