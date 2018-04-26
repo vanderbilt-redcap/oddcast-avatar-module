@@ -171,6 +171,18 @@ body.modal-open #pagecontainer{
 	float: right;
 }
 
+#oddcast-wrapper #review-mode-footer {
+	margin-top: 45px;
+	text-align: center;
+}
+
+#oddcast-wrapper #review-mode-footer button {
+	margin-top: 10px;
+	padding: 5px 10px;
+	font-weight: bold;
+	font-size: 13px;
+}
+
 .tippy-content{
 	font-size: 15px;
 }

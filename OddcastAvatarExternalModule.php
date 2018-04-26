@@ -117,6 +117,9 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				OddcastAvatarExternalModule.initialize(<?=json_encode([
 					'voice' => explode(',', $this->getProjectSetting('voice')),
 					'isInitialLoad' => $_SERVER['REQUEST_METHOD'] == 'GET',
+					'reviewModeEnabled' => $this->isReviewModeEnabled(),
+					'reviewModeCookieName' => REVIEW_MODE,
+					'reviewModeTurningOffValue' => TURNING_OFF,
 					'pageMessage' => $pageMessage,
 					'messagesForValues' => $this->getSubSettings('messages-for-field-values'),
 					'publicSurveyUrl' => $this->getPublicSurveyUrl(),
@@ -130,69 +133,6 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			})
 		</script>
 		<?php
-
-		$this->getReviewModeHtml();
-	}
-
-	private function getReviewModeHtml()
-	{
-		if (empty($this->getProjectSetting('enable-review-mode'))) {
-			return;
-		}
-
-		?>
-		<style>
-			#review-mode-footer {
-				margin-top: 45px;
-				text-align: center;
-			}
-
-			#review-mode-footer button {
-				margin-top: 10px;
-				padding: 5px 10px;
-				font-weight: bold;
-				font-size: 13px;
-			}
-		</style>
-		<script>
-			$(function () {
-				var cookieName = <?=json_encode(REVIEW_MODE)?>;
-				var onValue = 'on'
-				var turningOffValue = <?=json_encode(TURNING_OFF)?>;
-
-				<?php
-				if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-					?>Cookies.set(cookieName, onValue)<?php
-				}
-				?>
-
-				var clickPreviousButton = function () {
-					var previousButton = $('button[name=submit-btn-saveprevpage]')
-					if (previousButton.length == 0) {
-						Cookies.remove(cookieName)
-						$('body').css('visibility', 'visible') // poor man's loading indicator
-					}
-					else {
-						previousButton.click()
-					}
-				}
-
-				var value = Cookies.get(cookieName)
-				if (value == onValue) {
-					var reviewModeFooter = $('<div id="review-mode-footer">You are currently in Review Mode.<br><button	>Click here to begin consent</button></div>')
-					reviewModeFooter.insertBefore($('#footer'))
-					reviewModeFooter.find('button').click(function () {
-						Cookies.set(cookieName, turningOffValue)
-						reviewModeFooter.remove()
-						clickPreviousButton()
-					})
-				}
-				else if (value == turningOffValue) {
-					clickPreviousButton()
-				}
-			})
-		</script>
-		<?php
 	}
 
 	function redcap_every_page_before_render()
@@ -202,7 +142,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		}
 
 		$reviewMode = @$_COOKIE[REVIEW_MODE];
-		if (is_null($reviewMode)) {
+		if (!$this->isReviewModeEnabled() || is_null($reviewMode)) {
 			return;
 		}
 
@@ -238,6 +178,11 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			</style>
 			<?php
 		}
+	}
+
+	private function isReviewModeEnabled()
+	{
+		return $this->getProjectSetting('enable-review-mode');
 	}
 
 	private function getTimeoutVerificationFieldName(){

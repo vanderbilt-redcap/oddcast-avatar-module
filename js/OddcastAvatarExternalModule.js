@@ -111,26 +111,77 @@ var OddcastAvatarExternalModule = {
 			$('body').prepend(wrapper)
 			$('#pagecontainer').appendTo($('#oddcast-content'))
 
-			if(settings.isInitialLoad){
-				// Forget the show/character chosen from the last survey
-				Cookies.remove('oddcast-show-id')
-
-				// If a timeout was active, remove it.
-				Cookies.remove('timeout-active')
-
-				textIntroModal.modal('show')
-			}
-			else if(Cookies.get('oddcast-avatar-maximized') === 'true'){
-				maximizeAvatar()
-			}
-			else{
-				$('#oddcast-maximize-avatar').show()
-			}
-
 			OddcastAvatarExternalModule.initPortraitDialog()
 			OddcastAvatarExternalModule.initMessagesForValues(settings.messagesForValues)
 			OddcastAvatarExternalModule.initTimeout(settings)
+
+			OddcastAvatarExternalModule.startAvatar = function (isInitialLoad) {
+				if (isInitialLoad) {
+					// Forget the show/character chosen from the last survey
+					Cookies.remove('oddcast-show-id')
+
+					// If a timeout was active, remove it.
+					Cookies.remove('timeout-active')
+
+					textIntroModal.modal('show')
+				}
+				else if (Cookies.get('oddcast-avatar-maximized') === 'true') {
+					maximizeAvatar()
+				}
+				else {
+					$('#oddcast-maximize-avatar').show()
+				}
+			}
+
+			OddcastAvatarExternalModule.initReviewMode(settings)
 		})
+	},
+	initReviewMode: function (settings) {
+		var cookieName = settings.reviewModeCookieName
+		var onValue = 'on'
+		var turningOffValue = settings.reviewModeTurningOffValue
+
+		var setCookie = function (value) {
+			Cookies.set(cookieName, value, {expires: 1})
+		}
+
+		var clickPreviousButton = function () {
+			var previousButton = $('button[name=submit-btn-saveprevpage]')
+			if (previousButton.length == 0) {
+				Cookies.remove(cookieName)
+				$('body').css('visibility', 'visible') // poor man's loading indicator
+
+				OddcastAvatarExternalModule.startAvatar(true)
+			}
+			else {
+				previousButton.click()
+			}
+		}
+
+		if (!settings.reviewModeEnabled) {
+			Cookies.remove(cookieName)
+		}
+		else if (settings.isInitialLoad) {
+			setCookie(onValue)
+		}
+
+		var value = Cookies.get(cookieName)
+		if (value == onValue) {
+			var reviewModeFooter = $('<div id="review-mode-footer">You are currently in Review Mode.<br><button	>Click here to begin consent</button></div>')
+			reviewModeFooter.insertBefore($('#footer'))
+			reviewModeFooter.find('button').click(function () {
+				setCookie(turningOffValue)
+				reviewModeFooter.remove() // Important if we're already on the first page
+				clickPreviousButton()
+			})
+		}
+		else if (value == turningOffValue) {
+			clickPreviousButton()
+		}
+		else {
+			// Either we're done reviewing, or review mode is disabled.
+			OddcastAvatarExternalModule.startAvatar(settings.isInitialLoad)
+		}
 	},
 	getWrapper: function(){
 		return $('#oddcast-wrapper')
