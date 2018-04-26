@@ -211,6 +211,11 @@ var OddcastAvatarExternalModule = {
 	initMessagesForValues: function(messagesForValues){
 		var fieldMap = {}
 		$.each(messagesForValues, function(i, item){
+			if (!item.field) {
+				// The setting hasn't been fully configured.
+				return
+			}
+
 			if(fieldMap[item.field] == undefined){
 				fieldMap[item.field] = {}
 			}
