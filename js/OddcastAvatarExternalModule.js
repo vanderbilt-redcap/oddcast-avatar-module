@@ -145,8 +145,16 @@ var OddcastAvatarExternalModule = {
 		var onValue = 'on'
 		var turningOffValue = settings.reviewModeTurningOffValue
 
+		var submitButton = $('button[name=submit-btn-saverecord]:contains("Submit")')
+		submitButton.prop('disabled', true)
+
 		var setCookie = function (value) {
 			Cookies.set(cookieName, value, {expires: 1})
+		}
+
+		var startAvatar = function (isInitialLoad) {
+			submitButton.prop('disabled', false)
+			OddcastAvatarExternalModule.startAvatar(isInitialLoad)
 		}
 
 		var clickPreviousButton = function () {
@@ -155,7 +163,7 @@ var OddcastAvatarExternalModule = {
 				Cookies.remove(cookieName)
 				$('body').css('visibility', 'visible') // poor man's loading indicator
 
-				OddcastAvatarExternalModule.startAvatar(true)
+				startAvatar(true)
 			}
 			else {
 				previousButton.click()
@@ -163,9 +171,11 @@ var OddcastAvatarExternalModule = {
 		}
 
 		if (!settings.reviewModeEnabled) {
+			// Make sure Review Mode is disabled if a cookie is left over from when Review Mode was enabled previously.
 			Cookies.remove(cookieName)
 		}
 		else if (settings.isInitialLoad) {
+			// Start Review Mode
 			setCookie(onValue)
 		}
 
@@ -184,7 +194,7 @@ var OddcastAvatarExternalModule = {
 		}
 		else {
 			// Either we're done reviewing, or review mode is disabled.
-			OddcastAvatarExternalModule.startAvatar(settings.isInitialLoad)
+			startAvatar(settings.isInitialLoad)
 		}
 	},
 	getWrapper: function () {
