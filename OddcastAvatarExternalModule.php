@@ -100,10 +100,6 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		<script>
 			$(function(){
 				<?php
-				if($this->getProjectSetting('disable')){
-					echo 'return';
-				}
-
 				$pageMessage = '';
 				foreach($this->getSubSettings('page-messages') as $settingGroup){
 					if($settingGroup['page-number'] == $_GET['__page__']){
@@ -111,12 +107,12 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 						break;
 					}
 				}
-
 				?>
 
 				OddcastAvatarExternalModule.initialize(<?=json_encode([
 					'voice' => explode(',', $this->getProjectSetting('voice')),
 					'isInitialLoad' => $_SERVER['REQUEST_METHOD'] == 'GET',
+					'avatarDisabled' => $this->getProjectSetting('disable'),
 					'reviewModeEnabled' => $this->isReviewModeEnabled(),
 					'reviewModeCookieName' => REVIEW_MODE,
 					'reviewModeTurningOffValue' => TURNING_OFF,

@@ -116,6 +116,10 @@ var OddcastAvatarExternalModule = {
 			OddcastAvatarExternalModule.initTimeout(settings)
 
 			OddcastAvatarExternalModule.startAvatar = function (isInitialLoad) {
+				if(settings.avatarDisabled){
+					return
+				}
+
 				if (isInitialLoad) {
 					// Forget the show/character chosen from the last survey
 					Cookies.remove('oddcast-show-id')
