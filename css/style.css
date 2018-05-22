@@ -34,6 +34,7 @@ body {
 
 #pagecontainer{
 	height: 100vh;
+	overflow-x: hidden; /* Required on some surveys to prevent unnecessary play when horizontally scrolling. */
 	overflow-y: scroll;
 	min-width: 721px; /* After adding the width of the avatar (and borders), this will fill the screen of a landscape ipad. */
 	-webkit-overflow-scrolling: touch; /* use kinetic scrolling */
