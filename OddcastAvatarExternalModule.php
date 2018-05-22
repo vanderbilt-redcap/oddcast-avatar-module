@@ -21,10 +21,6 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			}
 		</style>
 
-		<link rel="stylesheet" href="https://unpkg.com/tippy.js@2.2.2/dist/tippy.css" integrity="sha384-wSlyG10EXV8zWqE9v9lzWCfOPiVQB5p5/9xT/zfpYn4yxqLooKBko44huGddKjAT" crossorigin="anonymous">
-		<link rel="stylesheet" href="https://unpkg.com/tippy.js@2.2.2/dist/themes/light.css" integrity="sha384-L67GFzFvXzI/emFX7zfRPrrglAGTl08iybyk/gP2LdDEaY77xQ2GwBjiUglPhEQw" crossorigin="anonymous">
-		<script src="https://unpkg.com/tippy.js@2.2.2/dist/tippy.all.min.js" integrity="sha384-PZHY4QRH2Yg34/USJTSmg+oXlrrxxxOHITDLz+TERu3KS9JbUpnsp0JrhT/F1Hmc" crossorigin="anonymous"></script>
-
 		<script src="//cdn.jsdelivr.net/npm/mobile-detect@1.4.1/mobile-detect.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.2.0/js.cookie.min.js" integrity="sha256-9Nt2r+tJnSd2A2CRUvnjgsD+ES1ExvjbjBNqidm9doI=" crossorigin="anonymous"></script>
 		<script src="https://cdn.jsdelivr.net/npm/jquery.idle@1.2.6/jquery.idle.min.js" integrity="sha256-RFOvLffDBWTRL2yzD1Atxv6t+G3Rd73IYdbmGO3IOzM=" crossorigin="anonymous"></script>

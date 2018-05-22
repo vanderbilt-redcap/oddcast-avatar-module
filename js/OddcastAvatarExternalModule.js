@@ -13,10 +13,6 @@ var OddcastAvatarExternalModule = {
 			$(fades[1]).replaceWith($(fades[0]))
 		}
 
-		if (settings.pageMessage == '') {
-			OddcastAvatarExternalModule.getPlayButton().hide()
-		}
-
 		$(function () {
 			var voice = settings.voice
 			if (!voice) {
@@ -42,6 +38,8 @@ var OddcastAvatarExternalModule = {
 
 				// Wait until the avatar is loaded in the background initially, or we could see a flash of the wrong character.
 				OddcastAvatarExternalModule.afterSceneLoaded(function () {
+					// The initial show is loaded, but we may not want to use this one so we load our own show later.
+
 					oddcastPlayer.find('.character').remove()
 
 					var showId = Cookies.get('oddcast-show-id')
@@ -51,6 +49,7 @@ var OddcastAvatarExternalModule = {
 						return
 					}
 
+					// Load the show we want instead.
 					OddcastAvatarExternalModule.loadShowByID(showId)
 
 					avatar.fadeIn(fadeDuration);
@@ -59,17 +58,28 @@ var OddcastAvatarExternalModule = {
 
 					Cookies.set('oddcast-avatar-maximized', 'true')
 
-					if (OddcastAvatarExternalModule.getPlayButton().is(':visible')) {
-						// This is the first time a character was picked.  Show the play button tooltip.
-						OddcastAvatarExternalModule.afterSceneLoaded(function () {
-							var playButton = OddcastAvatarExternalModule.getPlayButton()
-							if (playButton.is(':visible')) {
-								playButton = playButton[0]
-								tippy(playButton)
-								playButton._tippy.show()
+					OddcastAvatarExternalModule.afterSceneLoaded(function () {
+						// The show we want has been loaded.
+						if (settings.pageMessage == '') {
+							return
+						}
+
+						OddcastAvatarExternalModule.getPlayButton().show()
+
+						var events = 'mousemove touchstart'
+						var handler = function () {
+							if (!OddcastAvatarExternalModule.scenedLoaded) {
+								return
 							}
-						})
-					}
+
+							// Automatically play the page message the first time a user action is detected.
+							// A user action is required to play audio on iOS/Android.
+							OddcastAvatarExternalModule.sayText(settings.pageMessage)
+							$(document).off(events, handler)
+						}
+
+						$(document).on(events, handler)
+					})
 				})
 			}
 
