@@ -82,7 +82,16 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 						<i class="fa fa-user"></i>
 					</div>
 					<script type="text/javascript" src="//vhss-d.oddcast.com/vhost_embed_functions_v2.php?acc=6267283&js=1"></script>
-					<script type="text/javascript">AC_VHost_Embed(6267283,300,400,'',1,1, <?=$showIds[0]?>, 0,1,0,'709e320dba1a392fa4e863ef0809f9f1',0);</script>
+					<script type="text/javascript">
+						AC_VHost_Embed(6267283, 300, 400, '', 1, 1, <?=$showIds[0]?>, 0, 1, 0, '709e320dba1a392fa4e863ef0809f9f1', 0);
+						setTimeout(function () {
+							// For some stupid reason AC_VHost_Embed *sometimes* attaches an event listener to our submit
+							// button during the next iteration of the event loop that causes submits to fail.
+							// We effectively remove it by replace the submit button with a clone of itself.
+							var submitButton = $('button[name=submit-btn-saverecord]')
+							submitButton.replaceWith(submitButton.clone())
+						}, 0)
+					</script>
 				</div>
 			</div>
 			<div id="oddcast-content"></div>
