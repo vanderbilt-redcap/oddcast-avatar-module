@@ -457,7 +457,6 @@ var OddcastAvatarExternalModule = {
 		followCursor(0)
 		setIdleMovement(0, 0)
 
-		var avatar = OddcastAvatarExternalModule.getAvatar()
 		OddcastAvatarExternalModule.scenedLoaded = true
 	},
 	getAvatar: function () {
