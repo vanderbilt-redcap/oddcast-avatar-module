@@ -131,12 +131,6 @@ var OddcastAvatarExternalModule = {
 				}
 
 				if (isInitialLoad) {
-					// Forget the show/character chosen from the last survey
-					Cookies.remove('oddcast-show-id')
-
-					// If a timeout was active, remove it.
-					Cookies.remove('timeout-active')
-
 					textIntroModal.modal('show')
 				}
 				else if (Cookies.get('oddcast-avatar-maximized') === 'true') {
@@ -145,6 +139,14 @@ var OddcastAvatarExternalModule = {
 				else {
 					$('#oddcast-maximize-avatar').show()
 				}
+			}
+			
+			if (settings.isInitialLoad) {
+				// Forget the show/character chosen from the last survey
+				Cookies.remove('oddcast-show-id')
+
+				// If a timeout was active, remove it.
+				Cookies.remove('timeout-active')
 			}
 
 			OddcastAvatarExternalModule.initReviewMode(settings)
