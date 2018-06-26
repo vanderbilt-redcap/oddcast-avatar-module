@@ -89,7 +89,13 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 							// button during the next iteration of the event loop that causes submits to fail.
 							// We effectively remove it by replace the submit button with a clone of itself.
 							var submitButton = $('button[name=submit-btn-saverecord]')
-							submitButton.replaceWith(submitButton.clone())
+							var newButton = submitButton.clone()
+							submitButton.replaceWith(newButton)
+
+							newButton.click(function () {
+								// Prevent the "are you sure" prompt when leaving the page from triggering in IE & Chrome.
+								dataEntryFormValuesChanged = false
+							})
 						}, 0)
 					</script>
 				</div>
