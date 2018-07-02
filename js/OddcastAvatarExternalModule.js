@@ -19,7 +19,7 @@ var OddcastAvatarExternalModule = {
 			}
 
 			if (settings.voices.male == '') {
-				settings.voices.male = [3, 7]
+				settings.voices.male = [3, 2]
 			}
 
 			var fadeDuration = 200
