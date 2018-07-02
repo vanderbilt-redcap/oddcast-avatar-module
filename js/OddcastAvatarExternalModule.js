@@ -157,15 +157,19 @@ var OddcastAvatarExternalModule = {
 		var onValue = 'on'
 		var turningOffValue = settings.reviewModeTurningOffValue
 
-		var submitButton = $('button[name=submit-btn-saverecord]:contains("Submit")')
-		submitButton.prop('disabled', true)
+		var getSubmitButton = function () {
+			// This was switched to a function instead of a variable since the submit button is replaced when the avatar is loaded.
+			return $('button[name=submit-btn-saverecord]:contains("Submit")')
+		}
+		
+		getSubmitButton().prop('disabled', true)
 
 		var setCookie = function (value) {
 			Cookies.set(cookieName, value, {expires: 1})
 		}
 
 		var startAvatar = function (isInitialLoad) {
-			submitButton.prop('disabled', false)
+			getSubmitButton().prop('disabled', false)
 			OddcastAvatarExternalModule.startAvatar(isInitialLoad)
 		}
 
