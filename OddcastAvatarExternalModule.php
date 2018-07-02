@@ -9,7 +9,7 @@ const TURNING_OFF = 'turning-off';
 
 class OddcastAvatarExternalModule extends AbstractExternalModule
 {
-	function redcap_survey_page($project_id, $record)
+	function redcap_survey_page($project_id, $record, $instrument)
 	{
 		$showIds = [2560288, 2560294];
 
@@ -124,7 +124,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 					'voice' => explode(',', $this->getProjectSetting('voice')),
 					'isInitialLoad' => $_SERVER['REQUEST_METHOD'] == 'GET',
 					'avatarDisabled' => $this->getProjectSetting('disable'),
-					'reviewModeEnabled' => $this->isReviewModeEnabled(),
+					'reviewModeEnabled' => $this->isReviewModeEnabled($instrument),
 					'reviewModeCookieName' => REVIEW_MODE,
 					'reviewModeTurningOffValue' => TURNING_OFF,
 					'pageMessage' => $pageMessage,
@@ -187,9 +187,20 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		}
 	}
 
-	private function isReviewModeEnabled()
+	private function isReviewModeEnabled($instrument = null)
 	{
-		return $this->getProjectSetting('enable-review-mode');
+		if (!$this->getProjectSetting('enable-review-mode')) {
+			return false;
+		}
+		
+		$reviewModeForms = array_filter($this->getProjectSetting('review-mode-forms'));
+		if (!empty($instrument) && !empty($reviewModeForms)) {
+			if (!in_array($instrument, $reviewModeForms)) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	private function getTimeoutVerificationFieldName(){

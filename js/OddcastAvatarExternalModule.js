@@ -187,7 +187,7 @@ var OddcastAvatarExternalModule = {
 		}
 
 		if (!settings.reviewModeEnabled) {
-			// Make sure Review Mode is disabled if a cookie is left over from when Review Mode was enabled previously.
+			// Make sure Review Mode is disabled if a cookie is left over from when Review Mode was enabled previously (perhaps on a different instrument).
 			Cookies.remove(cookieName)
 		}
 		else if (settings.isInitialLoad) {

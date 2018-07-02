@@ -26,8 +26,14 @@
 		},
 		{
 			"key": "enable-review-mode",
-			"name": "Enable Review Mode",
+			"name": "Enable \"Review Mode\"",
 			"type": "checkbox"
+		},
+		{
+			"key": "review-mode-forms",
+			"name": "Limit \"Review Mode\" to specific form(s)",
+			"type": "form-list",
+			"repeatable": true
 		},
 		{
 			"key": "voice",
