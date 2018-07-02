@@ -11,7 +11,20 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 {
 	function redcap_survey_page($project_id, $record, $instrument)
 	{
-		$showIds = [2560288, 2560294];
+		$shows = [
+			2560288 => 'female',
+			2560294 => 'female',
+			2613244 => 'male',
+			2613247 => 'male',
+			2613251 => 'male',
+			2613248 => 'female',
+			2613253 => 'female',
+			2613256 => 'male',
+			2613261 => 'female',
+			2613263 => 'male',
+			2613264 => 'female',
+			2613267 => 'male',
+		];
 
 		?>
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" integrity="sha256-NuCn4IvuZXdBaFKJOAcsU2Q3ZpwbdFisd5dux4jkQ5w=" crossorigin="anonymous" />
@@ -41,7 +54,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 							<p class="top-section">Hello!  Thank you for your interest in volunteering for a research study.  At any time during the consent you can ask a study coordinator for help.  We also have our eStaff team members to guide you through the consent.  Please select an eStaff team member to take you through the consent:</p>
 							<div id="oddcast-character-list" class="text-center">
 								<?php
-								foreach($showIds as $id){
+								foreach ($shows as $id => $gender) {
 									?><img src="<?=$this->getUrl("images/$id.png")?>" data-show-id="<?=$id?>" class="oddcast-character" /><?php
 								}
 								?>
@@ -83,7 +96,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 					</div>
 					<script type="text/javascript" src="//vhss-d.oddcast.com/vhost_embed_functions_v2.php?acc=6267283&js=1"></script>
 					<script type="text/javascript">
-						AC_VHost_Embed(6267283, 300, 400, '', 1, 1, <?=$showIds[0]?>, 0, 1, 0, '709e320dba1a392fa4e863ef0809f9f1', 0);
+						AC_VHost_Embed(6267283, 300, 400, '', 1, 1, <?=array_keys($shows)[0]?>, 0, 1, 0, '709e320dba1a392fa4e863ef0809f9f1', 0);
 						setTimeout(function () {
 							// For some stupid reason AC_VHost_Embed *sometimes* attaches an event listener to our submit
 							// button during the next iteration of the event loop that causes submits to fail.
@@ -121,7 +134,11 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				?>
 
 				OddcastAvatarExternalModule.initialize(<?=json_encode([
-					'voice' => explode(',', $this->getProjectSetting('voice')),
+					'voices' => [
+						'female' => explode(',', $this->getProjectSetting('voice')),
+						'male' => explode(',', $this->getProjectSetting('male-voice')),
+					],
+					'shows' => $shows,
 					'isInitialLoad' => $_SERVER['REQUEST_METHOD'] == 'GET',
 					'avatarDisabled' => $this->getProjectSetting('disable'),
 					'reviewModeEnabled' => $this->isReviewModeEnabled($instrument),
@@ -192,7 +209,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		if (!$this->getProjectSetting('enable-review-mode')) {
 			return false;
 		}
-		
+
 		$reviewModeForms = array_filter($this->getProjectSetting('review-mode-forms'));
 		if (!empty($instrument) && !empty($reviewModeForms)) {
 			if (!in_array($instrument, $reviewModeForms)) {

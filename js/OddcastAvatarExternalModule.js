@@ -14,13 +14,13 @@ var OddcastAvatarExternalModule = {
 		}
 
 		$(function () {
-			var voice = settings.voice
-			if (!voice) {
-				voice = [1, 1];
+			if (settings.voices.female == '') {
+				settings.voices.female = [3, 3]
 			}
 
-			OddcastAvatarExternalModule.engine = voice[0];
-			OddcastAvatarExternalModule.person = voice[1];
+			if (settings.voices.male == '') {
+				settings.voices.male = [3, 7]
+			}
 
 			var fadeDuration = 200
 
@@ -48,6 +48,12 @@ var OddcastAvatarExternalModule = {
 						textIntroModal.modal('show')
 						return
 					}
+
+					var gender = settings.shows[showId]
+					var voice = settings.voices[gender]
+
+					OddcastAvatarExternalModule.engine = voice[0];
+					OddcastAvatarExternalModule.person = voice[1];
 
 					// Load the show we want instead.
 					OddcastAvatarExternalModule.loadShowByID(showId)
@@ -96,7 +102,7 @@ var OddcastAvatarExternalModule = {
 			$('#oddcast-controls .fa-user').click(function () {
 				textIntroModal.find('.top-section').html('Select an eStaff member:').css('font-weight', 'bold')
 				textIntroModal.find('.bottom-section').hide()
-				textIntroModal.find('.modal-dialog').width('350px')
+				textIntroModal.find('.modal-dialog').width('625px')
 
 				textIntroModal.modal('show')
 			})
@@ -140,7 +146,7 @@ var OddcastAvatarExternalModule = {
 					$('#oddcast-maximize-avatar').show()
 				}
 			}
-			
+
 			if (settings.isInitialLoad) {
 				// Forget the show/character chosen from the last survey
 				Cookies.remove('oddcast-show-id')
@@ -161,7 +167,7 @@ var OddcastAvatarExternalModule = {
 			// This was switched to a function instead of a variable since the submit button is replaced when the avatar is loaded.
 			return $('button[name=submit-btn-saverecord]:contains("Submit")')
 		}
-		
+
 		getSubmitButton().prop('disabled', true)
 
 		var setCookie = function (value) {

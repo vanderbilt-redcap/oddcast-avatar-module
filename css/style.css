@@ -133,7 +133,7 @@ body.modal-open #pagecontainer{
 
 .oddcast-character{
 	width: 125px;
-	margin: 10px 5px;
+	margin: 5px 5px;
 	display: inline-block;
 	border-bottom: 1px solid #f7ebeb;
 	cursor: pointer;
@@ -153,6 +153,11 @@ body.modal-open #pagecontainer{
 #oddcast-wrapper .modal p{
 	font-size: 14px;
 	line-height: 1.7;
+}
+
+#oddcast-wrapper .modal-dialog {
+	margin-top: 15px;
+	width: 710px;
 }
 
 #oddcast-wrapper .modal-body{
