@@ -1,7 +1,10 @@
 // This object is defined globally so it can be used in other modules (like Inline Descriptive Pop-ups).
 var OddcastAvatarExternalModule = {
 	scenedLoaded: false,
+	settings: null,
 	initialize: function (settings) {
+		OddcastAvatarExternalModule.settings = settings
+
 		var wrapper = OddcastAvatarExternalModule.getWrapper()
 		var avatar = OddcastAvatarExternalModule.getAvatar()
 		var textIntroModal = OddcastAvatarExternalModule.getTextIntroModal()
@@ -31,6 +34,8 @@ var OddcastAvatarExternalModule = {
 				$('#oddcast-maximize-avatar').show();
 
 				Cookies.set('oddcast-avatar-maximized', 'false')
+
+				OddcastAvatarExternalModule.log('avatar disabled')
 			}
 
 			var maximizeAvatar = function () {
@@ -89,7 +94,11 @@ var OddcastAvatarExternalModule = {
 				})
 			}
 
-			$('#oddcast-maximize-avatar').click(maximizeAvatar)
+			$('#oddcast-maximize-avatar').click(function () {
+				maximizeAvatar()
+				OddcastAvatarExternalModule.log('avatar enabled')
+			})
+
 			$('#oddcast-minimize-avatar').click(minimizeAvatar)
 
 			var oddcastPlayer = $('._html5Player')
@@ -117,6 +126,10 @@ var OddcastAvatarExternalModule = {
 				var showId = $(this).data('show-id')
 				Cookies.set('oddcast-show-id', showId)
 				maximizeAvatar()
+
+				OddcastAvatarExternalModule.log('character selected', {
+					'Show ID': showId
+				})
 			})
 
 			textIntroModal.find('button').click(function () {
@@ -455,7 +468,6 @@ var OddcastAvatarExternalModule = {
 		sayText(text, OddcastAvatarExternalModule.person, 1, OddcastAvatarExternalModule.engine)
 	},
 	loadShowByID: function (showId) {
-		console.log('showId', showId)
 		OddcastAvatarExternalModule.scenedLoaded = false
 
 		// loadShow() is designed to load by index, but we don't want to do that since index is affected by adding/removing shows in the list.
@@ -479,6 +491,11 @@ var OddcastAvatarExternalModule = {
 	},
 	getPlayButton: function () {
 		return $('#oddcast-controls .fa-play-circle')
+	},
+	log: function (message, parameters) {
+		if (OddcastAvatarExternalModule.settings.loggingSupported) {
+			ExternalModules.Vanderbilt.OddcastAvatarExternalModule.log(message, parameters)
+		}
 	}
 }
 

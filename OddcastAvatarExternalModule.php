@@ -11,6 +11,12 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 {
 	function redcap_survey_page($project_id, $record, $instrument)
 	{
+		$initializeJavascriptMethodName = 'initializeJavascriptModuleObject';
+		$loggingSupported = method_exists($this, $initializeJavascriptMethodName);
+		if ($loggingSupported) {
+			$this->{$initializeJavascriptMethodName}();
+		}
+
 		$shows = [
 			2560288 => 'female',
 			2560294 => 'female',
@@ -152,7 +158,8 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 					'timeoutVerification' => [
 						'fieldName' => $this->getTimeoutVerificationFieldName(),
 						'value' => $this->getTimeoutVerificationValue($project_id, $record)
-					]
+					],
+					'loggingSupported' => $loggingSupported
 				])?>)
 			})
 		</script>
