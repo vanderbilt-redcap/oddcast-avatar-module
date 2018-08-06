@@ -128,7 +128,7 @@ var OddcastAvatarExternalModule = {
 				maximizeAvatar()
 
 				OddcastAvatarExternalModule.log('character selected', {
-					'Show ID': showId
+					'show id': showId
 				})
 			})
 
