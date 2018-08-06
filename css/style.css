@@ -158,6 +158,7 @@ body.modal-open #pagecontainer{
 #oddcast-wrapper .modal-dialog {
 	margin-top: 15px;
 	width: 710px;
+	max-width: 710px;
 }
 
 #oddcast-wrapper .modal-body{
