@@ -478,10 +478,26 @@ var OddcastAvatarExternalModule = {
 	onSceneLoaded: function () {
 		window.mobile_events = 1 // Required for sayText() to work on iOS/Android
 
-		followCursor(0)
-		setIdleMovement(0, 0)
-
 		OddcastAvatarExternalModule.scenedLoaded = true
+
+		var postInit = function (runCount) {
+			// In IE the scene is apparently not fully initialized yet.
+			// It will become initialized at some point in the next few hundred milliseconds.
+			// We keep setting the following methods repeatedly for a while to make sure they're
+			// applied as soon as the avatar is fully initialized.
+			// Without this, the followCursor() method was not working consistently in IE.
+
+			followCursor(0) // Prevents the avatar's eyes from following the mouse cursor
+			setIdleMovement(0, 0)
+
+			if (runCount < 20) {
+				setTimeout(function () {
+					postInit(runCount + 1)
+				}, 50)
+			}
+		}
+
+		postInit(0)
 	},
 	getAvatar: function () {
 		return $('#oddcast-avatar')
