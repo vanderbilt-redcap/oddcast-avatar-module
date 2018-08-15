@@ -85,7 +85,7 @@ var OddcastAvatarExternalModule = {
 
 							// Automatically play the page message the first time a user action is detected.
 							// A user action is required to play audio on iOS/Android.
-							OddcastAvatarExternalModule.sayText(settings.pageMessage)
+							OddcastAvatarExternalModule.sayPageMessage('page message played automatically')
 							$(document).off(events, handler)
 						}
 
@@ -118,7 +118,7 @@ var OddcastAvatarExternalModule = {
 
 			OddcastAvatarExternalModule.getPlayButton().click(function () {
 				OddcastAvatarExternalModule.afterSceneLoaded(function () {
-					OddcastAvatarExternalModule.sayText(settings.pageMessage)
+					OddcastAvatarExternalModule.sayPageMessage('page message played manually')
 				})
 			})
 
@@ -169,6 +169,13 @@ var OddcastAvatarExternalModule = {
 			}
 
 			OddcastAvatarExternalModule.initReviewMode(settings)
+		})
+	},
+	sayPageMessage: function(logMessage){
+		var settings = OddcastAvatarExternalModule.settings
+		OddcastAvatarExternalModule.sayText(settings.pageMessage)
+		OddcastAvatarExternalModule.log(logMessage, {
+			page: settings.currentPageNumber
 		})
 	},
 	initReviewMode: function (settings) {

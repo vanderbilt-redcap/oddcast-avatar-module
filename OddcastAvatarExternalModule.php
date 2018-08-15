@@ -130,9 +130,10 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		<script>
 			$(function(){
 				<?php
+				$currentPageNumber = $_GET['__page__'];
 				$pageMessage = '';
 				foreach($this->getSubSettings('page-messages') as $settingGroup){
-					if($settingGroup['page-number'] == $_GET['__page__']){
+					if($settingGroup['page-number'] == $currentPageNumber){
 						$pageMessage = $settingGroup['page-message'];
 						break;
 					}
@@ -151,6 +152,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 					'reviewModeCookieName' => REVIEW_MODE,
 					'reviewModeTurningOffValue' => TURNING_OFF,
 					'pageMessage' => $pageMessage,
+					'currentPageNumber' => $currentPageNumber,
 					'messagesForValues' => $this->getSubSettings('messages-for-field-values'),
 					'publicSurveyUrl' => $this->getPublicSurveyUrl(),
 					'timeout' => $this->getProjectSetting('timeout'),
