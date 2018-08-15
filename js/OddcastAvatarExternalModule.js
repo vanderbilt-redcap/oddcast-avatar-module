@@ -311,6 +311,10 @@ var OddcastAvatarExternalModule = {
 				var message = valueMap[value]
 				if (message) {
 					OddcastAvatarExternalModule.sayText(message)
+					OddcastAvatarExternalModule.log('message for value played', {
+						field: fieldName,
+						value: value
+					})
 				}
 			})
 		})
