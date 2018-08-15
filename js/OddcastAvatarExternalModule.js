@@ -199,6 +199,8 @@ var OddcastAvatarExternalModule = {
 				$('body').css('visibility', 'visible') // poor man's loading indicator
 
 				startAvatar(true)
+
+				OddcastAvatarExternalModule.log('review mode exited')
 			}
 			else {
 				previousButton.click()
