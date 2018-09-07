@@ -442,6 +442,7 @@ var OddcastAvatarExternalModule = {
 	isModalDisplayed: function (modal) {
 		return modal.hasClass('in')
 	},
+	// This method is referenced by the Analytics module.
 	stopSpeech: function () {
 		// Only respsect this request if the Oddcast libraries have already loaded.
 		if (typeof stopSpeech != 'undefined') {
@@ -468,6 +469,7 @@ var OddcastAvatarExternalModule = {
 			callback
 		)
 	},
+	// This method is referenced by the Inline Popups module.
 	sayText: function (text) {
 		if (!OddcastAvatarExternalModule.engine) {
 			// The initialize function hasn't run yet.
@@ -515,7 +517,8 @@ var OddcastAvatarExternalModule = {
 	getAvatar: function () {
 		return $('#oddcast-avatar')
 	},
-	isEnabled: function () { // This function is used by the inline popups module.
+	// This method is referenced by the Inline Popups module.
+	isEnabled: function () {
 		return OddcastAvatarExternalModule.getAvatar().is(':visible')
 	},
 	getPlayButton: function () {
