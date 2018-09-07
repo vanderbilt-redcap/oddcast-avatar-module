@@ -71,7 +71,7 @@ var OddcastAvatarExternalModule = {
 
 					OddcastAvatarExternalModule.afterSceneLoaded(function () {
 						// The show we want has been loaded.
-						if (settings.pageMessage == '') {
+						if (!settings.pageMessage) {
 							return
 						}
 
