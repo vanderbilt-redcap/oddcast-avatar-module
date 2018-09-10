@@ -12,10 +12,6 @@ var OddcastAvatarExternalModule = {
 		}
 		else{
 			OddcastAvatarExternalModule.initializeParentPage()
-
-			// Still need to refactor/test everything below here:
-			
-			OddcastAvatarExternalModule.initReviewMode()
 		}
 	},
 	initializeParentPage: function(){
@@ -86,6 +82,7 @@ var OddcastAvatarExternalModule = {
 
 		OddcastAvatarExternalModule.initPortraitDialog()
 		OddcastAvatarExternalModule.initTimeout()
+		OddcastAvatarExternalModule.initReviewMode()
 	},
 	initializeIFrame: function(){
 		// The following improves scrolling on iPad.
@@ -101,7 +98,7 @@ var OddcastAvatarExternalModule = {
 			page: settings.currentPageNumber
 		})
 	},
-	initReviewMode: function (settings) {
+	initReviewMode: function () {
 		var settings = OddcastAvatarExternalModule.settings
 
 		var cookieName = settings.reviewModeCookieName
