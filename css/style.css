@@ -14,11 +14,8 @@ body {
 }
 
 #oddcast-wrapper{
-	display: table;
+	display: none;
 	margin: auto;
-	background: #f3f3f3;
-	border-left: 1px solid #ccc;
-	border-right: 1px solid #ccc;
 }
 
 #oddcast-wrapper > *{
@@ -28,16 +25,13 @@ body {
 
 #oddcast-sidebar{
 	position: relative;
-	border-right: 1px solid #ccc;
 	overflow: hidden; /* Prevent main_container from invisibly bleeding over into the survey. */
 }
 
-#pagecontainer{
+#oddcast-content > iframe{
 	height: 100vh;
-	overflow-x: hidden; /* Required on some surveys to prevent unnecessary play when horizontally scrolling. */
-	overflow-y: scroll;
+	border: 0px;
 	min-width: 721px; /* After adding the width of the avatar (and borders), this will fill the screen of a landscape ipad. */
-	-webkit-overflow-scrolling: touch; /* use kinetic scrolling */
 }
 
 body.modal-open #pagecontainer{
@@ -50,13 +44,14 @@ body.modal-open #pagecontainer{
 }
 
 #oddcast-sidebar{
-	min-width: 301px; /* The width must be set on the sidebar too, so that it doesn't collapse if the avatar is hidden. */
+	min-width: 300px; /* The width must be set on the sidebar too, so that it doesn't collapse if the avatar is hidden. */
 }
 
 #oddcast-avatar{
 	background: white;
 	overflow: hidden;
-	border-bottom: 1px solid #cccccc;
+	border-right: 1px solid #cccccc;
+	border-bottom: 1px solid #afafaf;
 	width: 300px;
 	display: none;
 }

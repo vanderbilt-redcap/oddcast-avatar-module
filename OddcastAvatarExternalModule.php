@@ -101,20 +101,14 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 					</div>
 					<script type="text/javascript" src="//vhss-d.oddcast.com/vhost_embed_functions_v2.php?acc=6267283&js=1"></script>
 					<script type="text/javascript">
-						AC_VHost_Embed(6267283, 300, 400, '', 1, 1, <?=array_keys($shows)[0]?>, 0, 1, 0, '709e320dba1a392fa4e863ef0809f9f1', 0);
-						setTimeout(function () {
-							// For some stupid reason AC_VHost_Embed *sometimes* attaches an event listener to our submit
-							// button during the next iteration of the event loop that causes submits to fail.
-							// We effectively remove it by replace the submit button with a clone of itself.
-							var submitButton = $('button[name=submit-btn-saverecord]')
-							var newButton = submitButton.clone()
-							submitButton.replaceWith(newButton)
+						(function(){
+							if(window.frameElement){
+								// We're inside an iFrame.  Return without initializing the avatar since it is already displayed in the parent page.
+								return;
+							}
 
-							newButton.click(function () {
-								// Prevent the "are you sure" prompt when leaving the page from triggering in IE & Chrome.
-								dataEntryFormValuesChanged = false
-							})
-						}, 0)
+							AC_VHost_Embed(6267283, 300, 400, '', 1, 1, <?=array_keys($shows)[0]?>, 0, 1, 0, '709e320dba1a392fa4e863ef0809f9f1', 0);
+						})()
 					</script>
 				</div>
 			</div>
@@ -128,6 +122,20 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 
 		<script>
 			$(function(){
+				if(window.frameElement){
+					// The following improves scrolling on iPad.
+					// For unknown reasons this line doesn't work when added via style.css.
+					$('body').css('-webkit-overflow-scrolling', 'touch')
+
+					// We're inside an iFrame.  Return without initializing the avatar since it is already displayed in the parent page.
+					return;
+				}
+				else{
+					// This is the parent page.  Load the Avatar, hide the survey content, and re-open the survey within an iframe instead.
+					$('#pagecontainer').hide()
+					$('#oddcast-content').html("<iframe src='<?=str_replace('&vorlon', '', $_SERVER['REQUEST_URI'])?>'></iframe>")
+				}
+
 				<?php
 				$currentPageNumber = $_GET['__page__'];
 				$pageMessage = '';

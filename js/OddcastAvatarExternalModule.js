@@ -76,20 +76,7 @@ var OddcastAvatarExternalModule = {
 						}
 
 						OddcastAvatarExternalModule.getPlayButton().show()
-
-						var events = 'mousemove touchstart'
-						var handler = function () {
-							if (!OddcastAvatarExternalModule.scenedLoaded) {
-								return
-							}
-
-							// Automatically play the page message the first time a user action is detected.
-							// A user action is required to play audio on iOS/Android.
-							OddcastAvatarExternalModule.sayPageMessage('page message played automatically')
-							$(document).off(events, handler)
-						}
-
-						$(document).on(events, handler)
+						OddcastAvatarExternalModule.sayPageMessage('page message played automatically')
 					})
 				})
 			}
@@ -137,8 +124,9 @@ var OddcastAvatarExternalModule = {
 				minimizeAvatar()
 			})
 
+			// Make the wrapper visible.
 			$('body').prepend(wrapper)
-			$('#pagecontainer').appendTo($('#oddcast-content'))
+			wrapper.css('display', 'table')
 
 			OddcastAvatarExternalModule.initPortraitDialog()
 			OddcastAvatarExternalModule.initMessagesForValues(settings.messagesForValues)
