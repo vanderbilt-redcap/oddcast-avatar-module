@@ -7,19 +7,13 @@ var OddcastAvatarExternalModule = {
 		OddcastAvatarExternalModule.settings = settings
 
 		if(window.frameElement){
-			// This is the iFrame.
-
-			// The following improves scrolling on iPad.
-			// For unknown reasons this line doesn't work when added via style.css.
-			$('body').css('-webkit-overflow-scrolling', 'touch')
+			OddcastAvatarExternalModule.initializeIFrame()
 		}
 		else{
 			OddcastAvatarExternalModule.initializeParentPage()
 
 			// Still need to refactor/test everything below here:
-			
-			OddcastAvatarExternalModule.initMessagesForValues()
-			OddcastAvatarExternalModule.initTimeout()
+
 
 			OddcastAvatarExternalModule.startAvatar = function (isInitialLoad) {
 				if (OddcastAvatarExternalModule.settings.avatarDisabled) {
@@ -116,6 +110,14 @@ var OddcastAvatarExternalModule = {
 		wrapper.css('display', 'table')
 
 		OddcastAvatarExternalModule.initPortraitDialog()
+		OddcastAvatarExternalModule.initTimeout()
+	},
+	initializeIFrame: function(){
+		// The following improves scrolling on iPad.
+		// For unknown reasons this line doesn't work when added via style.css.
+		$('body').css('-webkit-overflow-scrolling', 'touch')
+
+		OddcastAvatarExternalModule.initMessagesForValues()
 	},
 	sayPageMessage: function(logMessage){
 		var settings = OddcastAvatarExternalModule.settings
