@@ -9,17 +9,6 @@ var OddcastAvatarExternalModule = {
 		$(function () {
 			OddcastAvatarExternalModule.initializeParentPage()
 
-			var minimizeAvatar = function () {
-				OddcastAvatarExternalModule.stopSpeech();
-				OddcastAvatarExternalModule.getAvatar().fadeOut(OddcastAvatarExternalModule.fadeDuration);
-				$('#oddcast-minimize-avatar').hide();
-				$('#oddcast-maximize-avatar').show();
-
-				Cookies.set('oddcast-avatar-maximized', 'false')
-
-				OddcastAvatarExternalModule.log('avatar disabled')
-			}
-
 			var maximizeAvatar = function () {
 				var settings = OddcastAvatarExternalModule.settings
 				var textIntroModal = OddcastAvatarExternalModule.getTextIntroModal()
@@ -70,7 +59,9 @@ var OddcastAvatarExternalModule = {
 				OddcastAvatarExternalModule.log('avatar enabled')
 			})
 
-			$('#oddcast-minimize-avatar').click(minimizeAvatar)
+			$('#oddcast-minimize-avatar').click(function(){
+				OddcastAvatarExternalModule.minimizeAvatar()
+			})
 
 			var oddcastPlayer = $('._html5Player')
 			oddcastPlayer.click(function (e) {
@@ -106,7 +97,7 @@ var OddcastAvatarExternalModule = {
 
 			OddcastAvatarExternalModule.getTextIntroModal().find('button').click(function () {
 				OddcastAvatarExternalModule.getTextIntroModal().modal('hide')
-				minimizeAvatar()
+				OddcastAvatarExternalModule.minimizeAvatar()
 			})
 
 			// Make the wrapper visible.
@@ -518,6 +509,16 @@ var OddcastAvatarExternalModule = {
 		if (OddcastAvatarExternalModule.settings.loggingSupported) {
 			ExternalModules.Vanderbilt.OddcastAvatarExternalModule.log(message, parameters)
 		}
+	},
+	minimizeAvatar: function () {
+		OddcastAvatarExternalModule.stopSpeech();
+		OddcastAvatarExternalModule.getAvatar().fadeOut(OddcastAvatarExternalModule.fadeDuration);
+		$('#oddcast-minimize-avatar').hide();
+		$('#oddcast-maximize-avatar').show();
+
+		Cookies.set('oddcast-avatar-maximized', 'false')
+
+		OddcastAvatarExternalModule.log('avatar disabled')
 	}
 }
 
