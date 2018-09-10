@@ -118,8 +118,6 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			</div>
 		</div>
 
-		<script type="text/javascript" src="<?=$this->getUrl('js/OddcastAvatarExternalModule.js')?>"></script>
-
 		<script>
 			$(function(){
 				<?php
@@ -133,29 +131,42 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				}
 				?>
 
-				OddcastAvatarExternalModule.initialize(<?=json_encode([
-					'voices' => [
-						'female' => explode(',', $this->getProjectSetting('voice')),
-						'male' => explode(',', $this->getProjectSetting('male-voice')),
-					],
-					'shows' => $shows,
-					'isInitialLoad' => $_SERVER['REQUEST_METHOD'] == 'GET',
-					'avatarDisabled' => $this->getProjectSetting('disable'),
-					'reviewModeEnabled' => $this->isReviewModeEnabled($instrument),
-					'reviewModeCookieName' => REVIEW_MODE,
-					'reviewModeTurningOffValue' => TURNING_OFF,
-					'pageMessage' => $pageMessage,
-					'currentPageNumber' => $currentPageNumber,
-					'messagesForValues' => $this->getSubSettings('messages-for-field-values'),
-					'publicSurveyUrl' => $this->getPublicSurveyUrl(),
-					'timeout' => $this->getProjectSetting('timeout'),
-					'restartTimeout' => $this->getProjectSetting('restart-timeout'),
-					'timeoutVerification' => [
-						'fieldName' => $this->getTimeoutVerificationFieldName(),
-						'value' => $this->getTimeoutVerificationValue($project_id, $record)
-					],
-					'loggingSupported' => $loggingSupported
-				])?>)
+				// This object is defined globally so it can be used in other modules (like Inline Descriptive Pop-ups).
+				window.OddcastAvatarExternalModule = {
+					settings: <?=json_encode([
+						'voices' => [
+							'female' => explode(',', $this->getProjectSetting('voice')),
+							'male' => explode(',', $this->getProjectSetting('male-voice')),
+						],
+						'shows' => $shows,
+						'isInitialLoad' => $_SERVER['REQUEST_METHOD'] == 'GET',
+						'avatarDisabled' => $this->getProjectSetting('disable'),
+						'reviewModeEnabled' => $this->isReviewModeEnabled($instrument),
+						'reviewModeCookieName' => REVIEW_MODE,
+						'reviewModeTurningOffValue' => TURNING_OFF,
+						'pageMessage' => $pageMessage,
+						'currentPageNumber' => $currentPageNumber,
+						'messagesForValues' => $this->getSubSettings('messages-for-field-values'),
+						'publicSurveyUrl' => $this->getPublicSurveyUrl(),
+						'timeout' => $this->getProjectSetting('timeout'),
+						'restartTimeout' => $this->getProjectSetting('restart-timeout'),
+						'timeoutVerification' => [
+							'fieldName' => $this->getTimeoutVerificationFieldName(),
+							'value' => $this->getTimeoutVerificationValue($project_id, $record)
+						],
+						'loggingSupported' => $loggingSupported
+					])?>
+				}
+
+				var jsObjectUrl
+				if(window.frameElement){
+					jsObjectUrl = <?=json_encode($this->getUrl('js/OddcastAvatarExternalModule.iframe.js'))?>
+				}
+				else{
+					jsObjectUrl = <?=json_encode($this->getUrl('js/OddcastAvatarExternalModule.parent.js'))?>
+				}
+
+				$.getScript(jsObjectUrl)
 			})
 		</script>
 		<?php
