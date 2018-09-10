@@ -5,7 +5,6 @@ var OddcastAvatarExternalModule = {
 	initialize: function (settings) {
 		OddcastAvatarExternalModule.settings = settings
 
-		var avatar = OddcastAvatarExternalModule.getAvatar()
 		var textIntroModal = OddcastAvatarExternalModule.getTextIntroModal()
 
 		var fades = $('[id=fade]')
@@ -28,7 +27,7 @@ var OddcastAvatarExternalModule = {
 
 			var minimizeAvatar = function () {
 				OddcastAvatarExternalModule.stopSpeech();
-				avatar.fadeOut(fadeDuration);
+				OddcastAvatarExternalModule.getAvatar().fadeOut(fadeDuration);
 				$('#oddcast-minimize-avatar').hide();
 				$('#oddcast-maximize-avatar').show();
 
@@ -62,7 +61,7 @@ var OddcastAvatarExternalModule = {
 					// Load the show we want instead.
 					OddcastAvatarExternalModule.loadShowByID(showId)
 
-					avatar.fadeIn(fadeDuration);
+					OddcastAvatarExternalModule.getAvatar().fadeIn(fadeDuration);
 					$('#oddcast-minimize-avatar').show();
 					$('#oddcast-maximize-avatar').hide();
 
