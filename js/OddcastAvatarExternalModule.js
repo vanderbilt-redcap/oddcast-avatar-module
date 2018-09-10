@@ -2,6 +2,7 @@
 var OddcastAvatarExternalModule = {
 	scenedLoaded: false,
 	settings: null,
+	showId: null,
 	fadeDuration: 200,
 	initialize: function (settings) {
 		OddcastAvatarExternalModule.settings = settings
@@ -17,9 +18,6 @@ var OddcastAvatarExternalModule = {
 
 			// TODO - Need to re-test and likely refactor this block in more detail
 			if (OddcastAvatarExternalModule.settings.isInitialLoad) {
-				// Forget the show/character chosen from the last survey
-				Cookies.remove('oddcast-show-id')
-
 				// If a timeout was active, remove it.
 				Cookies.remove('timeout-active')
 			}
@@ -74,7 +72,8 @@ var OddcastAvatarExternalModule = {
 
 		$('.oddcast-character').click(function () {
 			var showId = $(this).data('show-id')
-			Cookies.set('oddcast-show-id', showId)
+			OddcastAvatarExternalModule.showId = showId
+			
 			OddcastAvatarExternalModule.maximizeAvatar()
 
 			OddcastAvatarExternalModule.log('character selected', {
@@ -505,7 +504,7 @@ var OddcastAvatarExternalModule = {
 
 			OddcastAvatarExternalModule.getPlayer().find('.character').remove()
 
-			var showId = Cookies.get('oddcast-show-id')
+			var showId = OddcastAvatarExternalModule.showId
 			if (!showId) {
 				// The user has not yet selected a character. Show the intro modal again instead.
 				textIntroModal.modal('show')
