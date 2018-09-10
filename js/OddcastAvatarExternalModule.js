@@ -9,53 +9,8 @@ var OddcastAvatarExternalModule = {
 		$(function () {
 			OddcastAvatarExternalModule.initializeParentPage()
 
-			var maximizeAvatar = function () {
-				var settings = OddcastAvatarExternalModule.settings
-				var textIntroModal = OddcastAvatarExternalModule.getTextIntroModal()
-				textIntroModal.modal('hide')
-
-				// Wait until the avatar is loaded in the background initially, or we could see a flash of the wrong character.
-				OddcastAvatarExternalModule.afterSceneLoaded(function () {
-					// The initial show is loaded, but we may not want to use this one so we load our own show later.
-
-					oddcastPlayer.find('.character').remove()
-
-					var showId = Cookies.get('oddcast-show-id')
-					if (!showId) {
-						// The user has not yet selected a character. Show the intro modal again instead.
-						textIntroModal.modal('show')
-						return
-					}
-
-					var gender = settings.shows[showId]
-					var voice = settings.voices[gender]
-
-					OddcastAvatarExternalModule.engine = voice[0];
-					OddcastAvatarExternalModule.person = voice[1];
-
-					// Load the show we want instead.
-					OddcastAvatarExternalModule.loadShowByID(showId)
-
-					OddcastAvatarExternalModule.getAvatar().fadeIn(OddcastAvatarExternalModule.fadeDuration);
-					$('#oddcast-minimize-avatar').show();
-					$('#oddcast-maximize-avatar').hide();
-
-					Cookies.set('oddcast-avatar-maximized', 'true')
-
-					OddcastAvatarExternalModule.afterSceneLoaded(function () {
-						// The show we want has been loaded.
-						if (!settings.pageMessage) {
-							return
-						}
-
-						OddcastAvatarExternalModule.getPlayButton().show()
-						OddcastAvatarExternalModule.sayPageMessage('page message played automatically')
-					})
-				})
-			}
-
 			$('#oddcast-maximize-avatar').click(function () {
-				maximizeAvatar()
+				OddcastAvatarExternalModule.maximizeAvatar()
 				OddcastAvatarExternalModule.log('avatar enabled')
 			})
 
@@ -63,7 +18,7 @@ var OddcastAvatarExternalModule = {
 				OddcastAvatarExternalModule.minimizeAvatar()
 			})
 
-			var oddcastPlayer = $('._html5Player')
+			var oddcastPlayer = OddcastAvatarExternalModule.getPlayer()
 			oddcastPlayer.click(function (e) {
 				// Oddcast sets a touch start handler that prevents our controls from working consistently, and causes exceptions in the mobile Safari console.
 				// Luckily we don't need this touch event, so we can just remove it.
@@ -88,7 +43,7 @@ var OddcastAvatarExternalModule = {
 			$('.oddcast-character').click(function () {
 				var showId = $(this).data('show-id')
 				Cookies.set('oddcast-show-id', showId)
-				maximizeAvatar()
+				OddcastAvatarExternalModule.maximizeAvatar()
 
 				OddcastAvatarExternalModule.log('character selected', {
 					'show id': showId
@@ -119,7 +74,7 @@ var OddcastAvatarExternalModule = {
 					OddcastAvatarExternalModule.getTextIntroModal().modal('show')
 				}
 				else if (Cookies.get('oddcast-avatar-maximized') === 'true') {
-					maximizeAvatar()
+					OddcastAvatarExternalModule.maximizeAvatar()
 				}
 				else {
 					$('#oddcast-maximize-avatar').show()
@@ -498,6 +453,9 @@ var OddcastAvatarExternalModule = {
 	getAvatar: function () {
 		return $('#oddcast-avatar')
 	},
+	getPlayer: function(){
+		return $('._html5Player')
+	},
 	// This method is referenced by the Inline Popups module.
 	isEnabled: function () {
 		return OddcastAvatarExternalModule.getAvatar().is(':visible')
@@ -519,6 +477,50 @@ var OddcastAvatarExternalModule = {
 		Cookies.set('oddcast-avatar-maximized', 'false')
 
 		OddcastAvatarExternalModule.log('avatar disabled')
+	},
+	maximizeAvatar: function () {
+		var settings = OddcastAvatarExternalModule.settings
+		var textIntroModal = OddcastAvatarExternalModule.getTextIntroModal()
+		textIntroModal.modal('hide')
+
+		// Wait until the avatar is loaded in the background initially, or we could see a flash of the wrong character.
+		OddcastAvatarExternalModule.afterSceneLoaded(function () {
+			// The initial show is loaded, but we may not want to use this one so we load our own show later.
+
+			OddcastAvatarExternalModule.getPlayer().find('.character').remove()
+
+			var showId = Cookies.get('oddcast-show-id')
+			if (!showId) {
+				// The user has not yet selected a character. Show the intro modal again instead.
+				textIntroModal.modal('show')
+				return
+			}
+
+			var gender = settings.shows[showId]
+			var voice = settings.voices[gender]
+
+			OddcastAvatarExternalModule.engine = voice[0];
+			OddcastAvatarExternalModule.person = voice[1];
+
+			// Load the show we want instead.
+			OddcastAvatarExternalModule.loadShowByID(showId)
+
+			OddcastAvatarExternalModule.getAvatar().fadeIn(OddcastAvatarExternalModule.fadeDuration);
+			$('#oddcast-minimize-avatar').show();
+			$('#oddcast-maximize-avatar').hide();
+
+			Cookies.set('oddcast-avatar-maximized', 'true')
+
+			OddcastAvatarExternalModule.afterSceneLoaded(function () {
+				// The show we want has been loaded.
+				if (!settings.pageMessage) {
+					return
+				}
+
+				OddcastAvatarExternalModule.getPlayButton().show()
+				OddcastAvatarExternalModule.sayPageMessage('page message played automatically')
+			})
+		})
 	}
 }
 
