@@ -6,61 +6,18 @@ var OddcastAvatarExternalModule = {
 	initialize: function (settings) {
 		OddcastAvatarExternalModule.settings = settings
 
-		$(function () {
+		if(window.frameElement){
+			// This is the iFrame.
+
+			// The following improves scrolling on iPad.
+			// For unknown reasons this line doesn't work when added via style.css.
+			$('body').css('-webkit-overflow-scrolling', 'touch')
+		}
+		else{
 			OddcastAvatarExternalModule.initializeParentPage()
 
-			$('#oddcast-maximize-avatar').click(function () {
-				OddcastAvatarExternalModule.maximizeAvatar()
-				OddcastAvatarExternalModule.log('avatar enabled')
-			})
-
-			$('#oddcast-minimize-avatar').click(function(){
-				OddcastAvatarExternalModule.minimizeAvatar()
-			})
-
-			var oddcastPlayer = OddcastAvatarExternalModule.getPlayer()
-			oddcastPlayer.click(function (e) {
-				// Oddcast sets a touch start handler that prevents our controls from working consistently, and causes exceptions in the mobile Safari console.
-				// Luckily we don't need this touch event, so we can just remove it.
-				oddcastPlayer.find('.main_container').removeAttr('ontouchstart')
-			})
-
-			$('#oddcast-controls .fa-user').click(function () {
-				var textIntroModal = OddcastAvatarExternalModule.getTextIntroModal()
-				textIntroModal.find('.top-section').html('Select an eStaff member:').css('font-weight', 'bold')
-				textIntroModal.find('.bottom-section').hide()
-				textIntroModal.find('.modal-dialog').width('625px')
-
-				textIntroModal.modal('show')
-			})
-
-			OddcastAvatarExternalModule.getPlayButton().click(function () {
-				OddcastAvatarExternalModule.afterSceneLoaded(function () {
-					OddcastAvatarExternalModule.sayPageMessage('page message played manually')
-				})
-			})
-
-			$('.oddcast-character').click(function () {
-				var showId = $(this).data('show-id')
-				Cookies.set('oddcast-show-id', showId)
-				OddcastAvatarExternalModule.maximizeAvatar()
-
-				OddcastAvatarExternalModule.log('character selected', {
-					'show id': showId
-				})
-			})
-
-			OddcastAvatarExternalModule.getTextIntroModal().find('button').click(function () {
-				OddcastAvatarExternalModule.getTextIntroModal().modal('hide')
-				OddcastAvatarExternalModule.minimizeAvatar()
-			})
-
-			// Make the wrapper visible.
-			var wrapper = OddcastAvatarExternalModule.getWrapper()
-			$('body').prepend(wrapper)
-			wrapper.css('display', 'table')
-
-			OddcastAvatarExternalModule.initPortraitDialog()
+			// Still need to refactor/test everything below here:
+			
 			OddcastAvatarExternalModule.initMessagesForValues()
 			OddcastAvatarExternalModule.initTimeout()
 
@@ -91,9 +48,14 @@ var OddcastAvatarExternalModule = {
 			}
 
 			OddcastAvatarExternalModule.initReviewMode()
-		})
+		}
 	},
 	initializeParentPage: function(){
+		$('#pagecontainer').hide()
+
+		var url = location.href.replace('&vorlon', '')
+		$('#oddcast-content').html("<iframe src='" + url + "'></iframe>")
+
 		if (OddcastAvatarExternalModule.settings.voices.female == '') {
 			OddcastAvatarExternalModule.settings.voices.female = [3, 3]
 		}
@@ -101,6 +63,59 @@ var OddcastAvatarExternalModule = {
 		if (OddcastAvatarExternalModule.settings.voices.male == '') {
 			OddcastAvatarExternalModule.settings.voices.male = [3, 2]
 		}
+
+		$('#oddcast-maximize-avatar').click(function () {
+			OddcastAvatarExternalModule.maximizeAvatar()
+			OddcastAvatarExternalModule.log('avatar enabled')
+		})
+
+		$('#oddcast-minimize-avatar').click(function(){
+			OddcastAvatarExternalModule.minimizeAvatar()
+		})
+
+		var oddcastPlayer = OddcastAvatarExternalModule.getPlayer()
+		oddcastPlayer.click(function (e) {
+			// Oddcast sets a touch start handler that prevents our controls from working consistently, and causes exceptions in the mobile Safari console.
+			// Luckily we don't need this touch event, so we can just remove it.
+			oddcastPlayer.find('.main_container').removeAttr('ontouchstart')
+		})
+
+		$('#oddcast-controls .fa-user').click(function () {
+			var textIntroModal = OddcastAvatarExternalModule.getTextIntroModal()
+			textIntroModal.find('.top-section').html('Select an eStaff member:').css('font-weight', 'bold')
+			textIntroModal.find('.bottom-section').hide()
+			textIntroModal.find('.modal-dialog').width('625px')
+
+			textIntroModal.modal('show')
+		})
+
+		OddcastAvatarExternalModule.getPlayButton().click(function () {
+			OddcastAvatarExternalModule.afterSceneLoaded(function () {
+				OddcastAvatarExternalModule.sayPageMessage('page message played manually')
+			})
+		})
+
+		$('.oddcast-character').click(function () {
+			var showId = $(this).data('show-id')
+			Cookies.set('oddcast-show-id', showId)
+			OddcastAvatarExternalModule.maximizeAvatar()
+
+			OddcastAvatarExternalModule.log('character selected', {
+				'show id': showId
+			})
+		})
+
+		OddcastAvatarExternalModule.getTextIntroModal().find('button').click(function () {
+			OddcastAvatarExternalModule.getTextIntroModal().modal('hide')
+			OddcastAvatarExternalModule.minimizeAvatar()
+		})
+
+		// Make the wrapper visible.
+		var wrapper = OddcastAvatarExternalModule.getWrapper()
+		$('body').prepend(wrapper)
+		wrapper.css('display', 'table')
+
+		OddcastAvatarExternalModule.initPortraitDialog()
 	},
 	sayPageMessage: function(logMessage){
 		var settings = OddcastAvatarExternalModule.settings

@@ -122,20 +122,6 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 
 		<script>
 			$(function(){
-				if(window.frameElement){
-					// The following improves scrolling on iPad.
-					// For unknown reasons this line doesn't work when added via style.css.
-					$('body').css('-webkit-overflow-scrolling', 'touch')
-
-					// We're inside an iFrame.  Return without initializing the avatar since it is already displayed in the parent page.
-					return;
-				}
-				else{
-					// This is the parent page.  Load the Avatar, hide the survey content, and re-open the survey within an iframe instead.
-					$('#pagecontainer').hide()
-					$('#oddcast-content').html("<iframe src='<?=str_replace('&vorlon', '', $_SERVER['REQUEST_URI'])?>'></iframe>")
-				}
-
 				<?php
 				$currentPageNumber = $_GET['__page__'];
 				$pageMessage = '';
