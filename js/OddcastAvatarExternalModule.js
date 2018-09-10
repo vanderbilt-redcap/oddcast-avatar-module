@@ -15,23 +15,6 @@ var OddcastAvatarExternalModule = {
 			// Still need to refactor/test everything below here:
 
 
-			OddcastAvatarExternalModule.startAvatar = function (isInitialLoad) {
-				if (OddcastAvatarExternalModule.settings.avatarDisabled) {
-					$('#oddcast-sidebar').hide()
-					return
-				}
-
-				if (isInitialLoad) {
-					OddcastAvatarExternalModule.getTextIntroModal().modal('show')
-				}
-				else if (Cookies.get('oddcast-avatar-maximized') === 'true') {
-					OddcastAvatarExternalModule.maximizeAvatar()
-				}
-				else {
-					$('#oddcast-maximize-avatar').show()
-				}
-			}
-
 			// TODO - Need to re-test and likely refactor this block in more detail
 			if (OddcastAvatarExternalModule.settings.isInitialLoad) {
 				// Forget the show/character chosen from the last survey
@@ -189,6 +172,22 @@ var OddcastAvatarExternalModule = {
 		else {
 			// Either we're done reviewing, or review mode is disabled.
 			startAvatar(settings.isInitialLoad)
+		}
+	},
+	startAvatar: function (isInitialLoad) {
+		if (OddcastAvatarExternalModule.settings.avatarDisabled) {
+			$('#oddcast-sidebar').hide()
+			return
+		}
+
+		if (isInitialLoad) {
+			OddcastAvatarExternalModule.getTextIntroModal().modal('show')
+		}
+		else if (Cookies.get('oddcast-avatar-maximized') === 'true') {
+			OddcastAvatarExternalModule.maximizeAvatar()
+		}
+		else {
+			$('#oddcast-maximize-avatar').show()
 		}
 	},
 	getWrapper: function () {
