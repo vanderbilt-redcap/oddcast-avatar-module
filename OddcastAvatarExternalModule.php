@@ -44,9 +44,8 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.2.0/js.cookie.min.js" integrity="sha256-9Nt2r+tJnSd2A2CRUvnjgsD+ES1ExvjbjBNqidm9doI=" crossorigin="anonymous"></script>
 		<script src="https://cdn.jsdelivr.net/npm/jquery.idle@1.2.6/jquery.idle.min.js" integrity="sha256-RFOvLffDBWTRL2yzD1Atxv6t+G3Rd73IYdbmGO3IOzM=" crossorigin="anonymous"></script>
 		<?php
-			$vorlonIPAddress = '10.151.18.189';
-			if(false && $_SERVER['HTTP_HOST'] == $vorlonIPAddress){
-				?><script src="http://<?=$vorlonIPAddress?>:1337/vorlon.js"></script><?php
+			if(isset($_GET['vorlon'])){
+				?><script src="http://<?=$_SERVER['HTTP_HOST']?>:1337/vorlon.js"></script><?php
 			}
 		?>
 
