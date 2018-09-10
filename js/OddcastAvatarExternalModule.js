@@ -6,13 +6,7 @@ var OddcastAvatarExternalModule = {
 		OddcastAvatarExternalModule.settings = settings
 
 		$(function () {
-			if (settings.voices.female == '') {
-				settings.voices.female = [3, 3]
-			}
-
-			if (settings.voices.male == '') {
-				settings.voices.male = [3, 2]
-			}
+			OddcastAvatarExternalModule.initializeParentPage()
 
 			var fadeDuration = 200
 
@@ -28,6 +22,7 @@ var OddcastAvatarExternalModule = {
 			}
 
 			var maximizeAvatar = function () {
+				var settings = OddcastAvatarExternalModule.settings
 				var textIntroModal = OddcastAvatarExternalModule.getTextIntroModal()
 				textIntroModal.modal('hide')
 
@@ -121,11 +116,12 @@ var OddcastAvatarExternalModule = {
 			wrapper.css('display', 'table')
 
 			OddcastAvatarExternalModule.initPortraitDialog()
-			OddcastAvatarExternalModule.initMessagesForValues(settings.messagesForValues)
-			OddcastAvatarExternalModule.initTimeout(settings)
+			OddcastAvatarExternalModule.initMessagesForValues()
+			OddcastAvatarExternalModule.initTimeout()
 
 			OddcastAvatarExternalModule.startAvatar = function (isInitialLoad) {
-				if (settings.avatarDisabled) {
+				if (OddcastAvatarExternalModule.settings.avatarDisabled) {
+					$('#oddcast-sidebar').hide()
 					return
 				}
 
@@ -140,7 +136,8 @@ var OddcastAvatarExternalModule = {
 				}
 			}
 
-			if (settings.isInitialLoad) {
+			// TODO - Need to re-test and likely refactor this block in more detail
+			if (OddcastAvatarExternalModule.settings.isInitialLoad) {
 				// Forget the show/character chosen from the last survey
 				Cookies.remove('oddcast-show-id')
 
@@ -148,8 +145,17 @@ var OddcastAvatarExternalModule = {
 				Cookies.remove('timeout-active')
 			}
 
-			OddcastAvatarExternalModule.initReviewMode(settings)
+			OddcastAvatarExternalModule.initReviewMode()
 		})
+	},
+	initializeParentPage: function(){
+		if (OddcastAvatarExternalModule.settings.voices.female == '') {
+			OddcastAvatarExternalModule.settings.voices.female = [3, 3]
+		}
+
+		if (OddcastAvatarExternalModule.settings.voices.male == '') {
+			OddcastAvatarExternalModule.settings.voices.male = [3, 2]
+		}
 	},
 	sayPageMessage: function(logMessage){
 		var settings = OddcastAvatarExternalModule.settings
@@ -159,6 +165,8 @@ var OddcastAvatarExternalModule = {
 		})
 	},
 	initReviewMode: function (settings) {
+		var settings = OddcastAvatarExternalModule.settings
+
 		var cookieName = settings.reviewModeCookieName
 		var onValue = 'on'
 		var turningOffValue = settings.reviewModeTurningOffValue
@@ -246,7 +254,8 @@ var OddcastAvatarExternalModule = {
 		checkOrientation()
 		window.addEventListener('orientationchange', checkOrientation)
 	},
-	initMessagesForValues: function (messagesForValues) {
+	initMessagesForValues: function () {
+		var messagesForValues = OddcastAvatarExternalModule.settings.messagesForValues
 		var fieldMap = {}
 		$.each(messagesForValues, function (i, item) {
 			if (!item.field || !item.value || !item.message) {
@@ -299,7 +308,9 @@ var OddcastAvatarExternalModule = {
 			})
 		})
 	},
-	initTimeout: function (settings) {
+	initTimeout: function () {
+		var settings = OddcastAvatarExternalModule.settings
+
 		if (!settings.timeout) {
 			settings.timeout = 5
 		}
