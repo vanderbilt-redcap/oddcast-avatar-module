@@ -5,8 +5,6 @@ var OddcastAvatarExternalModule = {
 	initialize: function (settings) {
 		OddcastAvatarExternalModule.settings = settings
 
-		var textIntroModal = OddcastAvatarExternalModule.getTextIntroModal()
-
 		var fades = $('[id=fade]')
 		if (fades.length == 2) {
 			// A quirk of e-Consent and the oddcast-wrapper cause two fade divs to be created on the e-Consent preview/confirmation page.
@@ -37,6 +35,7 @@ var OddcastAvatarExternalModule = {
 			}
 
 			var maximizeAvatar = function () {
+				var textIntroModal = OddcastAvatarExternalModule.getTextIntroModal()
 				textIntroModal.modal('hide')
 
 				// Wait until the avatar is loaded in the background initially, or we could see a flash of the wrong character.
@@ -94,6 +93,7 @@ var OddcastAvatarExternalModule = {
 			})
 
 			$('#oddcast-controls .fa-user').click(function () {
+				var textIntroModal = OddcastAvatarExternalModule.getTextIntroModal()
 				textIntroModal.find('.top-section').html('Select an eStaff member:').css('font-weight', 'bold')
 				textIntroModal.find('.bottom-section').hide()
 				textIntroModal.find('.modal-dialog').width('625px')
@@ -117,8 +117,8 @@ var OddcastAvatarExternalModule = {
 				})
 			})
 
-			textIntroModal.find('button').click(function () {
-				textIntroModal.modal('hide')
+			OddcastAvatarExternalModule.getTextIntroModal().find('button').click(function () {
+				OddcastAvatarExternalModule.getTextIntroModal().modal('hide')
 				minimizeAvatar()
 			})
 
@@ -137,7 +137,7 @@ var OddcastAvatarExternalModule = {
 				}
 
 				if (isInitialLoad) {
-					textIntroModal.modal('show')
+					OddcastAvatarExternalModule.getTextIntroModal().modal('show')
 				}
 				else if (Cookies.get('oddcast-avatar-maximized') === 'true') {
 					maximizeAvatar()
