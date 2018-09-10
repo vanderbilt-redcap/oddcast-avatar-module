@@ -2,17 +2,16 @@
 var OddcastAvatarExternalModule = {
 	scenedLoaded: false,
 	settings: null,
+	fadeDuration: 200,
 	initialize: function (settings) {
 		OddcastAvatarExternalModule.settings = settings
 
 		$(function () {
 			OddcastAvatarExternalModule.initializeParentPage()
 
-			var fadeDuration = 200
-
 			var minimizeAvatar = function () {
 				OddcastAvatarExternalModule.stopSpeech();
-				OddcastAvatarExternalModule.getAvatar().fadeOut(fadeDuration);
+				OddcastAvatarExternalModule.getAvatar().fadeOut(OddcastAvatarExternalModule.fadeDuration);
 				$('#oddcast-minimize-avatar').hide();
 				$('#oddcast-maximize-avatar').show();
 
@@ -48,7 +47,7 @@ var OddcastAvatarExternalModule = {
 					// Load the show we want instead.
 					OddcastAvatarExternalModule.loadShowByID(showId)
 
-					OddcastAvatarExternalModule.getAvatar().fadeIn(fadeDuration);
+					OddcastAvatarExternalModule.getAvatar().fadeIn(OddcastAvatarExternalModule.fadeDuration);
 					$('#oddcast-minimize-avatar').show();
 					$('#oddcast-maximize-avatar').hide();
 
