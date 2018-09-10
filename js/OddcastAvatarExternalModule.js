@@ -5,7 +5,6 @@ var OddcastAvatarExternalModule = {
 	initialize: function (settings) {
 		OddcastAvatarExternalModule.settings = settings
 
-		var wrapper = OddcastAvatarExternalModule.getWrapper()
 		var avatar = OddcastAvatarExternalModule.getAvatar()
 		var textIntroModal = OddcastAvatarExternalModule.getTextIntroModal()
 
@@ -125,6 +124,7 @@ var OddcastAvatarExternalModule = {
 			})
 
 			// Make the wrapper visible.
+			var wrapper = OddcastAvatarExternalModule.getWrapper()
 			$('body').prepend(wrapper)
 			wrapper.css('display', 'table')
 
