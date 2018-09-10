@@ -14,14 +14,7 @@ var OddcastAvatarExternalModule = {
 			OddcastAvatarExternalModule.initializeParentPage()
 
 			// Still need to refactor/test everything below here:
-
-
-			// TODO - Need to re-test and likely refactor this block in more detail
-			if (OddcastAvatarExternalModule.settings.isInitialLoad) {
-				// If a timeout was active, remove it.
-				Cookies.remove('timeout-active')
-			}
-
+			
 			OddcastAvatarExternalModule.initReviewMode()
 		}
 	},
@@ -73,7 +66,7 @@ var OddcastAvatarExternalModule = {
 		$('.oddcast-character').click(function () {
 			var showId = $(this).data('show-id')
 			OddcastAvatarExternalModule.showId = showId
-			
+
 			OddcastAvatarExternalModule.maximizeAvatar()
 
 			OddcastAvatarExternalModule.log('character selected', {
@@ -310,13 +303,6 @@ var OddcastAvatarExternalModule = {
 				// Hide any REDCap dialogs (like required fields messages) because they steal focus from inputs in bootstrap dialogs.
 				redcapDialog.hide()
 			}
-
-			Cookies.set('timeout-active', true)
-		}
-
-		if (Cookies.get('timeout-active')) {
-			// setTimeout() was required here to make sure this happened AFTER any REDCap dialogs were displayed (like required field messages).
-			setTimeout(showTimeoutModal, 0)
 		}
 
 		var lastActive = Date.now()
@@ -359,8 +345,6 @@ var OddcastAvatarExternalModule = {
 				if (redcapDialog.length > 0) {
 					redcapDialog.show()
 				}
-
-				Cookies.remove('timeout-active')
 			}
 			else {
 				triesRemaining--
