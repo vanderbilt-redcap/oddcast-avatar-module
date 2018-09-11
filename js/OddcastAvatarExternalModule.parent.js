@@ -1,9 +1,8 @@
-OddcastAvatarExternalModule = {
-	settings: OddcastAvatarExternalModule.settings,
+OddcastAvatarExternalModule.addProperties({
 	scenedLoaded: false,
 	showId: null,
 	fadeDuration: 200,
-	initialize: function(){
+	initializeParent: function(){
 		$('#pagecontainer').hide()
 
 		var url = location.href.replace('&vorlon', '')
@@ -329,7 +328,6 @@ OddcastAvatarExternalModule = {
 			callback
 		)
 	},
-	// This method is referenced by the Inline Popups module.
 	sayText: function (text) {
 		if (!OddcastAvatarExternalModule.engine) {
 			// The initialize function hasn't run yet.
@@ -380,7 +378,6 @@ OddcastAvatarExternalModule = {
 	getPlayer: function(){
 		return $('._html5Player')
 	},
-	// This method is referenced by the Inline Popups module.
 	isEnabled: function () {
 		return OddcastAvatarExternalModule.getAvatar().is(':visible')
 	},
@@ -395,6 +392,8 @@ OddcastAvatarExternalModule = {
 	minimizeAvatar: function () {
 		OddcastAvatarExternalModule.stopSpeech();
 		OddcastAvatarExternalModule.getAvatar().fadeOut(OddcastAvatarExternalModule.fadeDuration);
+		OddcastAvatarExternalModule.sendToIFrame('setEnabled', false)
+
 		$('#oddcast-minimize-avatar').hide();
 		$('#oddcast-maximize-avatar').show();
 
@@ -430,6 +429,8 @@ OddcastAvatarExternalModule = {
 			OddcastAvatarExternalModule.loadShowByID(showId)
 
 			OddcastAvatarExternalModule.getAvatar().fadeIn(OddcastAvatarExternalModule.fadeDuration);
+			OddcastAvatarExternalModule.sendToIFrame('setEnabled', true)
+
 			$('#oddcast-minimize-avatar').show();
 			$('#oddcast-maximize-avatar').hide();
 
@@ -445,12 +446,15 @@ OddcastAvatarExternalModule = {
 				OddcastAvatarExternalModule.sayPageMessage('page message played automatically')
 			})
 		})
+	},
+	sendToIFrame: function(){
+		OddcastAvatarExternalModule.sendTo($('#oddcast-content > iframe')[0].contentWindow, arguments)
 	}
-}
+})
 
 // Defining a global function is the standard Oddcast way of hooking into the scene loaded event...
 function vh_sceneLoaded() {
 	OddcastAvatarExternalModule.onSceneLoaded()
 }
 
-OddcastAvatarExternalModule.initialize()
+OddcastAvatarExternalModule.initializeParent()

@@ -1,6 +1,5 @@
-OddcastAvatarExternalModule = {
-	settings: OddcastAvatarExternalModule.settings,
-	initialize: function () {
+OddcastAvatarExternalModule.addProperties({
+	initializeIFrame: function () {
 		// The following improves scrolling on iPad.
 		// For unknown reasons this line doesn't work when added via style.css.
 		$('body').css('-webkit-overflow-scrolling', 'touch')
@@ -60,7 +59,21 @@ OddcastAvatarExternalModule = {
 				}
 			})
 		})
+	},
+	// This method is referenced by the Inline Popups module.
+	sayText: function(message){
+		OddcastAvatarExternalModule.sendToParent('sayText', message)
+	},
+	setEnabled: function(value){
+		OddcastAvatarExternalModule.enabled = value
+	},
+	// This method is referenced by the Inline Popups module.
+	isEnabled: function(){
+		return OddcastAvatarExternalModule.enabled
+	},
+	sendToParent: function(){
+		OddcastAvatarExternalModule.sendTo(window.parent, arguments)
 	}
-}
+})
 
-OddcastAvatarExternalModule.initialize()
+OddcastAvatarExternalModule.initializeIFrame()
