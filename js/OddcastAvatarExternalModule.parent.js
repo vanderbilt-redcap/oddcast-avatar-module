@@ -97,9 +97,9 @@ OddcastAvatarExternalModule.addProperties({
 			Cookies.set(cookieName, value, {expires: 1})
 		}
 
-		var startAvatar = function (isInitialLoad) {
+		var startAvatar = function () {
 			getSubmitButton().prop('disabled', false)
-			OddcastAvatarExternalModule.startAvatar(isInitialLoad)
+			OddcastAvatarExternalModule.startAvatar()
 		}
 
 		var clickPreviousButton = function () {
@@ -108,7 +108,7 @@ OddcastAvatarExternalModule.addProperties({
 				Cookies.remove(cookieName)
 				$('body').css('visibility', 'visible') // poor man's loading indicator
 
-				startAvatar(true)
+				startAvatar()
 
 				OddcastAvatarExternalModule.log('review mode exited')
 			}
@@ -141,24 +141,16 @@ OddcastAvatarExternalModule.addProperties({
 		}
 		else {
 			// Either we're done reviewing, or review mode is disabled.
-			startAvatar(settings.isInitialLoad)
+			startAvatar()
 		}
 	},
-	startAvatar: function (isInitialLoad) {
+	startAvatar: function () {
 		if (OddcastAvatarExternalModule.settings.avatarDisabled) {
 			$('#oddcast-sidebar').hide()
 			return
 		}
 
-		if (isInitialLoad) {
-			OddcastAvatarExternalModule.getTextIntroModal().modal('show')
-		}
-		else if (Cookies.get('oddcast-avatar-maximized') === 'true') {
-			OddcastAvatarExternalModule.maximizeAvatar()
-		}
-		else {
-			$('#oddcast-maximize-avatar').show()
-		}
+		OddcastAvatarExternalModule.getTextIntroModal().modal('show')
 	},
 	getWrapper: function () {
 		return $('#oddcast-wrapper')
@@ -397,8 +389,6 @@ OddcastAvatarExternalModule.addProperties({
 		$('#oddcast-minimize-avatar').hide();
 		$('#oddcast-maximize-avatar').show();
 
-		Cookies.set('oddcast-avatar-maximized', 'false')
-
 		OddcastAvatarExternalModule.log('avatar disabled')
 	},
 	maximizeAvatar: function () {
@@ -433,8 +423,6 @@ OddcastAvatarExternalModule.addProperties({
 
 			$('#oddcast-minimize-avatar').show();
 			$('#oddcast-maximize-avatar').hide();
-
-			Cookies.set('oddcast-avatar-maximized', 'true')
 
 			OddcastAvatarExternalModule.afterSceneLoaded(function () {
 				// The show we want has been loaded.
