@@ -145,6 +145,10 @@ OddcastAvatarExternalModule.addProperties({
 	sayText: function(message){
 		OddcastAvatarExternalModule.callOnParent('sayText', message)
 	},
+	// This method is referenced by the Analytics module.
+	stopSpeech: function () {
+		OddcastAvatarExternalModule.callOnParent('stopSpeech')
+	},
 	setEnabled: function(value){
 		OddcastAvatarExternalModule.enabled = value
 	},

@@ -245,7 +245,6 @@ OddcastAvatarExternalModule.addProperties({
 	isModalDisplayed: function (modal) {
 		return modal.hasClass('show')
 	},
-	// This method is referenced by the Analytics module.
 	stopSpeech: function () {
 		// Only respsect this request if the Oddcast libraries have already loaded.
 		if (typeof stopSpeech != 'undefined') {
