@@ -7,11 +7,12 @@ OddcastAvatarExternalModule.addProperties({
 		OddcastAvatarExternalModule.initMessagesForValues()
 		OddcastAvatarExternalModule.initTimeout()
 
+		// This must occur before review mode is initialized, so the correct page message is in place when avatar is initialized.
+		OddcastAvatarExternalModule.sendToParent('onIFrameInitialized', OddcastAvatarExternalModule.settings)
+
 		if(OddcastAvatarExternalModule.settings.reviewModeEnabled){
 			OddcastAvatarExternalModule.initReviewMode()
 		}
-
-		OddcastAvatarExternalModule.sendToParent('onIFrameInitialized', OddcastAvatarExternalModule.settings)
 	},
 	initMessagesForValues: function () {
 		var messagesForValues = OddcastAvatarExternalModule.settings.messagesForValues
