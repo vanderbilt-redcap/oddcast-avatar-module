@@ -5,6 +5,10 @@ OddcastAvatarExternalModule.addProperties({
 		$('body').css('-webkit-overflow-scrolling', 'touch')
 
 		OddcastAvatarExternalModule.initMessagesForValues()
+
+		if(OddcastAvatarExternalModule.settings.reviewModeEnabled){
+			OddcastAvatarExternalModule.initReviewMode()
+		}
 	},
 	initMessagesForValues: function () {
 		var messagesForValues = OddcastAvatarExternalModule.settings.messagesForValues
@@ -59,6 +63,68 @@ OddcastAvatarExternalModule.addProperties({
 				}
 			})
 		})
+	},
+	initReviewMode: function () {
+		var settings = OddcastAvatarExternalModule.settings
+
+		var cookieName = settings.reviewModeCookieName
+		var onValue = 'on'
+		var turningOffValue = settings.reviewModeTurningOffValue
+
+		var getSubmitButton = function () {
+			// This was switched to a function instead of a variable since the submit button is replaced when the avatar is loaded.
+			return $('button[name=submit-btn-saverecord]:contains("Submit")')
+		}
+
+		getSubmitButton().prop('disabled', true)
+
+		var setCookie = function (value) {
+			Cookies.set(cookieName, value, {expires: 1})
+		}
+
+		var startAvatar = function () {
+			getSubmitButton().prop('disabled', false)
+			OddcastAvatarExternalModule.sendToParent('startAvatar')
+		}
+
+		var clickPreviousButton = function () {
+			var previousButton = $('button[name=submit-btn-saveprevpage]')
+			if (previousButton.length == 0) {
+				Cookies.remove(cookieName)
+				$('body').css('visibility', 'visible') // poor man's loading indicator
+
+				startAvatar()
+
+				OddcastAvatarExternalModule.log('review mode exited')
+			}
+			else {
+				previousButton.click()
+			}
+		}
+
+		if (!settings.reviewModeEnabled) {
+			// Make sure Review Mode is disabled if a cookie is left over from when Review Mode was enabled previously (perhaps on a different instrument).
+			Cookies.remove(cookieName)
+		}
+		else if (settings.isInitialLoad) {
+			// Start Review Mode
+			setCookie(onValue)
+		}
+
+		var value = Cookies.get(cookieName)
+		if (value == onValue) {
+			var reviewModeFooter = $('<div id="oddcast-review-mode-footer">You are currently in Review Mode.<br><button>Click here to begin consent</button></div>')
+			reviewModeFooter.find('button').click(function () {
+				setCookie(turningOffValue)
+				reviewModeFooter.remove() // Important if we're already on the first page
+				clickPreviousButton()
+			})
+
+			$('#pagecontent').append(reviewModeFooter)
+		}
+		else if (value == turningOffValue) {
+			clickPreviousButton()
+		}
 	},
 	// This method is referenced by the Inline Popups module.
 	sayText: function(message){

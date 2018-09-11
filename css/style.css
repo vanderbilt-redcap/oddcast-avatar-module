@@ -177,14 +177,14 @@ body.modal-open #pagecontainer{
 	float: right;
 }
 
-#oddcast-wrapper #review-mode-footer {
-	margin-top: 45px;
+#oddcast-review-mode-footer {
+	padding: 30px;
 	text-align: center;
 	font-weight: bold;
 	font-size: 18px;
 }
 
-#oddcast-wrapper #review-mode-footer button {
+#oddcast-review-mode-footer button {
 	margin-top: 10px;
 	padding: 5px 10px;
 	font-weight: bold;
