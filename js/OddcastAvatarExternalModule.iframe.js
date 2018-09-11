@@ -8,7 +8,7 @@ OddcastAvatarExternalModule.addProperties({
 		OddcastAvatarExternalModule.initTimeout()
 
 		// This must occur before review mode is initialized, so the correct page message is in place when avatar is initialized.
-		OddcastAvatarExternalModule.sendToParent('onIFrameInitialized', OddcastAvatarExternalModule.settings)
+		OddcastAvatarExternalModule.callOnParent('onIFrameInitialized', OddcastAvatarExternalModule.settings)
 
 		if(OddcastAvatarExternalModule.settings.reviewModeEnabled){
 			OddcastAvatarExternalModule.initReviewMode()
@@ -70,12 +70,12 @@ OddcastAvatarExternalModule.addProperties({
 	},
 	initTimeout: function(){
 		OddcastAvatarExternalModule.onActivity(function(){
-			OddcastAvatarExternalModule.sendToParent('updateLastActivity')
+			OddcastAvatarExternalModule.callOnParent('updateLastActivity')
 		})
 
 		var field = $('input[name=' + OddcastAvatarExternalModule.settings.timeoutVerificationFieldName + ']')
 		field.change(function(){
-			OddcastAvatarExternalModule.sendToParent('updateTimeoutVerificationValue', field.val())
+			OddcastAvatarExternalModule.callOnParent('updateTimeoutVerificationValue', field.val())
 		})
 	},
 	initReviewMode: function () {
@@ -98,7 +98,7 @@ OddcastAvatarExternalModule.addProperties({
 
 		var startAvatar = function () {
 			getSubmitButton().prop('disabled', false)
-			OddcastAvatarExternalModule.sendToParent('startAvatar')
+			OddcastAvatarExternalModule.callOnParent('startAvatar')
 		}
 
 		var reviewModeFooter = $('<div id="oddcast-review-mode-footer">You are currently in Review Mode.<br><button>Click here to begin consent</button></div>')
@@ -143,7 +143,7 @@ OddcastAvatarExternalModule.addProperties({
 	},
 	// This method is referenced by the Inline Popups module.
 	sayText: function(message){
-		OddcastAvatarExternalModule.sendToParent('sayText', message)
+		OddcastAvatarExternalModule.callOnParent('sayText', message)
 	},
 	setEnabled: function(value){
 		OddcastAvatarExternalModule.enabled = value
@@ -152,8 +152,8 @@ OddcastAvatarExternalModule.addProperties({
 	isEnabled: function(){
 		return OddcastAvatarExternalModule.enabled
 	},
-	sendToParent: function(){
-		OddcastAvatarExternalModule.sendTo(window.parent, arguments)
+	callOnParent: function(){
+		OddcastAvatarExternalModule.callOnTarget(window.parent, arguments)
 	}
 })
 

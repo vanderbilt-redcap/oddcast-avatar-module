@@ -12,7 +12,7 @@ var OddcastAvatarExternalModule = {
 			OddcastAvatarExternalModule[name] = properties[name]
 		}
 	},
-	sendTo: function(target, arguments){
+	callOnTarget: function(target, arguments){
 		// Convert arguments to an array
 		arguments = Array.prototype.slice.call(arguments)
 

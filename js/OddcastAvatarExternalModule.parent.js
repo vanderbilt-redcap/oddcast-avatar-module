@@ -336,7 +336,7 @@ OddcastAvatarExternalModule.addProperties({
 	minimizeAvatar: function () {
 		OddcastAvatarExternalModule.stopSpeech();
 		OddcastAvatarExternalModule.getAvatar().fadeOut(OddcastAvatarExternalModule.fadeDuration);
-		OddcastAvatarExternalModule.sendToIFrame('setEnabled', false)
+		OddcastAvatarExternalModule.callOnIFrame('setEnabled', false)
 
 		$('#oddcast-minimize-avatar').hide();
 		$('#oddcast-maximize-avatar').show();
@@ -371,7 +371,7 @@ OddcastAvatarExternalModule.addProperties({
 			OddcastAvatarExternalModule.loadShowByID(showId)
 
 			OddcastAvatarExternalModule.getAvatar().fadeIn(OddcastAvatarExternalModule.fadeDuration);
-			OddcastAvatarExternalModule.sendToIFrame('setEnabled', true)
+			OddcastAvatarExternalModule.callOnIFrame('setEnabled', true)
 
 			// Handle the page message every time the avatar is maximized, in case the user hasn't heard the message for the current page
 			OddcastAvatarExternalModule.handlePageMessage()
@@ -380,8 +380,8 @@ OddcastAvatarExternalModule.addProperties({
 			$('#oddcast-maximize-avatar').hide();
 		})
 	},
-	sendToIFrame: function(){
-		OddcastAvatarExternalModule.sendTo($('#oddcast-content > iframe')[0].contentWindow, arguments)
+	callOnIFrame: function(){
+		OddcastAvatarExternalModule.callOnTarget($('#oddcast-content > iframe')[0].contentWindow, arguments)
 	}
 })
 
