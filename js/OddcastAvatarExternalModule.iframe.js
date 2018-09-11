@@ -87,10 +87,13 @@ OddcastAvatarExternalModule.addProperties({
 			OddcastAvatarExternalModule.sendToParent('startAvatar')
 		}
 
+		var reviewModeFooter = $('<div id="oddcast-review-mode-footer">You are currently in Review Mode.<br><button>Click here to begin consent</button></div>')
+
 		var clickPreviousButton = function () {
 			var previousButton = $('button[name=submit-btn-saveprevpage]')
 			if (previousButton.length == 0) {
 				Cookies.remove(cookieName)
+				reviewModeFooter.remove() // Important if we're already on the first page
 				$('body').css('visibility', 'visible') // poor man's loading indicator
 
 				startAvatar()
@@ -113,10 +116,8 @@ OddcastAvatarExternalModule.addProperties({
 
 		var value = Cookies.get(cookieName)
 		if (value == onValue) {
-			var reviewModeFooter = $('<div id="oddcast-review-mode-footer">You are currently in Review Mode.<br><button>Click here to begin consent</button></div>')
 			reviewModeFooter.find('button').click(function () {
 				setCookie(turningOffValue)
-				reviewModeFooter.remove() // Important if we're already on the first page
 				clickPreviousButton()
 			})
 
