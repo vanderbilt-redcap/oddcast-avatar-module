@@ -8,14 +8,6 @@ OddcastAvatarExternalModule.addProperties({
 		var url = location.href.replace('&vorlon', '')
 		$('#oddcast-content').html("<iframe src='" + url + "'></iframe>")
 
-		if (OddcastAvatarExternalModule.settings.voices.female == '') {
-			OddcastAvatarExternalModule.settings.voices.female = [3, 3]
-		}
-
-		if (OddcastAvatarExternalModule.settings.voices.male == '') {
-			OddcastAvatarExternalModule.settings.voices.male = [3, 2]
-		}
-
 		$('#oddcast-maximize-avatar').click(function () {
 			OddcastAvatarExternalModule.maximizeAvatar()
 			OddcastAvatarExternalModule.log('avatar enabled')
@@ -220,14 +212,16 @@ OddcastAvatarExternalModule.addProperties({
 		OddcastAvatarExternalModule.settings.timeoutVerification.value = value.trim().toLowerCase()
 	},
 	onIFrameInitialized: function(settings){
-		// Update the page message to match the current page
+		var oldPageMessage = OddcastAvatarExternalModule.settings.pageMessage
 
-		if(OddcastAvatarExternalModule.settings.pageMessage === settings.pageMessage){
+		// Update all the settings for the current page
+		OddcastAvatarExternalModule.settings = settings
+
+		if(settings.pageMessage === oldPageMessage){
 			// This is likely the IFrame initializing on the first page.
-			// Do nothing, since this page message should already have been played when the avatar was initially maximized.
+			// Do nothing, since this page message should already have been handled when the avatar was initially maximized.
 		}
 		else{
-			OddcastAvatarExternalModule.settings.pageMessage = settings.pageMessage
 			OddcastAvatarExternalModule.handlePageMessage()
 		}
 	},

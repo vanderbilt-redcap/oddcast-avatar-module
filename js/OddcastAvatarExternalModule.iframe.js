@@ -82,9 +82,6 @@ OddcastAvatarExternalModule.addProperties({
 		field.change(function(){
 			updateTimeoutVerificationValue(field.val())
 		})
-
-		// For pages after the page with the verification field.
-		updateTimeoutVerificationValue(timeoutVerification.value)
 	},
 	initReviewMode: function () {
 		var settings = OddcastAvatarExternalModule.settings

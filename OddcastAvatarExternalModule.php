@@ -130,12 +130,22 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 						break;
 					}
 				}
+
+				$femaleVoice = $this->getProjectSetting('voice');
+				if(empty($femaleVoice)){
+					$femaleVoice = '3,3';
+				}
+
+				$maleVoice = $this->getProjectSetting('male-voice');
+				if(empty($maleVoice)){
+					$maleVoice = '3,2';
+				}
 				?>
 
 				OddcastAvatarExternalModule.settings = <?=json_encode([
 					'voices' => [
-						'female' => explode(',', $this->getProjectSetting('voice')),
-						'male' => explode(',', $this->getProjectSetting('male-voice')),
+						'female' => explode(',', $femaleVoice),
+						'male' => explode(',', $maleVoice),
 					],
 					'shows' => $shows,
 					'isInitialLoad' => $_SERVER['REQUEST_METHOD'] == 'GET',
