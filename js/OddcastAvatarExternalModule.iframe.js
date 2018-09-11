@@ -5,6 +5,7 @@ OddcastAvatarExternalModule.addProperties({
 		$('body').css('-webkit-overflow-scrolling', 'touch')
 
 		OddcastAvatarExternalModule.initMessagesForValues()
+		OddcastAvatarExternalModule.initTimeout()
 
 		if(OddcastAvatarExternalModule.settings.reviewModeEnabled){
 			OddcastAvatarExternalModule.initReviewMode()
@@ -63,6 +64,25 @@ OddcastAvatarExternalModule.addProperties({
 				}
 			})
 		})
+	},
+	initTimeout: function(){
+		OddcastAvatarExternalModule.onActivity(function(){
+			OddcastAvatarExternalModule.sendToParent('updateLastActivity')
+		})
+
+		var timeoutVerification = OddcastAvatarExternalModule.settings.timeoutVerification
+		var updateTimeoutVerificationValue = function(value){
+			OddcastAvatarExternalModule.sendToParent('updateTimeoutVerificationValue', value)
+		}
+
+		// For the page with the verification field.
+		var field = $('input[name=' + timeoutVerification.fieldName + ']')
+		field.change(function(){
+			updateTimeoutVerificationValue(field.val())
+		})
+
+		// For pages after the page with the verification field.
+		updateTimeoutVerificationValue(timeoutVerification.value)
 	},
 	initReviewMode: function () {
 		var settings = OddcastAvatarExternalModule.settings

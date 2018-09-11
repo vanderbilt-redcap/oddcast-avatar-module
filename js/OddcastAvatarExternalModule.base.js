@@ -36,6 +36,9 @@ var OddcastAvatarExternalModule = {
 
 			OddcastAvatarExternalModule[method].apply(OddcastAvatarExternalModule, data.arguments)
 		}, false);
+	},
+	onActivity: function(action){
+		$(document).on('mousemove keydown mousedown touchstart touchmove', action)
 	}
 }
 

@@ -42,7 +42,6 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 
 		<script src="//cdn.jsdelivr.net/npm/mobile-detect@1.4.1/mobile-detect.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.2.0/js.cookie.min.js" integrity="sha256-9Nt2r+tJnSd2A2CRUvnjgsD+ES1ExvjbjBNqidm9doI=" crossorigin="anonymous"></script>
-		<script src="https://cdn.jsdelivr.net/npm/jquery.idle@1.2.6/jquery.idle.min.js" integrity="sha256-RFOvLffDBWTRL2yzD1Atxv6t+G3Rd73IYdbmGO3IOzM=" crossorigin="anonymous"></script>
 		<?php
 			if(isset($_GET['vorlon'])){
 				?><script src="http://<?=$_SERVER['HTTP_HOST']?>:1337/vorlon.js"></script><?php

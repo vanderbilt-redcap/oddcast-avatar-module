@@ -139,11 +139,10 @@ OddcastAvatarExternalModule.addProperties({
 
 		var redcapDialog
 		var triesRemaining
-		var timeoutVerificationValue
 		var showTimeoutModal = function () {
 			triesRemaining = 5
-			timeoutVerificationValue = OddcastAvatarExternalModule.getTimeoutVerificationValue(settings)
-			if (timeoutVerificationValue == '') {
+
+			if (OddcastAvatarExternalModule.settings.timeoutVerification.value == '') {
 				// There's nothing to verify, so just restart the survey.
 				openNewPublicSurvey()
 				return
@@ -159,43 +158,41 @@ OddcastAvatarExternalModule.addProperties({
 			}
 		}
 
-		var lastActive = Date.now()
-		$(document).idle({
-			idle: 1000,
-			recurIdleCall: true,
-			onIdle: function () {
-				if (OddcastAvatarExternalModule.isModalDisplayed(OddcastAvatarExternalModule.getTextIntroModal())) {
-					return
-				}
-
-				var minutesIdle = (Date.now() - lastActive) / 1000 / 60
-				if (!isTimeoutModalDisplayed()) {
-					if (minutesIdle >= settings.timeout) {
-						showTimeoutModal()
-						lastActive = Date.now()
-					}
-				}
-				else if (minutesIdle >= settings.restartTimeout) {
-					// The timeout modal is displayed.
-					openNewPublicSurvey()
-				}
-			},
-			onActive: function () {
-				lastActive = Date.now()
-			},
+		OddcastAvatarExternalModule.updateLastActivity()
+		OddcastAvatarExternalModule.onActivity(function(){
+			OddcastAvatarExternalModule.updateLastActivity()
 		})
+
+		setInterval(function(){
+			if (OddcastAvatarExternalModule.isModalDisplayed(OddcastAvatarExternalModule.getTextIntroModal()) && !OddcastAvatarExternalModule.showId) {
+				// The intro modal is still displayed for the first time.  Do not constantly reload the page.
+				return
+			}
+
+			var minutesIdle = (Date.now() - OddcastAvatarExternalModule.lastActivity) / 1000 / 60
+			if (!isTimeoutModalDisplayed()) {
+				if (minutesIdle >= settings.timeout) {
+					showTimeoutModal()
+					OddcastAvatarExternalModule.updateLastActivity()
+				}
+			}
+			else if (minutesIdle >= settings.restartTimeout) {
+				// The timeout modal is displayed.
+				openNewPublicSurvey()
+			}
+		}, 1000)
 
 		modal.find('button.restart').click(openNewPublicSurvey)
 
 		modal.find('button.continue').click(function () {
 			var enteredValue = input.val().trim().toLowerCase()
-			if (enteredValue == timeoutVerificationValue) {
+			if (enteredValue == OddcastAvatarExternalModule.settings.timeoutVerification.value) {
 				modal.modal('hide')
 
 				// Clear the value entered, in case the timeout modal is displayed again.
 				input.val('')
 
-				// If we had to hide a REDCap dialog (like a required fields message), re-dislpay it.
+				// If we had to hide a REDCap dialog (like a required fields message), re-display it.
 				if (redcapDialog.length > 0) {
 					redcapDialog.show()
 				}
@@ -212,21 +209,15 @@ OddcastAvatarExternalModule.addProperties({
 			}
 		})
 	},
-	getTimeoutVerificationValue: function (settings) {
-		var value
-
-		var verificationField = $('input[name=' + settings.timeoutVerification.fieldName + ']')
-		if (verificationField.length > 0) {
-			value = verificationField.val()
-		}
-		else {
-			value = settings.timeoutVerification.value
-			if (!value) {
-				value = ''
-			}
+	updateLastActivity: function(){
+		OddcastAvatarExternalModule.lastActivity = Date.now()
+	},
+	updateTimeoutVerificationValue: function(value){
+		if(!value){
+			value = ''
 		}
 
-		return value.trim().toLowerCase()
+		OddcastAvatarExternalModule.settings.timeoutVerification.value = value.trim().toLowerCase()
 	},
 	isModalDisplayed: function (modal) {
 		return modal.hasClass('show')
