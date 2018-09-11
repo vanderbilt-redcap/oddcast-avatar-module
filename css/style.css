@@ -7,6 +7,7 @@ html {
 body {
 	width: 100vw;
 	height: 100vh;
+	overflow: hidden; // Hide the few pixels added by the table layout an prevent an unnecessary scrollbar.
 }
 
 #changeFont {
@@ -34,7 +35,8 @@ body {
 	min-width: 721px; /* After adding the width of the avatar (and borders), this will fill the screen of a landscape ipad. */
 }
 
-body.modal-open #pagecontainer{
+body.modal-open #oddcast-sidebar,
+body.modal-open #oddcast-content{
     overflow: hidden; /* prevent touches in bootstrap dialogs from scrolling the background on mobile */
 	filter: blur(5px); /* obscure fields, important when the timeout dialog is open */
 }
