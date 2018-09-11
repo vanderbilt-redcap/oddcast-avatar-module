@@ -229,7 +229,7 @@ OddcastAvatarExternalModule.addProperties({
 		return value.trim().toLowerCase()
 	},
 	isModalDisplayed: function (modal) {
-		return modal.hasClass('in')
+		return modal.hasClass('show')
 	},
 	// This method is referenced by the Analytics module.
 	stopSpeech: function () {
