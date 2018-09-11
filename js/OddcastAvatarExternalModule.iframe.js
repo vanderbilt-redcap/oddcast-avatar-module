@@ -10,6 +10,8 @@ OddcastAvatarExternalModule.addProperties({
 		if(OddcastAvatarExternalModule.settings.reviewModeEnabled){
 			OddcastAvatarExternalModule.initReviewMode()
 		}
+
+		OddcastAvatarExternalModule.sendToParent('onIFrameInitialized', OddcastAvatarExternalModule.settings)
 	},
 	initMessagesForValues: function () {
 		var messagesForValues = OddcastAvatarExternalModule.settings.messagesForValues

@@ -219,6 +219,34 @@ OddcastAvatarExternalModule.addProperties({
 
 		OddcastAvatarExternalModule.settings.timeoutVerification.value = value.trim().toLowerCase()
 	},
+	onIFrameInitialized: function(settings){
+		// Update the page message to match the current page
+
+		if(OddcastAvatarExternalModule.settings.pageMessage === settings.pageMessage){
+			// This is likely the IFrame initializing on the first page.
+			// Do nothing, since this page message should already have been played when the avatar was initially maximized.
+		}
+		else{
+			OddcastAvatarExternalModule.settings.pageMessage = settings.pageMessage
+			OddcastAvatarExternalModule.handlePageMessage()
+		}
+	},
+	handlePageMessage: function(){
+		OddcastAvatarExternalModule.afterSceneLoaded(function(){
+			if(!OddcastAvatarExternalModule.isEnabled()){
+				return
+			}
+
+			var playButton = OddcastAvatarExternalModule.getPlayButton()
+			if(OddcastAvatarExternalModule.settings.pageMessage){
+				playButton.show()
+				OddcastAvatarExternalModule.sayPageMessage('page message played automatically')
+			}
+			else{
+				playButton.hide()
+			}
+		})
+	},
 	isModalDisplayed: function (modal) {
 		return modal.hasClass('show')
 	},
@@ -350,18 +378,11 @@ OddcastAvatarExternalModule.addProperties({
 			OddcastAvatarExternalModule.getAvatar().fadeIn(OddcastAvatarExternalModule.fadeDuration);
 			OddcastAvatarExternalModule.sendToIFrame('setEnabled', true)
 
+			// Handle the page message every time the avatar is maximized, in case the user hasn't heard the message for the current page
+			OddcastAvatarExternalModule.handlePageMessage()
+
 			$('#oddcast-minimize-avatar').show();
 			$('#oddcast-maximize-avatar').hide();
-
-			OddcastAvatarExternalModule.afterSceneLoaded(function () {
-				// The show we want has been loaded.
-				if (!settings.pageMessage) {
-					return
-				}
-
-				OddcastAvatarExternalModule.getPlayButton().show()
-				OddcastAvatarExternalModule.sayPageMessage('page message played automatically')
-			})
 		})
 	},
 	sendToIFrame: function(){
