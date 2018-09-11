@@ -2,6 +2,7 @@ OddcastAvatarExternalModule.addProperties({
 	scenedLoaded: false,
 	showId: null,
 	fadeDuration: 200,
+	timeoutVerificationValue: '',
 	initializeParent: function(){
 		$('#pagecontainer').hide()
 
@@ -134,7 +135,7 @@ OddcastAvatarExternalModule.addProperties({
 		var showTimeoutModal = function () {
 			triesRemaining = 5
 
-			if (OddcastAvatarExternalModule.settings.timeoutVerification.value == '') {
+			if (OddcastAvatarExternalModule.timeoutVerificationValue == '') {
 				// There's nothing to verify, so just restart the survey.
 				openNewPublicSurvey()
 				return
@@ -178,7 +179,7 @@ OddcastAvatarExternalModule.addProperties({
 
 		modal.find('button.continue').click(function () {
 			var enteredValue = input.val().trim().toLowerCase()
-			if (enteredValue == OddcastAvatarExternalModule.settings.timeoutVerification.value) {
+			if (enteredValue == OddcastAvatarExternalModule.timeoutVerificationValue) {
 				modal.modal('hide')
 
 				// Clear the value entered, in case the timeout modal is displayed again.
@@ -209,7 +210,7 @@ OddcastAvatarExternalModule.addProperties({
 			value = ''
 		}
 
-		OddcastAvatarExternalModule.settings.timeoutVerification.value = value.trim().toLowerCase()
+		OddcastAvatarExternalModule.timeoutVerificationValue = value.trim().toLowerCase()
 	},
 	onIFrameInitialized: function(settings){
 		var oldPageMessage = OddcastAvatarExternalModule.settings.pageMessage

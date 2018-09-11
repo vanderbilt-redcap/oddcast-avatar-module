@@ -72,15 +72,9 @@ OddcastAvatarExternalModule.addProperties({
 			OddcastAvatarExternalModule.sendToParent('updateLastActivity')
 		})
 
-		var timeoutVerification = OddcastAvatarExternalModule.settings.timeoutVerification
-		var updateTimeoutVerificationValue = function(value){
-			OddcastAvatarExternalModule.sendToParent('updateTimeoutVerificationValue', value)
-		}
-
-		// For the page with the verification field.
-		var field = $('input[name=' + timeoutVerification.fieldName + ']')
+		var field = $('input[name=' + OddcastAvatarExternalModule.settings.timeoutVerificationFieldName + ']')
 		field.change(function(){
-			updateTimeoutVerificationValue(field.val())
+			OddcastAvatarExternalModule.sendToParent('updateTimeoutVerificationValue', field.val())
 		})
 	},
 	initReviewMode: function () {

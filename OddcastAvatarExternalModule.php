@@ -159,10 +159,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 					'publicSurveyUrl' => $this->getPublicSurveyUrl(),
 					'timeout' => $this->getProjectSetting('timeout'),
 					'restartTimeout' => $this->getProjectSetting('restart-timeout'),
-					'timeoutVerification' => [
-						'fieldName' => $this->getTimeoutVerificationFieldName(),
-						'value' => $this->getTimeoutVerificationValue($project_id, $record)
-					],
+					'timeoutVerificationFieldName' => $this->getTimeoutVerificationFieldName(),
 					'loggingSupported' => $loggingSupported
 				])?>
 
@@ -248,11 +245,6 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 	private function getTimeoutVerificationLabel($project_id){
 		$fieldName = $this->getTimeoutVerificationFieldName();
 		return $this->getFieldLabel($project_id, $fieldName);
-	}
-
-	private function getTimeoutVerificationValue($project_id, $record){
-		$fieldName = $this->getTimeoutVerificationFieldName();
-		return @json_decode(\REDCap::getData($project_id, 'json', [$record], [$fieldName]), true)[0][$fieldName];
 	}
 
 	// This method now exists in the External Modules core code, but is duplicated here for compatibility with older REDCap versions.
