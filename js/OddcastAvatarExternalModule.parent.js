@@ -225,6 +225,10 @@ OddcastAvatarExternalModule.addProperties({
 		else{
 			OddcastAvatarExternalModule.handlePageMessage()
 		}
+
+		// Re-send the enabled status, in case the iframe wasn't loaded when it was last sent.
+		// This can be reproduced by simulating a "Slow 3G" connection in Chrome's developer tools and immediately selecting an avatar when the dialog is displayed.
+		OddcastAvatarExternalModule.callOnIFrame('setEnabled', OddcastAvatarExternalModule.isEnabled())
 	},
 	handlePageMessage: function(){
 		OddcastAvatarExternalModule.afterSceneLoaded(function(){
