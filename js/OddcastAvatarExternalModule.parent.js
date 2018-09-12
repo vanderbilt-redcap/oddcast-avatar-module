@@ -334,9 +334,7 @@ OddcastAvatarExternalModule.addProperties({
 		return $('#oddcast-controls .fa-play-circle')
 	},
 	log: function (message, parameters) {
-		if (OddcastAvatarExternalModule.settings.loggingSupported) {
-			ExternalModules.Vanderbilt.OddcastAvatarExternalModule.log(message, parameters)
-		}
+		OddcastAvatarExternalModule.callOnIFrame('log', message, parameters)
 	},
 	minimizeAvatar: function () {
 		OddcastAvatarExternalModule.stopSpeech();

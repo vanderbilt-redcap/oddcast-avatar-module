@@ -163,6 +163,11 @@ OddcastAvatarExternalModule.addProperties({
 	},
 	callOnParent: function(){
 		OddcastAvatarExternalModule.callOnTarget(window.parent, arguments)
+	},
+	log: function (message, parameters) {
+		if (OddcastAvatarExternalModule.settings.loggingSupported) {
+			ExternalModules.Vanderbilt.OddcastAvatarExternalModule.log(message, parameters)
+		}
 	}
 })
 
