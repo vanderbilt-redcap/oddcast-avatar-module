@@ -8,7 +8,9 @@ OddcastAvatarExternalModule.addProperties({
 		$('#pagecontainer').hide()
 
 		var url = location.href.replace('&vorlon', '')
-		$('#oddcast-content').html("<iframe src='" + url + "'></iframe>")
+		var iFrame = $("<iframe></iframe>")
+		$('#oddcast-content').append(iFrame)
+		iFrame.attr('src', url) // This is done separately from the iFrame definition/append to prevent an extra cancelled request in Chrome.
 
 		$('#oddcast-maximize-avatar').click(function () {
 			OddcastAvatarExternalModule.maximizeAvatar()
