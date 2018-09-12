@@ -11,6 +11,16 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 {
 	function redcap_survey_page($project_id, $record, $instrument)
 	{
+		$this->loadAvatar();
+	}
+
+	function redcap_survey_complete($project_id, $record, $instrument)
+	{
+		$this->loadAvatar();
+	}
+
+	function loadAvatar($project_id, $record, $instrument)
+	{
 		$initializeJavascriptMethodName = 'initializeJavascriptModuleObject';
 		$loggingSupported = method_exists($this, $initializeJavascriptMethodName);
 		if ($loggingSupported) {

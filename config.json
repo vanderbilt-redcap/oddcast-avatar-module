@@ -13,6 +13,7 @@
 
 	"permissions": [
 		"redcap_survey_page",
+		"redcap_survey_complete",
 		"redcap_every_page_before_render"
 	],
 
