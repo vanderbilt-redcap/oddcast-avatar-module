@@ -6,12 +6,42 @@ use ExternalModules\ExternalModules;
 
 const REVIEW_MODE = 'review-mode';
 const TURNING_OFF = 'turning-off';
+const TEMPORARY_RECORD_ID_TO_DELETE = 'temporary-record-id-to-delete';
 
 class OddcastAvatarExternalModule extends AbstractExternalModule
 {
 	function redcap_survey_page($project_id, $record, $instrument)
 	{
 		$this->loadAvatar();
+		$this->removeParentWindowLogEntry();
+	}
+
+	// The iFrame created by this module causes the analytics module to insert duplicate survey page load logs,
+	// so we remove the survey page load log for the temporary record id used by the parent window.
+	// We only want to keep the version of this log saved by the iFrame.
+	function removeParentWindowLogEntry()
+	{
+		$temporaryRecordIdToRemove = db_escape($_GET[TEMPORARY_RECORD_ID_TO_DELETE]);
+
+		if(empty($temporaryRecordIdToRemove)){
+			return;
+		}
+
+		$parts = explode('-', $temporaryRecordIdToRemove);
+		$time = $parts[5];
+
+		error_log('deleting: ' . $temporaryRecordIdToRemove);
+
+		if($time < time()-120){
+			// Do not respect requests to delete older logs.  This may be a malicious request.
+			return;
+		}
+		else if($time > time()){
+			// Ignore requests to delete future logs.  Something must have gone wrong
+			return;
+		}
+
+		$this->query("delete from redcap_external_modules_log where record = '$temporaryRecordIdToRemove' limit 1");
 	}
 
 	function redcap_survey_complete($project_id, $record, $instrument)
@@ -170,7 +200,8 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 					'timeout' => $this->getProjectSetting('timeout'),
 					'restartTimeout' => $this->getProjectSetting('restart-timeout'),
 					'timeoutVerificationFieldName' => $this->getTimeoutVerificationFieldName(),
-					'loggingSupported' => $loggingSupported
+					'loggingSupported' => $loggingSupported,
+					'temporaryRecordIdFieldName' => TEMPORARY_RECORD_ID_TO_DELETE
 				])?>
 
 				var jsObjectUrl

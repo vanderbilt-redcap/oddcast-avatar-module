@@ -5,12 +5,9 @@ OddcastAvatarExternalModule.addProperties({
 	timeoutVerificationValue: '',
 	iFrameLoaded: false,
 	initializeParent: function(){
-		$('#pagecontainer').hide()
+		OddcastAvatarExternalModule.loadIFrame()
 
-		var url = location.href.replace('&vorlon', '')
-		var iFrame = $("<iframe></iframe>")
-		$('#oddcast-content').append(iFrame)
-		iFrame.attr('src', url) // This is done separately from the iFrame definition/append to prevent an extra cancelled request in Chrome.
+		$('#pagecontainer').hide()
 
 		$('#oddcast-maximize-avatar').click(function () {
 			OddcastAvatarExternalModule.maximizeAvatar()
@@ -72,6 +69,24 @@ OddcastAvatarExternalModule.addProperties({
 		}
 
 		OddcastAvatarExternalModule.showBody()
+	},
+	loadIFrame: function(){
+		var iFrameUrl = location.href.replace('&vorlon', '')
+
+		// This field name is hard coded because it is undocumented/unsupported.
+		// If it ever changes, we'd prefer the duplicate log entry deletion to stop workingm
+		// rather than a syntax error breaking the entire module.
+		var parentTemporaryRecordId = $('input[name=external-modules-temporary-record-id]').val()
+		if(parentTemporaryRecordId){
+			iFrameUrl += '&' + OddcastAvatarExternalModule.settings.temporaryRecordIdFieldName + '=' + parentTemporaryRecordId
+		}
+		else{
+			console.error('The temporary record id for the parent window could not be detected.  This will likely result in an extraneous survey page load log entry.')
+		}
+
+		var iFrame = $("<iframe></iframe>")
+		$('#oddcast-content').append(iFrame)
+		iFrame.attr('src', iFrameUrl) // The src is set separately from the iFrame definition/append to prevent an extra cancelled request in Chrome.
 	},
 	sayPageMessage: function(logMessage){
 		var settings = OddcastAvatarExternalModule.settings
