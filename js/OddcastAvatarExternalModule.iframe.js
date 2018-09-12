@@ -13,6 +13,9 @@ OddcastAvatarExternalModule.addProperties({
 		if(OddcastAvatarExternalModule.settings.reviewModeEnabled){
 			OddcastAvatarExternalModule.initReviewMode()
 		}
+		else{
+			OddcastAvatarExternalModule.showBody()
+		}
 	},
 	initMessagesForValues: function () {
 		var messagesForValues = OddcastAvatarExternalModule.settings.messagesForValues
@@ -108,7 +111,7 @@ OddcastAvatarExternalModule.addProperties({
 			if (previousButton.length == 0) {
 				Cookies.remove(cookieName)
 				reviewModeFooter.remove() // Important if we're already on the first page
-				$('body').css('visibility', 'visible') // poor man's loading indicator
+				OddcastAvatarExternalModule.showBody()
 
 				startAvatar()
 
@@ -136,6 +139,8 @@ OddcastAvatarExternalModule.addProperties({
 			})
 
 			$('#pagecontent').append(reviewModeFooter)
+
+			OddcastAvatarExternalModule.showBody()
 		}
 		else if (value == turningOffValue) {
 			clickPreviousButton()

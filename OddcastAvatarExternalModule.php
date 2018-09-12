@@ -183,6 +183,21 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			return false;
 		}
 
+		?>
+		<style>
+			body {
+				/*
+					This prevents some confusing "flashes" of partially loaded content.
+					Simulate slower connections via Chrome's developer tools to reproduce this.
+					It will be most noticeable on initial page load when the content is replaced with the iframe,
+					and when exiting review mode from page three or greater.
+					The body is made visible again via the showBody() javascript method.
+				*/
+				visibility: hidden;
+			}
+		</style>
+		<?php
+
 		$reviewMode = @$_COOKIE[REVIEW_MODE];
 		if (!$this->isReviewModeEnabled() || is_null($reviewMode)) {
 			return;
@@ -209,16 +224,6 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				// This will allow us the skip required fields and navigate freely between pages.
 				$field['misc'] = '@HIDDEN';
 			}
-		}
-
-		if ($reviewMode === TURNING_OFF) {
-			?>
-			<style>
-				body {
-					visibility: hidden; /* poor man's loading indicator */
-				}
-			</style>
-			<?php
 		}
 	}
 

@@ -3,6 +3,11 @@ var OddcastAvatarExternalModule = {
 	initializeBase: function(){
 		OddcastAvatarExternalModule.listenForMessages()
 	},
+	showBody: function(){
+		// The body is hidden in the before render hook for prevent any unnecessary "flashes" of content being rearranged/reloaded.
+		// This method is used to make it visible again.
+		$('body').css('visibility', 'visible')
+	},
 	addProperties: function(properties){
 		for(var name in properties){
 			if(OddcastAvatarExternalModule[name]){

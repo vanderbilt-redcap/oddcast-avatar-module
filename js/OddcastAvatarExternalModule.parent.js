@@ -67,6 +67,8 @@ OddcastAvatarExternalModule.addProperties({
 		if(!OddcastAvatarExternalModule.settings.reviewModeEnabled){
 			OddcastAvatarExternalModule.startAvatar()
 		}
+
+		OddcastAvatarExternalModule.showBody()
 	},
 	sayPageMessage: function(logMessage){
 		var settings = OddcastAvatarExternalModule.settings
