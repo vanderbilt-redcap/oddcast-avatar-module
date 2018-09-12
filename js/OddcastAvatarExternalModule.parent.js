@@ -3,6 +3,7 @@ OddcastAvatarExternalModule.addProperties({
 	showId: null,
 	fadeDuration: 200,
 	timeoutVerificationValue: '',
+	iFrameLoaded: false,
 	initializeParent: function(){
 		$('#pagecontainer').hide()
 
@@ -215,6 +216,8 @@ OddcastAvatarExternalModule.addProperties({
 		OddcastAvatarExternalModule.timeoutVerificationValue = value.trim().toLowerCase()
 	},
 	onIFrameInitialized: function(settings){
+		OddcastAvatarExternalModule.iFrameLoaded = true
+		
 		var oldPageMessage = OddcastAvatarExternalModule.settings.pageMessage
 
 		// Update all the settings for the current page
@@ -228,9 +231,12 @@ OddcastAvatarExternalModule.addProperties({
 			OddcastAvatarExternalModule.handlePageMessage()
 		}
 
-		// Re-send the enabled status, in case the iframe wasn't loaded when it was last sent.
+		// Make sure the iFrame's enabled flag is up to date, in case the iFrame wasn't loaded when it last changed.
 		// This can be reproduced by simulating a "Slow 3G" connection in Chrome's developer tools and immediately selecting an avatar when the dialog is displayed.
-		OddcastAvatarExternalModule.callOnIFrame('setEnabled', OddcastAvatarExternalModule.isEnabled())
+		OddcastAvatarExternalModule.setEnabledOnIFrame()
+	},
+	onIFrameUnLoad: function(){
+		OddcastAvatarExternalModule.iFrameLoaded = false
 	},
 	handlePageMessage: function(){
 		OddcastAvatarExternalModule.afterSceneLoaded(function(){
@@ -338,8 +344,9 @@ OddcastAvatarExternalModule.addProperties({
 	},
 	minimizeAvatar: function () {
 		OddcastAvatarExternalModule.stopSpeech();
-		OddcastAvatarExternalModule.getAvatar().fadeOut(OddcastAvatarExternalModule.fadeDuration);
-		OddcastAvatarExternalModule.callOnIFrame('setEnabled', false)
+		OddcastAvatarExternalModule.getAvatar().fadeOut(OddcastAvatarExternalModule.fadeDuration, function(){
+			OddcastAvatarExternalModule.setEnabledOnIFrame()
+		});
 
 		$('#oddcast-minimize-avatar').hide();
 		$('#oddcast-maximize-avatar').show();
@@ -373,8 +380,9 @@ OddcastAvatarExternalModule.addProperties({
 			// Load the show we want instead.
 			OddcastAvatarExternalModule.loadShowByID(showId)
 
-			OddcastAvatarExternalModule.getAvatar().fadeIn(OddcastAvatarExternalModule.fadeDuration);
-			OddcastAvatarExternalModule.callOnIFrame('setEnabled', true)
+			OddcastAvatarExternalModule.getAvatar().fadeIn(OddcastAvatarExternalModule.fadeDuration, function(){
+				OddcastAvatarExternalModule.setEnabledOnIFrame()
+			});
 
 			// Handle the page message every time the avatar is maximized, in case the user hasn't heard the message for the current page
 			OddcastAvatarExternalModule.handlePageMessage()
@@ -383,7 +391,29 @@ OddcastAvatarExternalModule.addProperties({
 			$('#oddcast-maximize-avatar').hide();
 		})
 	},
+	setEnabledOnIFrame: function(){
+		if(OddcastAvatarExternalModule.iFrameLoaded){
+			OddcastAvatarExternalModule.callOnIFrame('setEnabled', OddcastAvatarExternalModule.isEnabled())
+		}
+	},
 	callOnIFrame: function(){
+		// Any number of issues can occur if we attempt to access the iFrame when it is not yet fully loaded.
+		// This can be reproduced by using setTimeout() to delay the loading of the iFrame for a second or so in initializeParent(),
+		// then by selecting an avatar character before the iFrame is fully loaded.
+		// The 'character selected' message will attempt to be logged before the iFrame is initialized.
+		// This problem is much more common on slower connections.
+		if(!OddcastAvatarExternalModule.iFrameLoaded){
+			var argumentsArray = Array.prototype.slice.call(arguments)
+
+			// console.log('An iFrame call could not be completed because the iFrame is not yet loaded.  It will be reattempted shortly.  Here are the arguments: ', argumentsArray)
+
+			setTimeout(function(){
+				OddcastAvatarExternalModule.callOnIFrame.apply(OddcastAvatarExternalModule, argumentsArray)
+			}, 50)
+
+			return
+		}
+
 		OddcastAvatarExternalModule.callOnTarget($('#oddcast-content > iframe')[0].contentWindow, arguments)
 	}
 })

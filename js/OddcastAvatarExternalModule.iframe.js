@@ -7,6 +7,10 @@ OddcastAvatarExternalModule.addProperties({
 		OddcastAvatarExternalModule.initMessagesForValues()
 		OddcastAvatarExternalModule.initTimeout()
 
+		$(window).on('beforeunload', function(){
+			OddcastAvatarExternalModule.callOnParent('onIFrameUnLoad')
+		})
+
 		// This must occur before review mode is initialized, so the correct page message is in place when avatar is initialized.
 		OddcastAvatarExternalModule.callOnParent('onIFrameInitialized', OddcastAvatarExternalModule.settings)
 
