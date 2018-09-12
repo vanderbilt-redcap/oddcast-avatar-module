@@ -7,7 +7,6 @@ html {
 body {
 	width: 100vw;
 	height: 100vh;
-	overflow: hidden; // Hide the few pixels added by the table layout an prevent an unnecessary scrollbar.
 }
 
 #changeFont {
@@ -30,6 +29,7 @@ body {
 }
 
 #oddcast-content > iframe{
+	display: block; /* This prevents a few pixels of whitespace from appearing below the iframe. */
 	height: 100vh;
 	border: 0px;
 	min-width: 721px; /* After adding the width of the avatar (and borders), this will fill the screen of a landscape ipad. */
