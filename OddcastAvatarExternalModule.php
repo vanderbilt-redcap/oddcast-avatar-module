@@ -201,7 +201,8 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 					'restartTimeout' => $this->getProjectSetting('restart-timeout'),
 					'timeoutVerificationFieldName' => $this->getTimeoutVerificationFieldName(),
 					'loggingSupported' => $loggingSupported,
-					'temporaryRecordIdFieldName' => TEMPORARY_RECORD_ID_TO_DELETE
+					'temporaryRecordIdFieldName' => TEMPORARY_RECORD_ID_TO_DELETE,
+					'speechRate' => $this->getProjectSetting('speech-rate')
 				])?>
 
 				var jsObjectUrl
