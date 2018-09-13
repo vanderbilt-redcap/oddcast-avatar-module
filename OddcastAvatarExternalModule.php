@@ -12,7 +12,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 {
 	function redcap_survey_page($project_id, $record, $instrument)
 	{
-		$this->loadAvatar();
+		$this->loadAvatar($project_id, $record, $instrument);
 		$this->removeParentWindowLogEntry();
 	}
 
@@ -46,7 +46,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 
 	function redcap_survey_complete($project_id, $record, $instrument)
 	{
-		$this->loadAvatar();
+		$this->loadAvatar($project_id, $record, $instrument);
 	}
 
 	function loadAvatar($project_id, $record, $instrument)
