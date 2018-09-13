@@ -7,6 +7,11 @@ html {
 body {
 	width: 100vw;
 	height: 100vh;
+	background-color: #333; /* Override the background to prevent users from picking a lighter color which looks funny with the avatar. */
+}
+
+#footer a {
+    color: #d2d0d0 !important; /* Since we override the body background color, we must also override the footer color so the user doesn't pick a dark color. */
 }
 
 #changeFont {
