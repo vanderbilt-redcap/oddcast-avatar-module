@@ -149,6 +149,10 @@ OddcastAvatarExternalModule.addProperties({
 		else if (value == turningOffValue) {
 			clickPreviousButton()
 		}
+		else{
+			// Review mode has been exited, and we're on a page other than one.
+			OddcastAvatarExternalModule.hideLoadingOverlay()
+		}
 	},
 	// This method is referenced by the Inline Popups module.
 	sayText: function(message){
