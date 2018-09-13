@@ -226,17 +226,23 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 
 		?>
 		<style>
-			body {
-				/*
-					This prevents some confusing "flashes" of partially loaded content.
-					Simulate slower connections via Chrome's developer tools to reproduce this.
-					It will be most noticeable on initial page load when the content is replaced with the iframe,
-					and when exiting review mode from page three or greater.
-					The body is made visible again via the showBody() javascript method.
-				*/
-				visibility: hidden;
+			/*
+				This loading overlay prevents some confusing "flashes" of partially loaded content.
+				Simulate slower connections via Chrome's developer tools to reproduce this.
+				It will be most noticeable on initial page load when the content is replaced with the iframe,
+				and when exiting review mode from page three or greater.
+		    */
+			#oddcast-loading-overlay{
+				background: #333;
+				height: 100vh;
+				width: 100vw;
+				position: fixed;
+				top: 0px;
+				left: 0px;
+				z-index: 9999999;
 			}
 		</style>
+		<div id="oddcast-loading-overlay"></div>
 		<?php
 
 		$reviewMode = @$_COOKIE[REVIEW_MODE];

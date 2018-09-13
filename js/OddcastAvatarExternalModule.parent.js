@@ -68,7 +68,7 @@ OddcastAvatarExternalModule.addProperties({
 			OddcastAvatarExternalModule.startAvatar()
 		}
 
-		OddcastAvatarExternalModule.showBody()
+		OddcastAvatarExternalModule.hideLoadingOverlay()
 	},
 	loadIFrame: function(){
 		var iFrameUrl = location.href.replace('&vorlon', '')
