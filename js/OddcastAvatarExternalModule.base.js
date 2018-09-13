@@ -1,12 +1,13 @@
 // This object is defined globally so it can be used in other modules (like Inline Descriptive Pop-ups).
 var OddcastAvatarExternalModule = {
+	fadeDuration: 200,
 	initializeBase: function(){
 		OddcastAvatarExternalModule.listenForMessages()
 	},
 	hideLoadingOverlay: function(){
 		// The body is hidden in the before render hook for prevent any unnecessary "flashes" of content being rearranged/reloaded.
 		// This method is used to make it visible again.
-		$('#oddcast-loading-overlay').hide()
+		$('#oddcast-loading-overlay').fadeOut(OddcastAvatarExternalModule.fadeDuration)
 	},
 	addProperties: function(properties){
 		for(var name in properties){

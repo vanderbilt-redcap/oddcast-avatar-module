@@ -233,7 +233,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				and when exiting review mode from page three or greater.
 		    */
 			#oddcast-loading-overlay{
-				background: #333;
+				background: #e8e8e8; /* This color is used to make transitions between pages less harsh */
 				height: 100vh;
 				width: 100vw;
 				position: fixed;

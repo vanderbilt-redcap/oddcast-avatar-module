@@ -1,7 +1,6 @@
 OddcastAvatarExternalModule.addProperties({
 	scenedLoaded: false,
 	showId: null,
-	fadeDuration: 200,
 	timeoutVerificationValue: '',
 	iFrameLoaded: false,
 	initializeParent: function(){
