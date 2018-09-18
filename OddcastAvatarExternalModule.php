@@ -161,13 +161,6 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			$(function(){
 				<?php
 				$currentPageNumber = $_GET['__page__'];
-				$pageMessage = '';
-				foreach($this->getSubSettings('page-messages') as $settingGroup){
-					if($settingGroup['page-number'] == $currentPageNumber){
-						$pageMessage = $settingGroup['page-message'];
-						break;
-					}
-				}
 
 				$femaleVoice = $this->getProjectSetting('voice');
 				if(empty($femaleVoice)){
@@ -191,7 +184,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 					'reviewModeEnabled' => $this->isReviewModeEnabled($instrument),
 					'reviewModeCookieName' => REVIEW_MODE,
 					'reviewModeTurningOffValue' => TURNING_OFF,
-					'pageMessage' => $pageMessage,
+					'pageMessage' => $this->getPageMessage($instrument, $currentPageNumber),
 					'currentPageNumber' => $currentPageNumber,
 					'messagesForValues' => $this->getSubSettings('messages-for-field-values'),
 					'publicSurveyUrl' => $this->getPublicSurveyUrl(),
@@ -215,6 +208,22 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			})
 		</script>
 		<?php
+	}
+
+	private function getPageMessage($instrument, $currentPageNumber)
+	{
+		foreach($this->getSubSettings('page-messages') as $settingGroup){
+			$forms = $settingGroup['page-message-forms'];
+			$formMatches = empty($forms) || in_array($instrument, $forms);
+
+			$pageNumberMatches = $settingGroup['page-number'] == $currentPageNumber;
+
+			if($formMatches && $pageNumberMatches){
+				return $settingGroup['page-message'];
+			}
+		}
+
+		return '';
 	}
 
 	function redcap_every_page_before_render()

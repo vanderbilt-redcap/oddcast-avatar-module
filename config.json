@@ -127,6 +127,12 @@
 					"type": "text"
 				},
 				{
+					"key": "page-message-forms",
+					"name": "<b>Form(s)</b> - If left blank, the message will be read on all forms",
+					"type": "form-list",
+					"repeatable": true
+				},
+				{
 					"key" : "page-message",
 					"name" : "Page Message",
 					"type" : "textarea"
