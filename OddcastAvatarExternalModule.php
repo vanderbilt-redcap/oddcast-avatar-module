@@ -30,8 +30,6 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		$parts = explode('-', $temporaryRecordIdToRemove);
 		$time = $parts[5];
 
-		error_log('deleting: ' . $temporaryRecordIdToRemove);
-
 		if($time < time()-120){
 			// Do not respect requests to delete older logs.  This may be a malicious request.
 			return;
