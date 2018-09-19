@@ -151,6 +151,12 @@
 					"type" : "field-list"
 				},
 				{
+					"key": "messages-for-field-values-forms",
+					"name": "<b>Form(s)</b> - If left blank, the message will apply to this field on all forms",
+					"type": "form-list",
+					"repeatable": true
+				},
+				{
 					"key" : "value",
 					"name" : "Value - For checkboxes and radio buttons, enter the numerical value (ex: 0, 1, etc.).",
 					"type" : "text"

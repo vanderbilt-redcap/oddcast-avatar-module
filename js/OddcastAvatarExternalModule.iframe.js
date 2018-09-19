@@ -23,10 +23,22 @@ OddcastAvatarExternalModule.addProperties({
 	},
 	initMessagesForValues: function () {
 		var messagesForValues = OddcastAvatarExternalModule.settings.messagesForValues
+		var instrument = OddcastAvatarExternalModule.settings.instrument
 		var fieldMap = {}
 		$.each(messagesForValues, function (i, item) {
 			if (!item.field || !item.value || !item.message) {
 				// The setting hasn't been fully configured.
+				return
+			}
+
+			var forms = item['messages-for-field-values-forms']
+			if(forms.length === 1 && !forms[0]){
+				// The form value is null or empty string, meaning no form was selected.  Remove this empty value.
+				forms = []
+			}
+
+			if(forms.length > 0 && forms.indexOf(instrument) === -1){
+				// This message isn't configured for this form.
 				return
 			}
 

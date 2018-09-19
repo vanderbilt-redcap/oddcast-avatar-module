@@ -187,6 +187,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 					'pageMessage' => $this->getPageMessage($instrument, $currentPageNumber),
 					'currentPageNumber' => $currentPageNumber,
 					'messagesForValues' => $this->getSubSettings('messages-for-field-values'),
+					'instrument' => $instrument,
 					'publicSurveyUrl' => $this->getPublicSurveyUrl(),
 					'timeout' => $this->getProjectSetting('timeout'),
 					'restartTimeout' => $this->getProjectSetting('restart-timeout'),
