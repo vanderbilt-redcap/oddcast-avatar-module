@@ -215,6 +215,10 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 	{
 		foreach($this->getSubSettings('page-messages') as $settingGroup){
 			$forms = $settingGroup['page-message-forms'];
+
+			// Remove the empty string form if the user hasn't selected anything.
+			$forms = array_filter($forms);
+
 			$formMatches = empty($forms) || in_array($instrument, $forms);
 
 			$pageNumberMatches = $settingGroup['page-number'] == $currentPageNumber;
