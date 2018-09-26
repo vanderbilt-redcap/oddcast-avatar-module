@@ -3,6 +3,7 @@ namespace Vanderbilt\OddcastAvatarExternalModule;
 
 use ExternalModules\AbstractExternalModule;
 use ExternalModules\ExternalModules;
+use Exception;
 
 const REVIEW_MODE = 'review-mode';
 const TURNING_OFF = 'turning-off';
@@ -10,6 +11,21 @@ const TEMPORARY_RECORD_ID_TO_DELETE = 'temporary-record-id-to-delete';
 
 class OddcastAvatarExternalModule extends AbstractExternalModule
 {
+	const SHOWS = [
+		2560288 => 'female',
+		2560294 => 'female',
+		2613244 => 'male',
+		2613247 => 'male',
+		2613251 => 'male',
+		2613248 => 'female',
+		2613253 => 'female',
+		2613256 => 'male',
+		2613261 => 'female',
+		2613263 => 'male',
+		2613264 => 'female',
+		2613267 => 'male',
+	];
+
 	function redcap_survey_page($project_id, $record, $instrument)
 	{
 		$this->loadAvatar($project_id, $record, $instrument);
@@ -55,21 +71,6 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			$this->{$initializeJavascriptMethodName}();
 		}
 
-		$shows = [
-			2560288 => 'female',
-			2560294 => 'female',
-			2613244 => 'male',
-			2613247 => 'male',
-			2613251 => 'male',
-			2613248 => 'female',
-			2613253 => 'female',
-			2613256 => 'male',
-			2613261 => 'female',
-			2613263 => 'male',
-			2613264 => 'female',
-			2613267 => 'male',
-		];
-
 		?>
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" integrity="sha256-NuCn4IvuZXdBaFKJOAcsU2Q3ZpwbdFisd5dux4jkQ5w=" crossorigin="anonymous" />
 		<style>
@@ -96,7 +97,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 							<p class="top-section">Hello!  Thank you for your interest in volunteering for a research study.  At any time during the consent you can ask a study coordinator for help.  We also have our eStaff team members to guide you through the consent.  Please select an eStaff team member to take you through the consent:</p>
 							<div id="oddcast-character-list" class="text-center">
 								<?php
-								foreach ($shows as $id => $gender) {
+								foreach (OddcastAvatarExternalModule::SHOWS as $id => $gender) {
 									?><img src="<?=$this->getUrl("images/$id.png")?>" data-show-id="<?=$id?>" class="oddcast-character" /><?php
 								}
 								?>
@@ -144,7 +145,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 								return;
 							}
 
-							AC_VHost_Embed(6267283, 300, 400, '', 1, 1, <?=array_keys($shows)[0]?>, 0, 1, 0, '709e320dba1a392fa4e863ef0809f9f1', 0);
+							AC_VHost_Embed(6267283, 300, 400, '', 1, 1, <?=array_keys(OddcastAvatarExternalModule::SHOWS)[0]?>, 0, 1, 0, '709e320dba1a392fa4e863ef0809f9f1', 0);
 						})()
 					</script>
 				</div>
@@ -178,7 +179,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 						'female' => explode(',', $femaleVoice),
 						'male' => explode(',', $maleVoice),
 					],
-					'shows' => $shows,
+					'shows' => OddcastAvatarExternalModule::SHOWS,
 					'isInitialLoad' => $_SERVER['REQUEST_METHOD'] == 'GET',
 					'avatarDisabled' => $this->getProjectSetting('disable'),
 					'reviewModeEnabled' => $this->isReviewModeEnabled($instrument),
@@ -350,5 +351,143 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 
 		return strpos($url, '/surveys/') === 0 &&
 			strpos($url, '__passthru=DataEntry%2Fimage_view.php') === false; // Prevent hooks from firing for survey logo URLs (and breaking them).
+	}
+
+	public function getQueryLogsSql($sql)
+	{
+		$sql = parent::getQueryLogsSql($sql);
+
+		// Remove the current module restriction.
+		// On 9/21/18 the ability to override the module id clause was added to the framework.
+		// We should make sure whatever REDCap version that change makes it into is deployed on UAB's servers before refactoring this to use this new feature.
+		$sql = str_replace("redcap_external_modules_log.external_module_id = (SELECT external_module_id FROM redcap_external_modules WHERE directory_prefix = 'vanderbilt_oddcast-avatar') and", '', $sql);
+
+		return $sql;
+	}
+
+	public function getShowDetails($desiredShowId)
+	{
+		$showNumber = 1;
+		foreach(OddcastAvatarExternalModule::SHOWS as $showId=>$showDetails){
+			if($showId == $desiredShowId){
+				return [$showNumber, $showDetails];
+			}
+
+			$showNumber++;
+		}
+
+		throw new Exception("Show ID not found: $desiredShowId");
+	}
+
+	public function getTimePeriodString($seconds)
+	{
+		$minutes = (int)($seconds/60);
+
+		$suffix = '';
+		if($minutes > 0){
+			$timePeriodNumber = $minutes;
+			$timePeriodWord = 'minute';
+			$suffix = ', ' . $this->getTimePeriodString($seconds%60);
+		}
+		else{
+			$timePeriodNumber = $seconds;
+			$timePeriodWord = 'second';
+		}
+
+		if($timePeriodNumber == 0 || $timePeriodNumber > 1){
+			$timePeriodWord .= 's';
+		}
+
+		return "$timePeriodNumber $timePeriodWord" . $suffix;
+	}
+
+	private function testGetTimePeriodString()
+	{
+		$assert = function($expected, $seconds){
+			$actual = $this->getTimePeriodString($seconds);
+			if($expected !== $actual){
+				throw new Exception("Expected '$expected' but got '$actual'!");
+			}
+		};
+
+		$assert('0 seconds', 0);
+		$assert('1 second', 1);
+		$assert('2 seconds', 2);
+		$assert('59 seconds', 59);
+		$assert('1 minute, 0 seconds', 60);
+		$assert('1 minute, 1 second', 61);
+		$assert('1 minute, 2 seconds', 62);
+		$assert('1 minute, 59 seconds', 60+59);
+		$assert('2 minutes, 0 seconds', 60*2);
+	}
+
+	public function runReportUnitTests()
+	{
+		$this->testGetTimePeriodString();
+	}
+
+	public function getAvatarUsagePeriods($record, $firstLog, $lastLog)
+	{
+		$sql = $this->getQueryLogsSql("
+			select
+				" . TIMESTAMP_COLUMN . ",
+				message,
+				page,
+				`show id`
+			where
+				record = '$record'
+				and log_id >= {$firstLog['log_id']}
+				and log_id <= {$lastLog['log_id']}
+		");
+
+		// The table name prefix is required until EM framework commit a386287 is in place on UAB's servers.
+		$sql .= " order by redcap_external_modules_log.log_id asc ";
+
+		$results = $this->query($sql);
+
+		$avatarUsagePeriods = [];
+		$currentAvatar = [];
+		while($log = db_fetch_assoc($results)){
+			$timestamp = $log['timestamp'];
+			$message = $log['message'];
+
+			$characterSelected = $message === 'character selected';
+			$avatarDisabled = $message === 'avatar disabled';
+			$avatarEnabled = $message === 'avatar enabled';
+
+			if($characterSelected || $avatarEnabled){
+				if($characterSelected){
+					$showId = $log['show id'];
+					if($showId === $currentAvatar['show id']) {
+						// The same avatar that was already displayed was selected.  Ignore this event.
+						continue;
+					}
+
+					if(empty($currentAvatar)){
+						// This is when the avatar was selected initially.  There is no previous avatar, so no need to set an end time.
+					}
+					else{
+						$currentAvatar['end'] = $timestamp;
+					}
+				}
+				else{ // avatar enabled
+					// We're re-enabling the avatar that was previously displayed, so use the same show id.
+					$showId = $currentAvatar['show id'];
+				}
+
+				unset($currentAvatar); // Prevent references from being mixed up
+				$currentAvatar = [
+					'show id' => $showId,
+					'start' => $timestamp,
+				];
+
+				$avatarUsagePeriods[] = &$currentAvatar;
+			}
+			else if($avatarDisabled){
+				$currentAvatar['end'] = $timestamp;
+			}
+		}
+
+		return $avatarUsagePeriods;
 	}
 }

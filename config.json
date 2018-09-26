@@ -19,6 +19,16 @@
 
 	"description": "Enables an Oddcast Avatar on surveys.",
 
+	"links": {
+		"project": [
+			{
+				"name": "Avatar Analytics",
+				"icon": "report",
+				"url": "analytics.php"
+			}
+		]
+	},
+
 	"project-settings": [
 		{
 			"key": "disable",
