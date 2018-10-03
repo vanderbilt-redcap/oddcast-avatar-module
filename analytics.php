@@ -27,13 +27,15 @@ require_once 'header.php';
 
 <?php
 
-$results = $module->queryLogs("
+$sql = "
 	select timestamp, record, instrument
 	where
 		record not like 'external-modules-temporary-record-id-%'
 		and message = 'survey complete'
 		and instrument is not null
-");
+";
+
+$results = $module->queryLogs($sql);
 
 $data = [];
 while($row = db_fetch_assoc($results)){
