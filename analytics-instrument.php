@@ -18,40 +18,12 @@ $instrument = db_escape($_GET['instrument']);
 
 <?php
 
-$getLog = function($otherWhereClauses) use ($module, $record, $instrument){
-	$sql = "
-		select
-			log_id,
-			" . TIMESTAMP_COLUMN . "
-		where
-			record = '$record'
-			and instrument = '$instrument'
-			and $otherWhereClauses
-	";
-
-	$result = $module->queryLogs($sql);
-
-	$row = db_fetch_assoc($result);
-	$row2 = db_fetch_assoc($result);
-
-	if($row2 !== null){
-		throw new Exception("Found more than one row for SQL: $sql");
-	}
-
-	return $row;
-};
-
-
-$firstLog = $getLog("
-	message = 'survey page loaded'
-	and page = 1
-");
-
-$lastLog = $getLog("
-	message = 'survey complete'
-");
-
-$avatarUsagePeriods = $module->getAvatarUsagePeriods($record, $firstLog, $lastLog);
+list(
+	$firstReviewModeLog,
+	$firstSurveyLog,
+	$surveyCompleteLog,
+	$avatarUsagePeriods
+) = $module->analyzeSurvey($record, $instrument);
 
 ?>
 
@@ -61,7 +33,12 @@ This report is very basic and should be made more user friendly.<br>
 <p>For a more granular/detailed series of events, see the "Analytics" report.</p>
 <br>
 <h5>General</h5>
-<b>Time user spent in survey:</b> <?=$module->getTimePeriodString($lastLog['timestamp'] - $firstLog['timestamp'])?><br>
+<?php if($firstReviewModeLog) { ?>
+	<b>Time spent in review mode:</b> <?=$module->getTimePeriodString($firstSurveyLog['timestamp'] - $firstReviewModeLog['timestamp'])?><br>
+<?php } else { ?>
+	<b>Review mode not enabled</b><br>
+<?php } ?>
+<b>Time spent in survey (after review mode):</b> <?=$module->getTimePeriodString($surveyCompleteLog['timestamp'] - $firstSurveyLog['timestamp'])?><br>
 <br>
 <h5>Avatar</h5>
 <h6>Periods during which an avatar was enabled:</h6>
@@ -78,7 +55,7 @@ else{
 		$avatarEnd = @$avatar['end'];
 		if(empty($avatarEnd)){
 			// They must have left the avatar on until the end of the survey.
-			$avatarEnd = $lastLog['timestamp'];
+			$avatarEnd = $surveyCompleteLog['timestamp'];
 		}
 
 		$seconds = $avatarEnd - $avatar['start'];

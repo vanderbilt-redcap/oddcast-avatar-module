@@ -426,8 +426,48 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		$this->testGetTimePeriodString();
 	}
 
-	public function getAvatarUsagePeriods($record, $firstLog, $lastLog)
+	public function analyzeSurvey($record, $instrument)
 	{
+		$getLogs = function ($whereClauses) use ($record, $instrument){
+			$sql = "
+				select
+					log_id,
+					" . TIMESTAMP_COLUMN . "
+				where
+					record = '$record'
+					and instrument = '$instrument'
+					and $whereClauses
+				order by log_id asc
+			";
+
+			$result = $this->queryLogs($sql);
+
+			$logs = [];
+			while($row = db_fetch_assoc($result)){
+				$logs[] = $row;
+			}
+
+			return $logs;
+		};
+
+		$pageOneLogs = $getLogs("
+			message = 'survey page loaded'
+			and page = 1
+		");
+
+		$firstSurveyLog = $pageOneLogs[0];
+
+		$surveyCompleteLogs = $getLogs("
+			message = 'survey complete'
+		");
+
+		$count = count($surveyCompleteLogs);
+		if($count !== 1){
+			throw new Exception("Expected 1 but found $count survey complete logs for record $record and instrument $instrument.");
+		}
+
+		$surveyCompleteLog = $surveyCompleteLogs[0];
+
 		$sql = $this->getQueryLogsSql("
 			select
 				" . TIMESTAMP_COLUMN . ",
@@ -436,8 +476,8 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				`show id`
 			where
 				record = '$record'
-				and log_id >= {$firstLog['log_id']}
-				and log_id <= {$lastLog['log_id']}
+				and log_id >= {$firstSurveyLog['log_id']}
+				and log_id <= {$surveyCompleteLog['log_id']}
 		");
 
 		// The table name prefix is required until EM framework commit a386287 is in place on UAB's servers.
@@ -445,49 +485,65 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 
 		$results = $this->query($sql);
 
-		$avatarUsagePeriods = [];
+		$firstReviewModeLog = null;
 		$currentAvatar = [];
+		$avatarUsagePeriods = [];
 		while($log = db_fetch_assoc($results)){
-			$timestamp = $log['timestamp'];
-			$message = $log['message'];
+			$this->handleAvatarMessages($log, $currentAvatar, $avatarUsagePeriods);
 
-			$characterSelected = $message === 'character selected';
-			$avatarDisabled = $message === 'avatar disabled';
-			$avatarEnabled = $message === 'avatar enabled';
-
-			if($characterSelected || $avatarEnabled){
-				if($characterSelected){
-					$showId = $log['show id'];
-					if($showId === $currentAvatar['show id']) {
-						// The same avatar that was already displayed was selected.  Ignore this event.
-						continue;
-					}
-
-					if(empty($currentAvatar)){
-						// This is when the avatar was selected initially.  There is no previous avatar, so no need to set an end time.
-					}
-					else{
-						$currentAvatar['end'] = $timestamp;
-					}
-				}
-				else{ // avatar enabled
-					// We're re-enabling the avatar that was previously displayed, so use the same show id.
-					$showId = $currentAvatar['show id'];
-				}
-
-				unset($currentAvatar); // Prevent references from being mixed up
-				$currentAvatar = [
-					'show id' => $showId,
-					'start' => $timestamp,
-				];
-
-				$avatarUsagePeriods[] = &$currentAvatar;
-			}
-			else if($avatarDisabled){
-				$currentAvatar['end'] = $timestamp;
+			if($log['message'] === 'review mode exited'){
+				$firstReviewModeLog = $firstSurveyLog;
+				$firstSurveyLog = $log;
 			}
 		}
 
-		return $avatarUsagePeriods;
+		return [
+			$firstReviewModeLog,
+			$firstSurveyLog,
+			$surveyCompleteLog,
+			$avatarUsagePeriods
+		];
+	}
+
+	private function handleAvatarMessages($log, &$currentAvatar, &$avatarUsagePeriods)
+	{
+		$timestamp = $log['timestamp'];
+		$message = $log['message'];
+
+		$characterSelected = $message === 'character selected';
+		$avatarDisabled = $message === 'avatar disabled';
+		$avatarEnabled = $message === 'avatar enabled';
+
+		if($characterSelected || $avatarEnabled){
+			if($characterSelected){
+				$showId = $log['show id'];
+				if($showId === $currentAvatar['show id']) {
+					// The same avatar that was already displayed was selected.  Ignore this event.
+					return;
+				}
+
+				if(empty($currentAvatar)){
+					// This is when the avatar was selected initially.  There is no previous avatar, so no need to set an end time.
+				}
+				else{
+					$currentAvatar['end'] = $timestamp;
+				}
+			}
+			else{ // avatar enabled
+				// We're re-enabling the avatar that was previously displayed, so use the same show id.
+				$showId = $currentAvatar['show id'];
+			}
+
+			unset($currentAvatar); // Prevent references from being mixed up
+			$currentAvatar = [
+				'show id' => $showId,
+				'start' => $timestamp,
+			];
+
+			$avatarUsagePeriods[] = &$currentAvatar;
+		}
+		else if($avatarDisabled){
+			$currentAvatar['end'] = $timestamp;
+		}
 	}
 }
