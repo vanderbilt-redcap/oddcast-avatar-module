@@ -470,14 +470,13 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 
 		$sql = $this->getQueryLogsSql("
 			select
+				log_id,
 				" . TIMESTAMP_COLUMN . ",
 				message,
 				page,
 				`show id`
 			where
 				record = '$record'
-				and log_id >= {$firstSurveyLog['log_id']}
-				and log_id <= {$surveyCompleteLog['log_id']}
 		");
 
 		// The table name prefix is required until EM framework commit a386287 is in place on UAB's servers.
@@ -489,7 +488,16 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		$currentAvatar = [];
 		$avatarUsagePeriods = [];
 		while($log = db_fetch_assoc($results)){
-			$this->handleAvatarMessages($log, $currentAvatar, $avatarUsagePeriods);
+			// Handle avatar messages for all instruments on this record, to make sure we detect avatar's still enabled from the previous instrument.
+			$this->handleAvatarMessages($log, $firstSurveyLog, $currentAvatar, $avatarUsagePeriods);
+
+			$logId = $log['log_id'];
+
+			if($logId < $firstSurveyLog['log_id'] ||
+			   $logId > $surveyCompleteLog['log_id']){
+				// This log is for a different instrument on this same record.
+				continue;
+			}
 
 			if($log['message'] === 'review mode exited'){
 				$firstReviewModeLog = $firstSurveyLog;
@@ -505,7 +513,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		];
 	}
 
-	private function handleAvatarMessages($log, &$currentAvatar, &$avatarUsagePeriods)
+	private function handleAvatarMessages($log, $firstSurveyLog, &$currentAvatar, &$avatarUsagePeriods)
 	{
 		$timestamp = $log['timestamp'];
 		$message = $log['message'];
@@ -514,7 +522,8 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		$avatarDisabled = $message === 'avatar disabled';
 		$avatarEnabled = $message === 'avatar enabled';
 
-		if($characterSelected || $avatarEnabled){
+		$isFirstSurveyLog = $log['log_id'] === $firstSurveyLog['log_id'];
+		if($characterSelected || $avatarEnabled || $isFirstSurveyLog){
 			if($characterSelected){
 				$showId = $log['show id'];
 				if($showId === $currentAvatar['show id']) {
@@ -529,9 +538,23 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 					$currentAvatar['end'] = $timestamp;
 				}
 			}
-			else{ // avatar enabled
+			else if($avatarEnabled) {
 				// We're re-enabling the avatar that was previously displayed, so use the same show id.
 				$showId = $currentAvatar['show id'];
+			}
+			else if ($isFirstSurveyLog){
+				// Remove usage periods from previous instruments.
+				$avatarUsagePeriods = [];
+
+				if(empty($currentAvatar) || isset($currentAvatar['end'])) {
+					// There is no open usage period from the last instrument.
+					return;
+				}
+				else{
+					// The avatar is still enabled from a previous instrument.
+					// Allow this method to behave as if the avatar is being re-enabled now (at the beginning of this instrument).
+					$showId = $lastPeriod['show id'];
+				}
 			}
 
 			unset($currentAvatar); // Prevent references from being mixed up
