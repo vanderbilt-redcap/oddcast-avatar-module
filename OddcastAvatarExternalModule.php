@@ -1,6 +1,8 @@
 <?php
 namespace Vanderbilt\OddcastAvatarExternalModule;
 
+require_once __DIR__ . '/classes/MockMySQLResult.php';
+
 use ExternalModules\AbstractExternalModule;
 use ExternalModules\ExternalModules;
 use Exception;
@@ -424,6 +426,206 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 	public function runReportUnitTests()
 	{
 		$this->testGetTimePeriodString();
+		$this->testAnalyzeLogEntries_avatar();
+	}
+
+	private function dump($var, $label)
+	{
+		return;
+
+		echo "<pre>$label\n";
+		var_dump($var);
+		echo "</pre>";
+	}
+
+	private function testAnalyzeLogEntries_avatar()
+	{
+		$showId = rand();
+		$showId2 = rand();
+
+		// basic usage
+		$this->assertAvatarUsagePeriods(
+			[
+				['message' => 'survey page loaded'],
+				['message' => 'character selected', 'show id' => $showId],
+				['message' => 'survey complete'],
+			],
+			0,
+			2,
+			[
+				[
+					'show id' => $showId,
+					'startIndex' => 1,
+					'endIndex' => 2
+				]
+			]
+		);
+
+		// ignored repeated character selections
+		$this->assertAvatarUsagePeriods(
+			[
+				['message' => 'survey page loaded'],
+				['message' => 'character selected', 'show id' => $showId],
+				['message' => 'character selected', 'show id' => $showId2],
+				['message' => 'survey complete'],
+			],
+			0,
+			3,
+			[
+				[
+					'show id' => $showId,
+					'startIndex' => 1,
+					'endIndex' => 2
+				],
+				[
+					'show id' => $showId2,
+					'startIndex' => 2,
+					'endIndex' => 3
+				]
+			]
+		);
+
+		// different character selections
+		$this->assertAvatarUsagePeriods(
+			[
+				['message' => 'survey page loaded'],
+				['message' => 'character selected', 'show id' => $showId],
+				['message' => 'character selected', 'show id' => $showId],
+				['message' => 'survey complete'],
+			],
+			0,
+			3,
+			[
+				[
+					'show id' => $showId,
+					'startIndex' => 1,
+					'endIndex' => 3
+				]
+			]
+		);
+
+		// disabling and enabling
+		$this->assertAvatarUsagePeriods(
+			[
+				['message' => 'survey page loaded'],
+				['message' => 'character selected', 'show id' => $showId],
+				['message' => 'avatar disabled'],
+				['message' => 'avatar enabled'],
+				['message' => 'survey complete'],
+			],
+			0,
+			4,
+			[
+				[
+					'show id' => $showId,
+					'startIndex' => 1,
+					'endIndex' => 2
+				],
+				[
+					'show id' => $showId,
+					'startIndex' => 3,
+					'endIndex' => 4
+				]
+			]
+		);
+
+		$twoInstrumentLogs = [
+			['message' => 'survey page loaded'],
+			['message' => 'character selected', 'show id' => $showId],
+			['message' => 'survey complete'],
+			['message' => 'survey page loaded'],
+			['message' => 'character selected', 'show id' => $showId2],
+			['message' => 'survey complete'],
+		];
+
+		// first of two instruments
+		$this->assertAvatarUsagePeriods(
+			$twoInstrumentLogs,
+			0,
+			2,
+			[
+				[
+					'show id' => $showId,
+					'startIndex' => 1,
+					'endIndex' => 2
+				]
+			]
+		);
+
+		// second of two instruments, and avatar left enabled from first
+		$this->assertAvatarUsagePeriods(
+			$twoInstrumentLogs,
+			3,
+			5,
+			[
+				[
+					'show id' => $showId,
+					'startIndex' => 3,
+					'endIndex' => 4
+				],
+				[
+					'show id' => $showId2,
+					'startIndex' => 4,
+					'endIndex' => 5
+				]
+			]
+		);
+	}
+
+	private function assertAvatarUsagePeriods($logs, $firstSurveyIndex, $surveyCompleteIndex, $expectedPeriods)
+	{
+		$lastId = 1;
+		$lastTimestamp = time();
+		$createLog = function($params) use (&$lastId, &$lastTimestamp){
+			$params['log_id'] = $lastId;
+			$lastId++;
+
+			$params['timestamp'] = $lastTimestamp;
+			$lastTimestamp++;
+
+			return $params;
+		};
+
+		for($i=0; $i<count($logs); $i++){
+			$logs[$i] = $createLog($logs[$i]);
+		}
+
+		$firstSurveyLog = $logs[$firstSurveyIndex];
+		$surveyCompleteLog = $logs[$surveyCompleteIndex];
+
+		$results = new MockMySQLResult($logs);
+
+		list(
+			$firstReviewModeLog,
+			$firstSurveyLog,
+			$surveyCompleteLog,
+			$avatarUsagePeriods
+		) = $this->analyzeLogEntries($firstSurveyLog, $surveyCompleteLog, $results);
+
+		if(count($avatarUsagePeriods) !== count($expectedPeriods)){
+			throw new Exception("Unexpected number of usage periods");
+		}
+
+		for($i=0; $i<count($expectedPeriods); $i++){
+			$expected = $expectedPeriods[$i];
+			$actual = $avatarUsagePeriods[$i];
+
+			$expected['start'] = $logs[$expected['startIndex']]['timestamp'];
+			$expected['end'] = $logs[$expected['endIndex']]['timestamp'];
+
+			if($expected['start'] >= $expected['end']){
+				throw new Exception("The expected start is not before the expected end for index $i");
+			}
+
+			foreach(['show id', 'start', 'end'] as $param){
+				$expectedValue = $expected[$param];
+				$actualValue = $actual[$param];
+
+				if($expectedValue !== $actualValue){
+					throw new Exception("Expected '$expectedValue' but found '$actualValue' for index $i and param '$param'");
+				}
+			}
+		}
 	}
 
 	public function analyzeSurvey($record, $instrument)
@@ -484,12 +686,16 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 
 		$results = $this->query($sql);
 
+		return $this->analyzeLogEntries($firstSurveyLog, $surveyCompleteLog, $results);
+	}
+
+	private function analyzeLogEntries($firstSurveyLog, $surveyCompleteLog, $results)
+	{
 		$firstReviewModeLog = null;
-		$currentAvatar = [];
 		$avatarUsagePeriods = [];
-		while($log = db_fetch_assoc($results)){
+		while($log = $results->fetch_assoc()){
 			// Handle avatar messages for all instruments on this record, to make sure we detect avatar's still enabled from the previous instrument.
-			$this->handleAvatarMessages($log, $firstSurveyLog, $currentAvatar, $avatarUsagePeriods);
+			$this->handleAvatarMessages($log, $firstSurveyLog, $surveyCompleteLog, $avatarUsagePeriods);
 
 			$logId = $log['log_id'];
 
@@ -513,8 +719,19 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		];
 	}
 
-	private function handleAvatarMessages($log, $firstSurveyLog, &$currentAvatar, &$avatarUsagePeriods)
+	private function handleAvatarMessages($log, $firstSurveyLog, $surveyCompleteLog, &$avatarUsagePeriods)
 	{
+		if($log['log_id'] > $surveyCompleteLog['log_id']){
+			// We are in an instrument after the requested instrument.
+			// Ignore avatar events after this point;
+			return;
+		}
+
+		$currentAvatar = null;
+		if(!empty($avatarUsagePeriods)){
+			$currentAvatar = &$avatarUsagePeriods[count($avatarUsagePeriods)-1];
+		}
+
 		$timestamp = $log['timestamp'];
 		$message = $log['message'];
 
@@ -523,16 +740,18 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		$avatarEnabled = $message === 'avatar enabled';
 
 		$isFirstSurveyLog = $log['log_id'] === $firstSurveyLog['log_id'];
+		$isSurveyCompleteLog = $log['log_id'] === $surveyCompleteLog['log_id'];
+
 		if($characterSelected || $avatarEnabled || $isFirstSurveyLog){
 			if($characterSelected){
 				$showId = $log['show id'];
-				if($showId === $currentAvatar['show id']) {
-					// The same avatar that was already displayed was selected.  Ignore this event.
-					return;
-				}
 
 				if(empty($currentAvatar)){
 					// This is when the avatar was selected initially.  There is no previous avatar, so no need to set an end time.
+				}
+				else if($showId === $currentAvatar['show id']) {
+					// The same avatar that was already displayed was selected again.  Ignore this event.
+					return;
 				}
 				else{
 					$currentAvatar['end'] = $timestamp;
@@ -553,19 +772,16 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				else{
 					// The avatar is still enabled from a previous instrument.
 					// Allow this method to behave as if the avatar is being re-enabled now (at the beginning of this instrument).
-					$showId = $lastPeriod['show id'];
+					$showId = $currentAvatar['show id'];
 				}
 			}
 
-			unset($currentAvatar); // Prevent references from being mixed up
-			$currentAvatar = [
+			$avatarUsagePeriods[] = [
 				'show id' => $showId,
-				'start' => $timestamp,
+				'start' => $timestamp
 			];
-
-			$avatarUsagePeriods[] = &$currentAvatar;
 		}
-		else if($avatarDisabled){
+		else if($avatarDisabled || $isSurveyCompleteLog){
 			$currentAvatar['end'] = $timestamp;
 		}
 	}

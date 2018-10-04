@@ -52,13 +52,7 @@ else{
 	foreach($avatarUsagePeriods as $avatar){
 		list($showNumber, $gender) = $module->getShowDetails($avatar['show id']);
 
-		$avatarEnd = @$avatar['end'];
-		if(empty($avatarEnd)){
-			// They must have left the avatar on until the end of the survey.
-			$avatarEnd = $surveyCompleteLog['timestamp'];
-		}
-
-		$seconds = $avatarEnd - $avatar['start'];
+		$seconds = $avatar['end'] - $avatar['start'];
 		$timePeriodString = $module->getTimePeriodString($seconds);
 
 		echo "#$showNumber - $gender, race TBD, $timePeriodString<br>";
