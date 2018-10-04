@@ -25,6 +25,14 @@ list(
 	$avatarUsagePeriods
 ) = $module->analyzeSurvey($record, $instrument);
 
+if($firstReviewModeLog) {
+	$timeSpentInReviewMode = $module->getTimePeriodString($firstSurveyLog['timestamp'] - $firstReviewModeLog['timestamp']);
+	$timeSpentInSurveySuffix = ' (after review mode)';
+} else {
+	$timeSpentInReviewMode = 'Review mode was not enabled';
+	$timeSpentInSurveySuffix = '';
+}
+
 ?>
 
 <br>
@@ -33,12 +41,8 @@ This report is very basic and should be made more user friendly.<br>
 <p>For a more granular/detailed series of events, see the "Analytics" report.</p>
 <br>
 <h5>General</h5>
-<?php if($firstReviewModeLog) { ?>
-	<b>Time spent in review mode:</b> <?=$module->getTimePeriodString($firstSurveyLog['timestamp'] - $firstReviewModeLog['timestamp'])?><br>
-<?php } else { ?>
-	<b>Review mode not enabled</b><br>
-<?php } ?>
-<b>Time spent in survey (after review mode):</b> <?=$module->getTimePeriodString($surveyCompleteLog['timestamp'] - $firstSurveyLog['timestamp'])?><br>
+<b>Time spent in review mode:</b> <?=$timeSpentInReviewMode?><br>
+<b>Time spent in survey<?=$timeSpentInSurveySuffix?>:</b> <?=$module->getTimePeriodString($surveyCompleteLog['timestamp'] - $firstSurveyLog['timestamp'])?><br>
 <br>
 <h5>Avatar</h5>
 <h6>Periods during which an avatar was enabled:</h6>
