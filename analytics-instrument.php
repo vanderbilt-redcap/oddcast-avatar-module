@@ -22,7 +22,8 @@ list(
 	$firstReviewModeLog,
 	$firstSurveyLog,
 	$surveyCompleteLog,
-	$avatarUsagePeriods
+	$avatarUsagePeriods,
+	$videoStats,
 ) = $module->analyzeSurvey($record, $instrument);
 
 if($firstReviewModeLog) {
@@ -61,4 +62,37 @@ else{
 
 		echo "#$showNumber - $gender, race TBD, $timePeriodString<br>";
 	}
+}
+
+?>
+
+<br>
+<br>
+<h5>Videos</h5>
+
+<?php
+if(empty($videoStats)){
+	?><div>No videos were played</div><?php
+}
+else{
+	?>
+	<table class="table table-striped table-bordered" style="width: auto">
+		<tr>
+			<th>Field Name</th>
+			<th>Time Spent Playing</th>
+			<th>Number of Plays</th>
+		</tr>
+		<?php
+		foreach($videoStats as $field=>$stats){
+			?>
+			<tr>
+				<td><?=$field?></td>
+				<td class="text-right"><?=$module->getTimePeriodString($stats['playTime'])?></td>
+				<td class="text-right"><?=$stats['playCount']?></td>
+			</tr>
+			<?php
+		}
+		?>
+	</table>
+	<?php
 }

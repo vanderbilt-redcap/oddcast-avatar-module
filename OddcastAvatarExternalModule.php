@@ -427,12 +427,11 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 	{
 		$this->testGetTimePeriodString();
 		$this->testAnalyzeLogEntries_avatar();
+		$this->testAnalyzeLogEntries_video();
 	}
 
-	private function dump($var, $label)
+	public function dump($var, $label)
 	{
-		return;
-
 		echo "<pre>$label\n";
 		var_dump($var);
 		echo "</pre>";
@@ -572,11 +571,22 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		);
 	}
 
-	private function assertAvatarUsagePeriods($logs, $firstSurveyIndex, $surveyCompleteIndex, $expectedPeriods)
+	private function flushOutMockLogs($logs)
 	{
 		$lastId = 1;
 		$lastTimestamp = time();
 		$createLog = function($params) use (&$lastId, &$lastTimestamp){
+			$isVideoMessage = strpos($params['message'], 'video ') === 0;
+			if($isVideoMessage){
+				if(!isset($params['seconds'])){
+					$params['seconds'] = $lastId - 1;
+				}
+
+				if(!isset($params['field'])){
+					$params['field'] = 'video_1';
+				}
+			}
+
 			$params['log_id'] = $lastId;
 			$lastId++;
 
@@ -589,6 +599,13 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		for($i=0; $i<count($logs); $i++){
 			$logs[$i] = $createLog($logs[$i]);
 		}
+
+		return $logs;
+	}
+
+	private function assertAvatarUsagePeriods($logs, $firstSurveyIndex, $surveyCompleteIndex, $expectedPeriods)
+	{
+		$logs = $this->flushOutMockLogs($logs);
 
 		$firstSurveyLog = $logs[$firstSurveyIndex];
 		$surveyCompleteLog = $logs[$surveyCompleteIndex];
@@ -625,6 +642,253 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 					throw new Exception("Expected '$expectedValue' but found '$actualValue' for index $i and param '$param'");
 				}
 			}
+		}
+	}
+
+
+	private function testAnalyzeLogEntries_video()
+	{
+		// test no video messages
+		$this->assertVideoStats(
+			[],
+			[]
+		);
+
+		// tess all messages that stop play
+		$this->assertVideoStats(
+			[
+				['message' => 'video played'],
+				// survey page loaded & complete messages will be added and tested automatically
+			],
+			[
+				'video_1' => [
+					'playTime' => 1,
+					'playCount' => 1,
+				]
+			]
+		);
+		$this->assertVideoStats(
+			[
+				['message' => 'video played'],
+				['message' => 'video paused'],
+			],
+			[
+				'video_1' => [
+					'playTime' => 1,
+					'playCount' => 1,
+				]
+			]
+		);
+		$this->assertVideoStats(
+			[
+				['message' => 'video played'],
+				['message' => 'video ended'],
+			],
+			[
+				'video_1' => [
+					'playTime' => 1,
+					'playCount' => 1,
+				]
+			]
+		);
+
+		// test two play events in a row
+		$this->assertVideoStats(
+			[
+				['message' => 'video played'],
+				['message' => 'video played'],
+			],
+			[
+				'video_1' => [
+					'playTime' => 2,
+					'playCount' => 1,
+				]
+			]
+		);
+
+		// test play time
+		$this->assertVideoStats(
+			[
+				['message' => 'video played'],
+				['message' => 'video paused'],
+				['message' => 'video played'],
+				['message' => 'video paused'],
+				['message' => 'video played'],
+				['message' => 'video ended'],
+			],
+			[
+				'video_1' => [
+					'playTime' => 3,
+					'playCount' => 1,
+				]
+			]
+		);
+
+		// test repeats after end
+		$this->assertVideoStats(
+			[
+				['message' => 'video played'],
+				['message' => 'video ended'],
+				['message' => 'video played', 'seconds' => 0],
+				['message' => 'video ended'],
+			],
+			[
+				'video_1' => [
+					'playTime' => 2,
+					'playCount' => 2,
+				]
+			]
+		);
+
+		// test repeats after seeking back to the beginning
+		$this->assertVideoStats(
+			[
+				['message' => 'video played'],
+				['message' => 'video paused'],
+				['message' => 'video played', 'seconds' => 0],
+			],
+			[
+				'video_1' => [
+					'playTime' => 2,
+					'playCount' => 2,
+				]
+			]
+		);
+
+		// test repeats after seeking back near to the beginning
+		$this->assertVideoStats(
+			[
+				['message' => 'video played'],
+				['message' => 'video paused'],
+				['message' => 'video played', 'seconds' => 1],
+			],
+			[
+				'video_1' => [
+					'playTime' => 2,
+					'playCount' => 2,
+				]
+			]
+		);
+
+		// make sure pausing and playing early in the video doesn't count as an extra play
+		$this->assertVideoStats(
+			[
+				['message' => 'video played'],
+				['message' => 'video paused'],
+				['message' => 'video played'],
+			],
+			[
+				'video_1' => [
+					'playTime' => 2,
+					'playCount' => 1,
+				]
+			]
+		);
+
+		// test repeats after going forward and backward a page
+		$this->assertVideoStats(
+			[
+				['message' => 'video played'],
+
+				// Add some message to put us past the threshold considered a new play.
+				['message' => 'foo'],
+				['message' => 'foo'],
+				['message' => 'foo'],
+				['message' => 'foo'],
+				['message' => 'foo'],
+
+				['message' => 'survey page loaded'],
+				['message' => 'survey page loaded'],
+				['message' => 'video played', 'seconds' => 0],
+				['message' => 'video paused'],
+			],
+			[
+				'video_1' => [
+					'playTime' => 7,
+					'playCount' => 2,
+				]
+			]
+		);
+
+		// test multiple videos
+		$this->assertVideoStats(
+			[
+				['message' => 'video played'],
+				['message' => 'video ended'],
+				['message' => 'video played', 'field' => 'video_2'],
+				['message' => 'video ended', 'field' => 'video_2'],
+			],
+			[
+				'video_1' => [
+					'playTime' => 1,
+					'playCount' => 1,
+				],
+				'video_2' => [
+					'playTime' => 1,
+					'playCount' => 1,
+				]
+			]
+		);
+
+		// test multiple videos playing when page changes
+		$this->assertVideoStats(
+			[
+				['message' => 'video played'],
+				['message' => 'video played', 'field' => 'video_2'],
+			],
+			[
+				'video_1' => [
+					'playTime' => 2,
+					'playCount' => 1,
+				],
+				'video_2' => [
+					'playTime' => 1,
+					'playCount' => 1,
+				]
+			]
+		);
+	}
+
+	private function assertVideoStats($logs, $expectedStats, $addTrailingSurveyPageLog = null)
+	{
+		if($addTrailingSurveyPageLog === null){
+			// Run this method twice, both with and without a trailing survey page log.
+			$this->assertVideoStats($logs, $expectedStats, true);
+			$this->assertVideoStats($logs, $expectedStats, false);
+			return;
+		}
+
+		if($addTrailingSurveyPageLog){
+			array_unshift($logs, ['message' => 'survey page loaded']);
+		}
+
+		array_push($logs, ['message' => 'survey complete']);
+
+		$logs = $this->flushOutMockLogs($logs);
+
+		$firstSurveyLog = $logs[0];
+		$surveyCompleteLog = $logs[count($logs)-1];
+
+		$results = new MockMySQLResult($logs);
+
+		list(
+			$firstReviewModeLog,
+			$firstSurveyLog,
+			$surveyCompleteLog,
+			$avatarUsagePeriods,
+			$videoStats
+		) = $this->analyzeLogEntries($firstSurveyLog, $surveyCompleteLog, $results);
+
+		foreach($videoStats as &$stats){
+			// Remove unused temporary stats that we don't want to compare.
+			unset($stats['currentPlayLog']);
+			unset($stats['lastPositionInSeconds']);
+		}
+
+		if($expectedStats !== $videoStats){
+			$this->dump($expectedStats, 'expected stats');
+			$this->dump($videoStats, 'actual stats');
+			throw new Exception("Actual video stats did not match expected");
 		}
 	}
 
@@ -676,7 +940,9 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				" . TIMESTAMP_COLUMN . ",
 				message,
 				page,
-				`show id`
+				`show id`,
+				field,
+				seconds
 			where
 				record = '$record'
 		");
@@ -693,6 +959,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 	{
 		$firstReviewModeLog = null;
 		$avatarUsagePeriods = [];
+		$videoStats = [];
 		while($log = $results->fetch_assoc()){
 			// Handle avatar messages for all instruments on this record, to make sure we detect avatar's still enabled from the previous instrument.
 			$this->handleAvatarMessages($log, $firstSurveyLog, $surveyCompleteLog, $avatarUsagePeriods);
@@ -705,6 +972,8 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				continue;
 			}
 
+			$this->handleVideoMessages($log, $videoStats);
+
 			if($log['message'] === 'review mode exited'){
 				$firstReviewModeLog = $firstSurveyLog;
 				$firstSurveyLog = $log;
@@ -715,8 +984,74 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			$firstReviewModeLog,
 			$firstSurveyLog,
 			$surveyCompleteLog,
-			$avatarUsagePeriods
+			$avatarUsagePeriods,
+			$videoStats
 		];
+	}
+
+	private function handleVideoMessages($log, &$allVideoStats)
+	{
+		$message = $log['message'];
+
+		$onPlayStopped = function(&$currentVideoStats) use ($log){
+			if(isset($currentVideoStats['currentPlayLog'])){
+				$currentVideoStats['playTime'] += $log['timestamp'] - $currentVideoStats['currentPlayLog']['timestamp'];
+				unset($currentVideoStats['currentPlayLog']);
+			}
+		};
+
+		$isVideoMessage = strpos($log['message'], 'video ') === 0;
+		if($isVideoMessage) {
+			$field = $log['field'];
+			$seconds = $log['seconds'];
+
+			if(isset($allVideoStats[$field])){
+				$currentVideoStats = &$allVideoStats[$field];
+			}
+			else{
+				$currentVideoStats = [];
+			}
+
+			if ($message === 'video played') {
+				if (!isset($allVideoStats[$field])) {
+					$currentVideoStats = [
+						'playTime' => 0,
+						'playCount' => 0
+					];
+
+					$allVideoStats[$field] = &$currentVideoStats;
+				}
+
+				if ($currentVideoStats['currentPlayLog']) {
+					// The last video message was also a play message.  They must have seeked.
+					// Keep the old timestamp since we never stopped playing.
+				} else {
+					$currentVideoStats['currentPlayLog'] = $log;
+				}
+
+				if ($seconds < 5) {
+					$previousSeconds = @$currentVideoStats['lastPositionInSeconds'];
+					if ($previousSeconds !== null && $previousSeconds < $seconds) {
+						// The user either paused then played the video, or seeked forward a little.
+						// Either way, don't consider this a repeat.
+					} else {
+						// Either this is the first play, or the video was rewound to a point near the beginning of the video.
+						// Consider this a new play regardless.
+						$currentVideoStats['playCount']++;
+					}
+				}
+			}
+			else if (in_array($message, ['video paused', 'video ended'])) {
+				$onPlayStopped($currentVideoStats);
+			}
+
+			$currentVideoStats['lastPositionInSeconds'] = $seconds;
+		}
+		else if (in_array($message, ['survey page loaded', 'survey complete'])) {
+			foreach($allVideoStats as $field=>&$currentVideoStats) {
+				$onPlayStopped($currentVideoStats);
+			}
+		}
 	}
 
 	private function handleAvatarMessages($log, $firstSurveyLog, $surveyCompleteLog, &$avatarUsagePeriods)
