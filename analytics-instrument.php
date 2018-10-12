@@ -24,6 +24,7 @@ list(
 	$surveyCompleteLog,
 	$avatarUsagePeriods,
 	$videoStats,
+	$popupStats,
 ) = $module->analyzeSurvey($record, $instrument);
 
 if($firstReviewModeLog) {
@@ -89,6 +90,37 @@ else{
 				<td><?=$field?></td>
 				<td class="text-right"><?=$module->getTimePeriodString($stats['playTime'])?></td>
 				<td class="text-right"><?=$stats['playCount']?></td>
+			</tr>
+			<?php
+		}
+		?>
+	</table>
+	<?php
+}
+
+?>
+
+<br>
+<br>
+<h5>Inline Descriptive Popups</h5>
+
+<?php
+if(empty($popupStats)){
+	?><div>No inline popups were used.</div><?php
+}
+else{
+	?>
+	<table class="table table-striped table-bordered" style="width: auto">
+		<tr>
+			<th>Term</th>
+			<th>Number of Views</th>
+		</tr>
+		<?php
+		foreach($popupStats as $term=>$views){
+			?>
+			<tr>
+				<td><?=$term?></td>
+				<td class="text-right"><?=$views?></td>
 			</tr>
 			<?php
 		}

@@ -942,7 +942,8 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				page,
 				`show id`,
 				field,
-				seconds
+				seconds,
+				`link text`
 			where
 				record = '$record'
 		");
@@ -960,6 +961,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		$firstReviewModeLog = null;
 		$avatarUsagePeriods = [];
 		$videoStats = [];
+		$popupStats = [];
 		while($log = $results->fetch_assoc()){
 			// Handle avatar messages for all instruments on this record, to make sure we detect avatar's still enabled from the previous instrument.
 			$this->handleAvatarMessages($log, $firstSurveyLog, $surveyCompleteLog, $avatarUsagePeriods);
@@ -973,6 +975,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			}
 
 			$this->handleVideoMessages($log, $videoStats);
+			$this->handlePopupMessages($log, $popupStats);
 
 			if($log['message'] === 'review mode exited'){
 				$firstReviewModeLog = $firstSurveyLog;
@@ -985,7 +988,8 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			$firstSurveyLog,
 			$surveyCompleteLog,
 			$avatarUsagePeriods,
-			$videoStats
+			$videoStats,
+			$popupStats
 		];
 	}
 
@@ -1051,6 +1055,19 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			foreach($allVideoStats as $field=>&$currentVideoStats) {
 				$onPlayStopped($currentVideoStats);
 			}
+		}
+	}
+
+	private function handlePopupMessages($log, &$popupStats){
+		$message = $log['message'];
+		$term = @$log['link text'];
+
+		if($message === 'popup opened') {
+			if (!isset($popupStats[$term])) {
+				$popupStats[$term] = 0;
+			}
+
+			$popupStats[$term]++;
 		}
 	}
 
