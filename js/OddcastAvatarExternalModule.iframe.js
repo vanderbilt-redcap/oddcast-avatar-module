@@ -32,7 +32,7 @@ OddcastAvatarExternalModule.addProperties({
 			}
 
 			var forms = item['messages-for-field-values-forms']
-			if(forms.length === 1 && !forms[0]){
+			if(forms === undefined || forms.length === 1 && !forms[0]){
 				// The form value is null or empty string, meaning no form was selected.  Remove this empty value.
 				forms = []
 			}
