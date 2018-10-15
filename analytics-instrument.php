@@ -39,7 +39,6 @@ if($firstReviewModeLog) {
 
 <br>
 
-This report is very basic and should be made more user friendly.<br>
 <p>For a more granular/detailed series of events, see the "Analytics" report.</p>
 <br>
 <h5>General</h5>
@@ -73,7 +72,7 @@ else{
 
 <?php
 if(empty($videoStats)){
-	?><div>No videos were played</div><?php
+	?><div>No videos were played.</div><?php
 }
 else{
 	?>
