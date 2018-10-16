@@ -38,7 +38,7 @@ if($firstReviewModeLog) {
 	.table{
 		width: auto;
 		margin-top: 15px;
-		margin-bottom: 40px;
+		margin-bottom: 0px;
 	}
 
 	td{
@@ -73,11 +73,18 @@ if($firstReviewModeLog) {
 		</table>
 
 		<br>
+		<br>
 
 		<?php
 		$module->displayVideoStats($videoStats);
+		?>
+		<br>
+		<br>
+		<?php
 		$module->displayPopupStats($popupStats);
 		?>
+		<br>
+		<br>
 	</div>
 	<div class="col-12 col-lg-6"><?php $module->displayAvatarStats($avatarUsagePeriods); ?></div>
 </div>
