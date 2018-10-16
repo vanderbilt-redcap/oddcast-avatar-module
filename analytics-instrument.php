@@ -35,6 +35,11 @@ if($firstReviewModeLog) {
 		max-width: 1200px;
 	}
 
+	table#general-info th{
+		padding: 3px;
+		padding-right: 15px;
+	}
+
 	.table{
 		width: auto;
 		margin-top: 15px;
@@ -53,7 +58,7 @@ if($firstReviewModeLog) {
 
 <div class="row">
 	<div class="col-12 col-lg-6">
-		<table>
+		<table id="general-info">
 			<tr>
 				<th>Record ID:</th>
 				<td><?=$record?></td>
@@ -63,7 +68,7 @@ if($firstReviewModeLog) {
 				<td><?=$instrument?></td>
 			</tr>
 			<tr>
-				<th>Time spent in review mode:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
+				<th>Time spent in review mode:</th>
 				<td><?=$timeSpentInReviewMode?></td>
 			</tr>
 			<tr>
