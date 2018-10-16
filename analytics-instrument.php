@@ -13,6 +13,12 @@ $instrument = db_escape($_GET['instrument']);
 
 ?>
 
+<style>
+	.table{
+		width: auto;
+	}
+</style>
+
 <div><b>Record:</b> <?=$record?></div>
 <div><b>Instrument:</b> <?=$instrument?></div>
 
@@ -46,7 +52,7 @@ if($firstReviewModeLog) {
 <b>Time spent in survey<?=$timeSpentInSurveySuffix?>:</b> <?=$module->getTimePeriodString($surveyCompleteLog['timestamp'] - $firstSurveyLog['timestamp'])?><br>
 <br>
 <h5>Avatar</h5>
-<h6>Periods during which an avatar was enabled:</h6>
+<p>Periods during which an avatar was enabled (in order):</p>
 
 <?php
 
@@ -54,14 +60,39 @@ if(empty($avatarUsagePeriods)){
 	echo "None";
 }
 else{
-	foreach($avatarUsagePeriods as $avatar){
-		list($showNumber, $gender) = $module->getShowDetails($avatar['show id']);
+	?>
+	<style>
+		td.character{
+			padding: 0px;
+		}
 
-		$seconds = $avatar['end'] - $avatar['start'];
-		$timePeriodString = $module->getTimePeriodString($seconds);
-
-		echo "#$showNumber - $gender, race TBD, $timePeriodString<br>";
-	}
+		td.character img{
+			width: 100px;
+			border-top: 4px solid white;
+		}
+	</style>
+	<table class="table table-striped table-bordered">
+		<tr>
+			<th>Character</th>
+			<th>Gender</th>
+			<th>Length of Time Enabled</th>
+		</tr>
+		<?php
+		foreach($avatarUsagePeriods as $avatar){
+			$showId = $avatar['show id'];
+			list($showNumber, $gender) = $module->getShowDetails($showId);
+			?>
+			<tr>
+				<td style="display: none"><a href="" class="character-link" onclick="return false" data-show-id="<?=$showId?>">#<?=$showNumber?></a></td>
+				<td class="character"><img src="<?=$module->getUrl("images/$showId.png")?>"</td>
+				<td class="align-middle"><?=ucfirst($gender)?></td>
+				<td class="align-middle"><?=$module->getTimePeriodString($avatar['end'] - $avatar['start'])?></td>
+			</tr>
+			<?php
+		}
+		?>
+	</table>
+	<?php
 }
 
 ?>
@@ -76,7 +107,7 @@ if(empty($videoStats)){
 }
 else{
 	?>
-	<table class="table table-striped table-bordered" style="width: auto">
+	<table class="table table-striped table-bordered">
 		<tr>
 			<th>Field Name</th>
 			<th>Time Spent Playing</th>
@@ -109,7 +140,7 @@ if(empty($popupStats)){
 }
 else{
 	?>
-	<table class="table table-striped table-bordered" style="width: auto">
+	<table class="table table-striped table-bordered">
 		<tr>
 			<th>Term</th>
 			<th>Number of Views</th>
