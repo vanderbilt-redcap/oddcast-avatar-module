@@ -1224,7 +1224,6 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 	{
 		?>
 		<h5>Avatar</h5>
-		<p>Periods during which an avatar was enabled or disabled:</p>
 		<?php
 
 		if(empty($avatarUsagePeriods)){
