@@ -31,23 +31,53 @@ if($firstReviewModeLog) {
 ?>
 
 <style>
+	body{
+		max-width: 1200px;
+	}
+
 	.table{
 		width: auto;
 		margin-top: 15px;
-		margin-bottom: 30px;
+		margin-bottom: 40px;
+	}
+
+	td{
+		overflow: hidden;
+		max-width: 290px;
+		text-overflow: ellipsis;
 	}
 </style>
 
 <p>This report summarizes several event types.  For a more granular/detailed series of events, see the "Analytics" report.</p>
-
-<div><b>Record:</b> <?=$record?></div>
-<div><b>Instrument:</b> <?=$instrument?></div>
 <br>
-<b>Time spent in review mode:</b> <?=$timeSpentInReviewMode?><br>
-<b>Time spent in survey<?=$timeSpentInSurveySuffix?>:</b> <?=$module->getTimePeriodString($surveyCompleteLog['timestamp'] - $firstSurveyLog['timestamp'])?><br>
-<br>
-<?php
 
-$module->displayAvatarStats($avatarUsagePeriods);
-$module->displayVideoStats($videoStats);
-$module->displayPopupStats($popupStats);
+<div class="row">
+	<div class="col-12 col-lg-6">
+		<table>
+			<tr>
+				<th>Record ID:</th>
+				<td><?=$record?></td>
+			</tr>
+			<tr>
+				<th>Instrument:</th>
+				<td><?=$instrument?></td>
+			</tr>
+			<tr>
+				<th>Time spent in review mode:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
+				<td><?=$timeSpentInReviewMode?></td>
+			</tr>
+			<tr>
+				<th>Time spent in survey<?=$timeSpentInSurveySuffix?>:</th>
+				<td><?=$module->getTimePeriodString($surveyCompleteLog['timestamp'] - $firstSurveyLog['timestamp'])?></td>
+			</tr>
+		</table>
+
+		<br>
+
+		<?php
+		$module->displayVideoStats($videoStats);
+		$module->displayPopupStats($popupStats);
+		?>
+	</div>
+	<div class="col-12 col-lg-6"><?php $module->displayAvatarStats($avatarUsagePeriods); ?></div>
+</div>
