@@ -52,7 +52,7 @@ if($firstReviewModeLog) {
 <b>Time spent in survey<?=$timeSpentInSurveySuffix?>:</b> <?=$module->getTimePeriodString($surveyCompleteLog['timestamp'] - $firstSurveyLog['timestamp'])?><br>
 <br>
 <h5>Avatar</h5>
-<p>Periods during which an avatar was enabled (in order):</p>
+<p>Periods during which an avatar was enabled or disabled (in order):</p>
 
 <?php
 
@@ -78,17 +78,31 @@ else{
 			<th>Length of Time Enabled</th>
 		</tr>
 		<?php
+		$lastEnd = null;
 		foreach($avatarUsagePeriods as $avatar){
+			if($lastEnd){
+				$secondsDisabled = $avatar['start'] - $lastEnd;
+				if($secondsDisabled > 0){
+					?><tr><td colspan="3">Avatar disabled for <?=$module->getTimePeriodString(v)?></td></tr><?php
+				}
+			}
+
 			$showId = $avatar['show id'];
-			list($showNumber, $gender) = $module->getShowDetails($showId);
+
 			?>
 			<tr>
-				<td style="display: none"><a href="" class="character-link" onclick="return false" data-show-id="<?=$showId?>">#<?=$showNumber?></a></td>
-				<td class="character"><img src="<?=$module->getUrl("images/$showId.png")?>"</td>
-				<td class="align-middle"><?=ucfirst($gender)?></td>
+				<?php if(@$avatar['disabled']) { ?>
+					<td class="align-middle text-center" colspan="2">Disabled</td>
+				<?php } else { ?>
+					<td class="character"><img src="<?=$module->getUrl("images/$showId.png")?>"</td>
+					<td class="align-middle"><?=ucfirst(OddcastAvatarExternalModule::SHOWS[$showId])?></td>
+				<?php } ?>
+
 				<td class="align-middle"><?=$module->getTimePeriodString($avatar['end'] - $avatar['start'])?></td>
 			</tr>
 			<?php
+
+			$lastEnd = $avatar['end'];
 		}
 		?>
 	</table>

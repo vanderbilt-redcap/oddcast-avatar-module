@@ -367,20 +367,6 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		return $sql;
 	}
 
-	public function getShowDetails($desiredShowId)
-	{
-		$showNumber = 1;
-		foreach(OddcastAvatarExternalModule::SHOWS as $showId=>$showDetails){
-			if($showId == $desiredShowId){
-				return [$showNumber, $showDetails];
-			}
-
-			$showNumber++;
-		}
-
-		throw new Exception("Show ID not found: $desiredShowId");
-	}
-
 	public function getTimePeriodString($seconds)
 	{
 		$minutes = (int)($seconds/60);
@@ -522,24 +508,28 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				],
 				[
 					'show id' => $showId,
+					'startIndex' => 2,
+					'endIndex' => 3,
+					'disabled' => true
+				],
+				[
+					'show id' => $showId,
 					'startIndex' => 3,
 					'endIndex' => 4
 				]
 			]
 		);
 
-		$twoInstrumentLogs = [
-			['message' => 'survey page loaded'],
-			['message' => 'character selected', 'show id' => $showId],
-			['message' => 'survey complete'],
-			['message' => 'survey page loaded'],
-			['message' => 'character selected', 'show id' => $showId2],
-			['message' => 'survey complete'],
-		];
-
 		// first of two instruments
 		$this->assertAvatarUsagePeriods(
-			$twoInstrumentLogs,
+			[
+				['message' => 'survey page loaded'],
+				['message' => 'character selected', 'show id' => $showId],
+				['message' => 'survey complete'],
+				['message' => 'survey page loaded'],
+				['message' => 'character selected', 'show id' => $showId2],
+				['message' => 'survey complete'],
+			],
 			0,
 			2,
 			[
@@ -553,7 +543,14 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 
 		// second of two instruments, and avatar left enabled from first
 		$this->assertAvatarUsagePeriods(
-			$twoInstrumentLogs,
+			[
+				['message' => 'survey page loaded'],
+				['message' => 'character selected', 'show id' => $showId],
+				['message' => 'survey complete'],
+				['message' => 'survey page loaded'],
+				['message' => 'character selected', 'show id' => $showId2],
+				['message' => 'survey complete'],
+			],
 			3,
 			5,
 			[
@@ -566,6 +563,34 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 					'show id' => $showId2,
 					'startIndex' => 4,
 					'endIndex' => 5
+				]
+			]
+		);
+
+		// second of two instruments, and avatar left disabled from first
+		$this->assertAvatarUsagePeriods(
+			[
+				['message' => 'survey page loaded'],
+				['message' => 'character selected', 'show id' => $showId],
+				['message' => 'avatar disabled'],
+				['message' => 'survey complete'],
+				['message' => 'survey page loaded'],
+				['message' => 'avatar enabled'],
+				['message' => 'survey complete'],
+			],
+			4,
+			6,
+			[
+				[
+					'show id' => $showId,
+					'startIndex' => 4,
+					'endIndex' => 5,
+					'disabled' => true
+				],
+				[
+					'show id' => $showId,
+					'startIndex' => 5,
+					'endIndex' => 6
 				]
 			]
 		);
@@ -627,20 +652,31 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			$expected = $expectedPeriods[$i];
 			$actual = $avatarUsagePeriods[$i];
 
-			$expected['start'] = $logs[$expected['startIndex']]['timestamp'];
-			$expected['end'] = $logs[$expected['endIndex']]['timestamp'];
+			$startIndex = $expected['startIndex'];
+			$endIndex = $expected['endIndex'];
+
+			$expected['start'] = $logs[$startIndex]['timestamp'];
+
+			// Move 'disabled' to be the last key, so triple equals works as expected below.
+			$disabled = @$expected['disabled'] == true;
+			unset($expected['disabled']);
+			$expected['disabled'] = $disabled;
+
+			$expected['end'] = $logs[$endIndex]['timestamp'];
+
+			unset($expected['startIndex']);
+			unset($expected['endIndex']);
 
 			if($expected['start'] >= $expected['end']){
 				throw new Exception("The expected start is not before the expected end for index $i");
 			}
 
-			foreach(['show id', 'start', 'end'] as $param){
-				$expectedValue = $expected[$param];
-				$actualValue = $actual[$param];
-
-				if($expectedValue !== $actualValue){
-					throw new Exception("Expected '$expectedValue' but found '$actualValue' for index $i and param '$param'");
-				}
+			if($expected !== $actual){
+				$this->dump($startIndex, 'expected startIndex');
+				$this->dump($endIndex, 'expected endIndex');
+				$this->dump($expected, '$expected');
+				$this->dump($actual, '$actual');
+				throw new Exception("The expected and actual periods did not match!");
 			}
 		}
 	}
@@ -958,6 +994,8 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 
 	private function analyzeLogEntries($firstSurveyLog, $surveyCompleteLog, $results)
 	{
+//		$this->dump('analyzeLogEntries');
+
 		$firstReviewModeLog = null;
 		$avatarUsagePeriods = [];
 		$videoStats = [];
@@ -1094,47 +1132,47 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		$isFirstSurveyLog = $log['log_id'] === $firstSurveyLog['log_id'];
 		$isSurveyCompleteLog = $log['log_id'] === $surveyCompleteLog['log_id'];
 
-		if($characterSelected || $avatarEnabled || $isFirstSurveyLog){
-			if($characterSelected){
-				$showId = $log['show id'];
-
-				if(empty($currentAvatar)){
-					// This is when the avatar was selected initially.  There is no previous avatar, so no need to set an end time.
-				}
-				else if($showId === $currentAvatar['show id']) {
-					// The same avatar that was already displayed was selected again.  Ignore this event.
-					return;
-				}
-				else{
-					$currentAvatar['end'] = $timestamp;
-				}
-			}
-			else if($avatarEnabled) {
-				// We're re-enabling the avatar that was previously displayed, so use the same show id.
-				$showId = $currentAvatar['show id'];
-			}
-			else if ($isFirstSurveyLog){
-				// Remove usage periods from previous instruments.
-				$avatarUsagePeriods = [];
-
-				if(empty($currentAvatar) || isset($currentAvatar['end'])) {
-					// There is no open usage period from the last instrument.
-					return;
-				}
-				else{
-					// The avatar is still enabled from a previous instrument.
-					// Allow this method to behave as if the avatar is being re-enabled now (at the beginning of this instrument).
-					$showId = $currentAvatar['show id'];
-				}
-			}
-
-			$avatarUsagePeriods[] = [
-				'show id' => $showId,
-				'start' => $timestamp
-			];
+		if(!($isFirstSurveyLog || $characterSelected || $avatarDisabled || $avatarEnabled || $isSurveyCompleteLog)){
+			return;
 		}
-		else if($avatarDisabled || $isSurveyCompleteLog){
+
+		$showId = @$currentAvatar['show id'];
+
+		if($characterSelected){
+			$showId = $log['show id'];
+
+			if($showId === $currentAvatar['show id']) {
+				// The same avatar that was already displayed was selected again.  Ignore this event.
+				return;
+			}
+		}
+		else if ($isFirstSurveyLog){
+			if(empty($currentAvatar)) {
+				// No avatar period was added from a previous instrument.
+				// This must be the first instrument and the initial avatar selection popup must be displayed.
+				// Don't start any periods yet.
+				return;
+			}
+
+			// Remove usage periods from previous instruments.
+			$avatarUsagePeriods = [];
+
+			$avatarDisabled = $currentAvatar['disabled'];
+		}
+
+		if($currentAvatar){
 			$currentAvatar['end'] = $timestamp;
 		}
+
+		if(!$isSurveyCompleteLog){
+			$avatarUsagePeriods[] = [
+				'show id' => $showId,
+				'start' => $timestamp,
+				'disabled' => $avatarDisabled
+			];
+		}
+
+//		$this->dump($message, '$message');
+//		$this->dump($avatarUsagePeriods, '$avatarUsagePeriods');
 	}
 }
