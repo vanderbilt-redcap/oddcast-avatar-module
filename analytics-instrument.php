@@ -62,47 +62,54 @@ if(empty($avatarUsagePeriods)){
 else{
 	?>
 	<style>
+		table.avatar tr:not(:first-child),
+		table.avatar td.character img{
+			height: 100px;
+		}
+
 		td.character{
 			padding: 0px;
 		}
 
 		td.character img{
-			width: 100px;
 			border-top: 4px solid white;
 		}
 	</style>
-	<table class="table table-striped table-bordered">
+	<table class="table table-striped table-bordered avatar">
 		<tr>
+			<th>Status</th>
+			<th>Length of Time</th>
 			<th>Character</th>
 			<th>Gender</th>
-			<th>Length of Time Enabled</th>
 		</tr>
 		<?php
-		$lastEnd = null;
 		foreach($avatarUsagePeriods as $avatar){
-			if($lastEnd){
-				$secondsDisabled = $avatar['start'] - $lastEnd;
-				if($secondsDisabled > 0){
-					?><tr><td colspan="3">Avatar disabled for <?=$module->getTimePeriodString(v)?></td></tr><?php
-				}
-			}
-
 			$showId = $avatar['show id'];
+
+			if($avatar['initialSelectionDialog']){
+				$status = 'Initial selection<br>dialog displayed';
+			}
+			else if($avatar['disabled']){
+				$status = 'Disabled';
+			}
+			else{
+				$status = 'Enabled';
+			}
 
 			?>
 			<tr>
-				<?php if(@$avatar['disabled']) { ?>
-					<td class="align-middle text-center" colspan="2">Disabled</td>
+				<td class="align-middle"><?=$status?></td>
+				<td class="align-middle"><?=str_replace(', ', '<br>and ', $module->getTimePeriodString($avatar['end'] - $avatar['start']))?></td>
+
+				<?php if($avatar['disabled'] || $avatar['initialSelectionDialog']) { ?>
+					<td></td>
+					<td></td>
 				<?php } else { ?>
 					<td class="character"><img src="<?=$module->getUrl("images/$showId.png")?>"</td>
 					<td class="align-middle"><?=ucfirst(OddcastAvatarExternalModule::SHOWS[$showId])?></td>
 				<?php } ?>
-
-				<td class="align-middle"><?=$module->getTimePeriodString($avatar['end'] - $avatar['start'])?></td>
 			</tr>
 			<?php
-
-			$lastEnd = $avatar['end'];
 		}
 		?>
 	</table>

@@ -439,6 +439,11 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			2,
 			[
 				[
+					'startIndex' => 0,
+					'endIndex' => 1,
+					'initialSelectionDialog' => true
+				],
+				[
 					'show id' => $showId,
 					'startIndex' => 1,
 					'endIndex' => 2
@@ -457,6 +462,11 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			0,
 			3,
 			[
+				[
+					'startIndex' => 0,
+					'endIndex' => 1,
+					'initialSelectionDialog' => true
+				],
 				[
 					'show id' => $showId,
 					'startIndex' => 1,
@@ -482,6 +492,11 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			3,
 			[
 				[
+					'startIndex' => 0,
+					'endIndex' => 1,
+					'initialSelectionDialog' => true
+				],
+				[
 					'show id' => $showId,
 					'startIndex' => 1,
 					'endIndex' => 3
@@ -501,6 +516,11 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			0,
 			4,
 			[
+				[
+					'startIndex' => 0,
+					'endIndex' => 1,
+					'initialSelectionDialog' => true
+				],
 				[
 					'show id' => $showId,
 					'startIndex' => 1,
@@ -533,6 +553,11 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			0,
 			2,
 			[
+				[
+					'startIndex' => 0,
+					'endIndex' => 1,
+					'initialSelectionDialog' => true
+				],
 				[
 					'show id' => $showId,
 					'startIndex' => 1,
@@ -645,22 +670,39 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		) = $this->analyzeLogEntries($firstSurveyLog, $surveyCompleteLog, $results);
 
 		if(count($avatarUsagePeriods) !== count($expectedPeriods)){
-			throw new Exception("Unexpected number of usage periods");
+			throw new Exception("Expected " . count($expectedPeriods) . " usage period(s), but found " . count($avatarUsagePeriods));
 		}
+
+		// Used to specifically order keys such that the triple equals check works as expected below.
+		$moveKeyToEnd = function(&$array, $key){
+			if(isset($array[$key])){
+				$value = $array[$key];
+			}
+			else{
+				// Make values default to false
+				$value = false;
+			}
+
+			unset($array[$key]);
+			$array[$key] = $value;
+		};
 
 		for($i=0; $i<count($expectedPeriods); $i++){
 			$expected = $expectedPeriods[$i];
 			$actual = $avatarUsagePeriods[$i];
+
+			if(!isset($expected['show id'])){
+				$expected['show id'] = null;
+			}
+
+			$moveKeyToEnd($expected, 'initialSelectionDialog');
 
 			$startIndex = $expected['startIndex'];
 			$endIndex = $expected['endIndex'];
 
 			$expected['start'] = $logs[$startIndex]['timestamp'];
 
-			// Move 'disabled' to be the last key, so triple equals works as expected below.
-			$disabled = @$expected['disabled'] == true;
-			unset($expected['disabled']);
-			$expected['disabled'] = $disabled;
+			$moveKeyToEnd($expected, 'disabled');
 
 			$expected['end'] = $logs[$endIndex]['timestamp'];
 
@@ -1137,27 +1179,28 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		}
 
 		$showId = @$currentAvatar['show id'];
+		$initialSelectionDialog = false;
 
-		if($characterSelected){
+		if ($isFirstSurveyLog){
+			// Remove usage periods from previous instruments.
+			$avatarUsagePeriods = [];
+
+			if(empty($currentAvatar)){
+				// No avatar period was added from a previous instrument.
+				// This must be the first instrument and the initial avatar selection popup must be displayed.
+				$initialSelectionDialog = true;
+			}
+			else{
+				$avatarDisabled = $currentAvatar['disabled'];
+			}
+		}
+		else if($characterSelected){
 			$showId = $log['show id'];
 
 			if($showId === $currentAvatar['show id']) {
 				// The same avatar that was already displayed was selected again.  Ignore this event.
 				return;
 			}
-		}
-		else if ($isFirstSurveyLog){
-			if(empty($currentAvatar)) {
-				// No avatar period was added from a previous instrument.
-				// This must be the first instrument and the initial avatar selection popup must be displayed.
-				// Don't start any periods yet.
-				return;
-			}
-
-			// Remove usage periods from previous instruments.
-			$avatarUsagePeriods = [];
-
-			$avatarDisabled = $currentAvatar['disabled'];
 		}
 
 		if($currentAvatar){
@@ -1167,6 +1210,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		if(!$isSurveyCompleteLog){
 			$avatarUsagePeriods[] = [
 				'show id' => $showId,
+				'initialSelectionDialog' => $initialSelectionDialog,
 				'start' => $timestamp,
 				'disabled' => $avatarDisabled
 			];
