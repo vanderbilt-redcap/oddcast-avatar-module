@@ -1291,7 +1291,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 	public function displayVideoStats($videoStats)
 	{
 		?>
-		<h5>Videos</h5>
+		<h5>Videos (in order played)</h5>
 
 		<?php
 		if(empty($videoStats)){
