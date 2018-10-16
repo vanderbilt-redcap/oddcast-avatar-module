@@ -451,7 +451,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			]
 		);
 
-		// ignored repeated character selections
+		// different character selections
 		$this->assertAvatarUsagePeriods(
 			[
 				['message' => 'survey page loaded'],
@@ -480,7 +480,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			]
 		);
 
-		// different character selections
+		// repeated character selections
 		$this->assertAvatarUsagePeriods(
 			[
 				['message' => 'survey page loaded'],
@@ -499,6 +499,11 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				[
 					'show id' => $showId,
 					'startIndex' => 1,
+					'endIndex' => 2
+				],
+				[
+					'show id' => $showId,
+					'startIndex' => 2,
 					'endIndex' => 3
 				]
 			]
@@ -1196,11 +1201,6 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		}
 		else if($characterSelected){
 			$showId = $log['show id'];
-
-			if($showId === $currentAvatar['show id']) {
-				// The same avatar that was already displayed was selected again.  Ignore this event.
-				return;
-			}
 		}
 
 		if($currentAvatar){
