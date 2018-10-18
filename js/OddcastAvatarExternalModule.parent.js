@@ -33,7 +33,7 @@ OddcastAvatarExternalModule.addProperties({
 			textIntroModal.modal('show')
 		})
 
-		OddcastAvatarExternalModule.getPlayButton().click(function () {
+		OddcastAvatarExternalModule.getPageMessageButton().click(function () {
 			OddcastAvatarExternalModule.afterSceneLoaded(function () {
 				OddcastAvatarExternalModule.sayPageMessage('page message played manually')
 			})
@@ -261,13 +261,13 @@ OddcastAvatarExternalModule.addProperties({
 				return
 			}
 
-			var playButton = OddcastAvatarExternalModule.getPlayButton()
+			var pageMessageButton = OddcastAvatarExternalModule.getPageMessageButton()
 			if(OddcastAvatarExternalModule.settings.pageMessage){
-				playButton.show()
+				pageMessageButton.show()
 				OddcastAvatarExternalModule.sayPageMessage('page message played automatically')
 			}
 			else{
-				playButton.hide()
+				pageMessageButton.hide()
 			}
 		})
 	},
@@ -362,7 +362,7 @@ OddcastAvatarExternalModule.addProperties({
 	isEnabled: function () {
 		return OddcastAvatarExternalModule.getAvatar().is(':visible')
 	},
-	getPlayButton: function () {
+	getPageMessageButton: function () {
 		return $('#oddcast-controls .fa-play-circle')
 	},
 	log: function (message, parameters) {

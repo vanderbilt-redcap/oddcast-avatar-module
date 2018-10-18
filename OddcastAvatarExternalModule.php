@@ -136,7 +136,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				<button id="oddcast-maximize-avatar">Enable eStaff</button>
 				<div id='oddcast-avatar' >
 					<div id="oddcast-controls">
-						<i class="fa fa-play-circle" title="Click this icon to play the message for this page."></i>
+						<i class="fa fa-comment" title="Click this icon to play the message for this page."></i>
 						<i class="fa fa-user"></i>
 					</div>
 					<script type="text/javascript" src="//vhss-d.oddcast.com/vhost_embed_functions_v2.php?acc=6267283&js=1"></script>
