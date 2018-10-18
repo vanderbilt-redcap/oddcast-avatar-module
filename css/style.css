@@ -95,7 +95,9 @@ body.modal-open #oddcast-content{
 	cursor: pointer;
 }
 
-#oddcast-controls .fa-play-circle {
+#oddcast-controls .fa-play-circle,
+#oddcast-controls .fa-pause-circle,
+#oddcast-controls .fa-comment{
 	display: none;
 }
 

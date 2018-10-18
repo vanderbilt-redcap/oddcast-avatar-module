@@ -3,6 +3,7 @@ OddcastAvatarExternalModule.addProperties({
 	showId: null,
 	timeoutVerificationValue: '',
 	iFrameLoaded: false,
+	isPaused: false,
 	initializeParent: function(){
 		OddcastAvatarExternalModule.loadIFrame()
 
@@ -37,6 +38,24 @@ OddcastAvatarExternalModule.addProperties({
 			OddcastAvatarExternalModule.afterSceneLoaded(function () {
 				OddcastAvatarExternalModule.sayPageMessage('page message played manually')
 			})
+		})
+
+		$('#oddcast-controls .fa-play-circle').click(function(){
+			if(OddcastAvatarExternalModule.isPaused){
+				freezeToggle()
+				OddcastAvatarExternalModule.isPaused = false
+				OddcastAvatarExternalModule.togglePlayAndPauseButtons(true)
+			}
+			else{
+				// Replay the last played message
+				vhsshtml5_clickPlayButton(0)
+			}
+		})
+
+		$('#oddcast-controls .fa-pause-circle').click(function(){
+			freezeToggle()
+			OddcastAvatarExternalModule.isPaused = true
+			OddcastAvatarExternalModule.togglePlayAndPauseButtons(false)
 		})
 
 		$('.oddcast-character').click(function () {
@@ -441,12 +460,35 @@ OddcastAvatarExternalModule.addProperties({
 		}
 
 		OddcastAvatarExternalModule.callOnTarget($('#oddcast-content > iframe')[0].contentWindow, arguments)
+	},
+	togglePlayAndPauseButtons: function(isPlaying){
+		var playButton = $('#oddcast-controls .fa-play-circle')
+		var pauseButton = $('#oddcast-controls .fa-pause-circle')
+
+		if(isPlaying){
+			playButton.hide()
+			pauseButton.show()
+		}
+		else{
+			pauseButton.hide()
+			playButton.show()
+		}
 	}
 })
 
-// Defining a global function is the standard Oddcast way of hooking into the scene loaded event...
+// Defining these global functions is the standard Oddcast way of hooking into events as documented here:
+// http://www.oddcast.com/support/docs/vhost_API_Reference.pdf
+
 function vh_sceneLoaded() {
 	OddcastAvatarExternalModule.onSceneLoaded()
+}
+
+function vh_talkStarted() {
+	OddcastAvatarExternalModule.togglePlayAndPauseButtons(true)
+}
+
+function vh_talkEnded() {
+	OddcastAvatarExternalModule.togglePlayAndPauseButtons(false)
 }
 
 OddcastAvatarExternalModule.initializeParent()
