@@ -363,7 +363,7 @@ OddcastAvatarExternalModule.addProperties({
 		return OddcastAvatarExternalModule.getAvatar().is(':visible')
 	},
 	getPageMessageButton: function () {
-		return $('#oddcast-controls .fa-play-circle')
+		return $('#oddcast-controls .fa-comment')
 	},
 	log: function (message, parameters) {
 		OddcastAvatarExternalModule.callOnIFrame('log', message, parameters)
