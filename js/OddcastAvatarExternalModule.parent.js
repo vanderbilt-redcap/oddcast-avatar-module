@@ -100,6 +100,7 @@ OddcastAvatarExternalModule.addProperties({
 			return
 		}
 
+		$('#oddcast-sidebar').show() // it will be hidden by default (for review mode)
 		OddcastAvatarExternalModule.getTextIntroModal().modal('show')
 	},
 	getWrapper: function () {

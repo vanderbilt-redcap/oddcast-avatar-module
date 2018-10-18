@@ -28,11 +28,6 @@ body {
 	vertical-align: top;
 }
 
-#oddcast-sidebar{
-	position: relative;
-	overflow: hidden; /* Prevent main_container from invisibly bleeding over into the survey. */
-}
-
 #oddcast-content > iframe{
 	display: block; /* This prevents a few pixels of whitespace from appearing below the iframe. */
 	height: 100vh;
@@ -51,7 +46,10 @@ body.modal-open #oddcast-content{
 }
 
 #oddcast-sidebar{
+	position: relative;
+	overflow: hidden; /* Prevent main_container from invisibly bleeding over into the survey. */
 	min-width: 300px; /* The width must be set on the sidebar too, so that it doesn't collapse if the avatar is hidden. */
+	display: none; /* Hide by default, in case review mode is enabled. */
 }
 
 #oddcast-avatar{
