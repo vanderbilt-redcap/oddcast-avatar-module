@@ -136,7 +136,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				<button id="oddcast-maximize-avatar">Enable eStaff</button>
 				<div id='oddcast-avatar' >
 					<div id="oddcast-controls">
-						<i class="fa fa-play-circle tippy" title="Click this icon to play the<br>message for this page." data-tippy-arrow="true" data-tippy-trigger="manual" data-tippy-offset="-50, 0" data-tippy-theme="light inline-popups"></i>
+						<i class="fa fa-play-circle tippy" title="Click this icon to play the message for this page."></i>
 						<i class="fa fa-user"></i>
 					</div>
 					<script type="text/javascript" src="//vhss-d.oddcast.com/vhost_embed_functions_v2.php?acc=6267283&js=1"></script>
