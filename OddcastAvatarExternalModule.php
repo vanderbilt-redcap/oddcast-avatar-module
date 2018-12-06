@@ -238,6 +238,14 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 
 	function redcap_every_page_before_render()
 	{
+		if($_SERVER['HTTP_HOST'] === 'localhost' && PHP_MAJOR_VERSION !== 5 || PHP_MINOR_VERSION !== 4){
+			?>
+			<script>
+				alert("Please test the <?=$this->getModuleName()?> module in PHP 5.4 for STRIDE, since UMass (and maybe UAB) are currently on 5.4.")
+			</script>
+			<?php
+		}
+
 		if (!$this->isSurveyPage()) {
 			return false;
 		}
