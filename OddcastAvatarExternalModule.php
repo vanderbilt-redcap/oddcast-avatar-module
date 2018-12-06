@@ -13,7 +13,7 @@ const TEMPORARY_RECORD_ID_TO_DELETE = 'temporary-record-id-to-delete';
 
 class OddcastAvatarExternalModule extends AbstractExternalModule
 {
-	const SHOWS = [
+	static $SHOWS = [
 		2560288 => 'female',
 		2560294 => 'female',
 		2613244 => 'male',
@@ -99,7 +99,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 							<p class="top-section">Hello!  Thank you for your interest in volunteering for a research study.  At any time during the consent you can ask a study coordinator for help.  We also have our eStaff team members to guide you through the consent.  Please select an eStaff team member to take you through the consent:</p>
 							<div id="oddcast-character-list" class="text-center">
 								<?php
-								foreach (OddcastAvatarExternalModule::SHOWS as $id => $gender) {
+								foreach (OddcastAvatarExternalModule::$SHOWS as $id => $gender) {
 									?><img src="<?=$this->getUrl("images/$id.png")?>" data-show-id="<?=$id?>" class="oddcast-character" /><?php
 								}
 								?>
@@ -149,7 +149,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 								return;
 							}
 
-							AC_VHost_Embed(6267283, 300, 400, '', 1, 1, <?=array_keys(OddcastAvatarExternalModule::SHOWS)[0]?>, 0, 1, 0, '709e320dba1a392fa4e863ef0809f9f1', 0);
+							AC_VHost_Embed(6267283, 300, 400, '', 1, 1, <?=array_keys(OddcastAvatarExternalModule::$SHOWS)[0]?>, 0, 1, 0, '709e320dba1a392fa4e863ef0809f9f1', 0);
 						})()
 					</script>
 				</div>
@@ -183,7 +183,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 						'female' => explode(',', $femaleVoice),
 						'male' => explode(',', $maleVoice),
 					],
-					'shows' => OddcastAvatarExternalModule::SHOWS,
+					'shows' => OddcastAvatarExternalModule::$SHOWS,
 					'isInitialLoad' => $_SERVER['REQUEST_METHOD'] == 'GET',
 					'avatarDisabled' => $this->getProjectSetting('disable'),
 					'reviewModeEnabled' => $this->isReviewModeEnabled($instrument),
@@ -1278,7 +1278,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 							<td></td>
 						<?php } else { ?>
 							<td class="character"><img src="<?=$this->getUrl("images/$showId.png")?>"</td>
-							<td class="align-middle"><?=ucfirst(OddcastAvatarExternalModule::SHOWS[$showId])?></td>
+							<td class="align-middle"><?=ucfirst(OddcastAvatarExternalModule::$SHOWS[$showId])?></td>
 						<?php } ?>
 					</tr>
 					<?php
