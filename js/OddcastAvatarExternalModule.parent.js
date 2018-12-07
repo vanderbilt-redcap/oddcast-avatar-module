@@ -7,8 +7,6 @@ OddcastAvatarExternalModule.addProperties({
 	initializeParent: function(){
 		OddcastAvatarExternalModule.loadIFrame()
 
-		$('#pagecontainer').hide()
-
 		$('#oddcast-maximize-avatar').click(function () {
 			OddcastAvatarExternalModule.maximizeAvatar()
 			OddcastAvatarExternalModule.log('avatar enabled')
@@ -75,10 +73,13 @@ OddcastAvatarExternalModule.addProperties({
 		})
 
 		// Make the wrapper visible.
-		var wrapper = OddcastAvatarExternalModule.getWrapper()
-		$('body').prepend(wrapper)
-		wrapper.css('display', 'table')
-
+		if(!OddcastAvatarExternalModule.settings.avatarDisabled){
+			$('#pagecontainer').hide()
+			var wrapper = OddcastAvatarExternalModule.getWrapper()
+			$('body').prepend(wrapper)
+			wrapper.css('display', 'table')
+		}
+		
 		OddcastAvatarExternalModule.initPortraitDialog()
 		OddcastAvatarExternalModule.initTimeout()
 

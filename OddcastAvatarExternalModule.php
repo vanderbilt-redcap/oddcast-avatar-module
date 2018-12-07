@@ -236,7 +236,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		return '';
 	}
 
-	function redcap_every_page_before_render()
+	function redcap_every_page_top()
 	{
 		if($_SERVER['HTTP_HOST'] === 'localhost' && (PHP_MAJOR_VERSION !== 5 || PHP_MINOR_VERSION !== 4)){
 			?>
