@@ -31,9 +31,10 @@ OddcastAvatarExternalModule.addProperties({
 			// Temporarily reset this value just for this function call.
 			isMobileDevice = false
 
+			var speakerIconUrl = iconob.src
 			var argumentArray = Array.prototype.slice.call(arguments)
 			originalPlayAudioObject.apply(null, argumentArray)
-			iconob.src = $('.spkrplay')[0].src
+			iconob.src = speakerIconUrl
 
 			isMobileDevice = originalIsMobileDevice
 		}
