@@ -6,6 +6,7 @@ OddcastAvatarExternalModule.addProperties({
 
 		OddcastAvatarExternalModule.initMessagesForValues()
 		OddcastAvatarExternalModule.initTimeout()
+		OddcastAvatarExternalModule.initTTS()
 
 		$(window).on('beforeunload', function(){
 			OddcastAvatarExternalModule.callOnParent('onIFrameUnLoad')
@@ -19,6 +20,26 @@ OddcastAvatarExternalModule.addProperties({
 		}
 		else{
 			OddcastAvatarExternalModule.hideLoadingOverlay()
+		}
+	},
+	initTTS: function () {
+		var originalPlayAudioObject = window.playAudioObject
+		window.playAudioObject = function(ob,iconob,event){
+			var originalIsMobileDevice = isMobileDevice
+
+			// isMobileDevice is incorrectly detected inside the iframe, and regardless we want TTS to work even on mobile with the avatar.
+			// Temporarily reset this value just for this function call.
+			isMobileDevice = false
+
+			var argumentArray = Array.prototype.slice.call(arguments)
+			originalPlayAudioObject.apply(null, argumentArray)
+			iconob.src = $('.spkrplay')[0].src
+
+			isMobileDevice = originalIsMobileDevice
+		}
+
+		window.playAudio = function(text, iconob){
+			OddcastAvatarExternalModule.sayText(text)
 		}
 	},
 	initMessagesForValues: function () {
