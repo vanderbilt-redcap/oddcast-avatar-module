@@ -8,6 +8,7 @@ body {
 	width: 100vw;
 	height: 100vh;
 	background-color: #333; /* Override the background to prevent users from picking a lighter color which looks funny with the avatar. */
+	overflow-x: hidden; /* Removes the horizontal scrollbar on the body inside the iframe for some scenarios */
 }
 
 #footer a {
