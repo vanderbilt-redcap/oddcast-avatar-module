@@ -1075,6 +1075,10 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			if($log['message'] === 'review mode exited'){
 				$firstReviewModeLog = $firstSurveyLog;
 				$firstSurveyLog = $log;
+
+				// Ignore any stats from review mode
+				$videoStats = [];
+				$popupStats = [];
 			}
 		}
 

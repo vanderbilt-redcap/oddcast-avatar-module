@@ -53,7 +53,7 @@ if($firstReviewModeLog) {
 	}
 </style>
 
-<p>This report summarizes several event types.  For a more granular/detailed series of events, see the "Analytics" report.</p>
+<p>This report summarizes several event types.  Events during Review Mode are not included in this report.  For a more granular/detailed series of events, see the "Analytics" report.</p>
 <br>
 
 <div class="row">
