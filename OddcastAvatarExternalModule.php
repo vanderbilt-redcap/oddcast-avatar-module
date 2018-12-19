@@ -1236,6 +1236,16 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 
 	public function displayAvatarStats($avatarUsagePeriods)
 	{
+		$avatarUsageTotals = [];
+		foreach($avatarUsagePeriods as $avatar) {
+			if($avatar['initialSelectionDialog'] || $avatar['disabled']){
+				continue;
+			}
+
+			$showId = $avatar['show id'];
+			$avatarUsageTotals[$showId] += $avatar['end'] - $avatar['start'];
+		}
+
 		?>
 		<h5>Avatar</h5>
 		<?php
@@ -1261,37 +1271,17 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			</style>
 			<table class="table table-striped table-bordered avatar">
 				<tr>
-					<th>Status</th>
-					<th>Length of Time</th>
 					<th>Character</th>
 					<th>Gender</th>
+					<th>Length of Time Used</th>
 				</tr>
 				<?php
-				foreach($avatarUsagePeriods as $avatar){
-					$showId = $avatar['show id'];
-
-					if($avatar['initialSelectionDialog']){
-						$status = 'Initial selection<br>dialog displayed';
-					}
-					else if($avatar['disabled']){
-						$status = 'Disabled';
-					}
-					else{
-						$status = 'Enabled';
-					}
-
+				foreach($avatarUsageTotals as $showId=>$total){
 					?>
 					<tr>
-						<td class="align-middle"><?=$status?></td>
-						<td class="align-middle"><?=str_replace(', ', '<br>and ', $this->getTimePeriodString($avatar['end'] - $avatar['start']))?></td>
-
-						<?php if($avatar['disabled'] || $avatar['initialSelectionDialog']) { ?>
-							<td></td>
-							<td></td>
-						<?php } else { ?>
-							<td class="character"><img src="<?=$this->getUrl("images/$showId.png")?>"</td>
-							<td class="align-middle"><?=ucfirst(OddcastAvatarExternalModule::$SHOWS[$showId])?></td>
-						<?php } ?>
+						<td class="character"><img src="<?=$this->getUrl("images/$showId.png")?>"</td>
+						<td class="align-middle"><?=ucfirst(OddcastAvatarExternalModule::$SHOWS[$showId])?></td>
+						<td class="align-middle"><?=str_replace(', ', '<br>and ', $this->getTimePeriodString($total))?></td>
 					</tr>
 					<?php
 				}
