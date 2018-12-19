@@ -178,6 +178,9 @@ OddcastAvatarExternalModule.addProperties({
 
 			$('#pagecontent').append(reviewModeFooter)
 
+			// Remove the econsent checkbox's id (if present) so it can't be initialized.  Clicking this checkbox would re-enable the submit button.
+			$('#econsent_confirm_checkbox').removeAttr('id')
+
 			OddcastAvatarExternalModule.hideLoadingOverlay()
 		}
 		else if (value == turningOffValue) {
