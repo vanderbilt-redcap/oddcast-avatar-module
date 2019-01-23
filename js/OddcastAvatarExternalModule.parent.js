@@ -329,13 +329,16 @@ OddcastAvatarExternalModule.addProperties({
 			return
 		}
 
-		var speechRate = OddcastAvatarExternalModule.settings.speechRate
-		if(speechRate && speechRate != 100){
-			speechRate = 100 - speechRate
+		// Speech rates are only fully supported in engine #3.
+		if(OddcastAvatarExternalModule.engine === '3') {
+			var speechRate = OddcastAvatarExternalModule.settings.speechRate
+			if (speechRate && speechRate != 100) {
+				speechRate = 100 - speechRate
 
-			// Only certain percentage values are accepted (not just any value).
-			// They do not appear in the documentation, so trial and error was used to find the list in the settings.
-			text = "<PROSODY RATE='-" + speechRate + "%'>" + text + "</PROSODY>"
+				// Only certain percentage values are accepted (not just any value).
+				// They do not appear in the documentation, so trial and error was used to find the list in the settings.
+				text = "<PROSODY RATE='-" + speechRate + "%'>" + text + "</PROSODY>"
+			}
 		}
 
 		stopSpeech()
