@@ -269,6 +269,17 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			}
 		</style>
 		<div id="oddcast-loading-overlay"></div>
+		<script>
+			setTimeout(function(){
+				/*
+					In most scenarios OddcastAvatarExternalModule.hideLoadingOverlay() will already have run by now,
+					in which case the following line will do nothing.  That's OK.
+					Currently the following line is only known to be required for the page where return codes are entered.
+					It's probably a good safety net to prevent other potential issues as well.
+				 */
+				$('#oddcast-loading-overlay').fadeOut(200)
+			}, 500)
+		</script>
 		<?php
 
 		$reviewMode = @$_COOKIE[REVIEW_MODE];
