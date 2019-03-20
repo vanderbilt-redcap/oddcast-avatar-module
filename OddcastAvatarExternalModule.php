@@ -361,10 +361,25 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 
 	public function validateSettings($settings){
 		$pageNumbers = $settings['page-number'];
-		$uniquePageNumbers = array_unique($pageNumbers);
+		$allForms = $settings['page-message-forms'];
 
-		if(count($pageNumbers) != count($uniquePageNumbers)){
-			return "Multiple page messages for the same page number are not currently supported.";
+		$messagesSet = [];
+		for($i=0; $i<count($pageNumbers); $i++){
+			$pageNumber = $pageNumbers[$i];
+			$forms = $allForms[$i];
+
+			foreach($forms as $form){
+				$existingForms = @$messagesSet[$pageNumber];
+				if($existingForms){
+					foreach($existingForms as $existingForm){
+						if(empty($form) || empty($existingForm) || $form === $existingForm){
+							return "Multiple page messages are set on the same form for page $pageNumber.  This is not allowed.";
+						}
+					}
+				}
+
+				$messagesSet[$pageNumber][] = $form;
+			}
 		}
 	}
 
