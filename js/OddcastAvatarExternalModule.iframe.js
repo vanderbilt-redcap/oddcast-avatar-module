@@ -14,13 +14,6 @@ OddcastAvatarExternalModule.addProperties({
 
 		// This must occur before review mode is initialized, so the correct page message is in place when avatar is initialized.
 		OddcastAvatarExternalModule.callOnParent('onIFrameInitialized', OddcastAvatarExternalModule.settings)
-
-		if(OddcastAvatarExternalModule.settings.reviewModeEnabled){
-			OddcastAvatarExternalModule.initReviewMode()
-		}
-		else{
-			OddcastAvatarExternalModule.hideLoadingOverlay()
-		}
 	},
 	initTTS: function () {
 		var originalPlayAudioObject = window.playAudioObject

@@ -271,6 +271,16 @@ OddcastAvatarExternalModule.addProperties({
 		// Make sure the iFrame's enabled flag is up to date, in case the iFrame wasn't loaded when it last changed.
 		// This can be reproduced by simulating a "Slow 3G" connection in Chrome's developer tools and immediately selecting an avatar when the dialog is displayed.
 		OddcastAvatarExternalModule.setEnabledOnIFrame()
+
+		if(
+			OddcastAvatarExternalModule.settings.reviewModeEnabled
+			&& !$('#oddcast-sidebar').is(':visible')  // If the sidebar is already visible then we're on a survey other than the first one.  We only want to initialize review mode on the first survey.
+		){
+			OddcastAvatarExternalModule.callOnIFrame('initReviewMode')
+		}
+		else{
+			OddcastAvatarExternalModule.callOnIFrame('hideLoadingOverlay')
+		}
 	},
 	onIFrameUnLoad: function(){
 		OddcastAvatarExternalModule.iFrameLoaded = false
