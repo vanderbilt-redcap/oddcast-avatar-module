@@ -238,7 +238,8 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 
 	function redcap_every_page_top()
 	{
-		if($_SERVER['HTTP_HOST'] === 'localhost' && (PHP_MAJOR_VERSION !== 5 || PHP_MINOR_VERSION !== 4)){
+		// The following check has been disabled since PHP 5.4 is buggy (hangs) in UniServer on Windows.
+		if(false && $_SERVER['HTTP_HOST'] === 'localhost' && (PHP_MAJOR_VERSION !== 5 || PHP_MINOR_VERSION !== 4)){
 			?>
 			<script>
 				alert("Please test the <?=$this->getModuleName()?> module in PHP 5.4 for STRIDE, since UMass (and maybe UAB) are currently on 5.4.")
