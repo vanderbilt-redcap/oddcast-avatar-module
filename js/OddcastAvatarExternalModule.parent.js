@@ -101,6 +101,13 @@ OddcastAvatarExternalModule.addProperties({
 		}
 		else{
 			console.error('The temporary record id for the parent window could not be detected.  This will likely result in an extraneous survey page load log entry.')
+
+			// In older versions of the framework ExternalModules::isSurveyPage() does not work correctly
+			// for REDCap installs that are hosted in a subdirectory instead of directly at a domain url.
+			// This breaks temporary recording id generation, which in turn prevents the iframe from
+			// loading in IE (and sometimes in Firefox) because the parent url is identical to the iframe url.
+			// The following parameter is appended to allow the avatar module to work in that scenario.
+			iFrameUrl += '&iframe-matching-parent-url-fix'
 		}
 
 		var iFrame = $("<iframe></iframe>")
