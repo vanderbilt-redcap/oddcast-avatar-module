@@ -77,10 +77,10 @@ OddcastAvatarExternalModule.addProperties({
 			$('#pagecontainer').hide()
 			var wrapper = OddcastAvatarExternalModule.getWrapper()
 			$('body').prepend(wrapper)
-			wrapper.css('display', 'table')
+
+			wrapper.removeClass('hidden')
 		}
-		
-		OddcastAvatarExternalModule.initPortraitDialog()
+
 		OddcastAvatarExternalModule.initTimeout()
 
 		if(!OddcastAvatarExternalModule.settings.reviewModeEnabled){
@@ -135,25 +135,6 @@ OddcastAvatarExternalModule.addProperties({
 	},
 	getTextIntroModal: function () {
 		return OddcastAvatarExternalModule.getWrapper().find('.modal.text-intro')
-	},
-	initPortraitDialog: function () {
-		var checkOrientation = function () {
-			var md = new MobileDetect(window.navigator.userAgent);
-			if (!md.mobile() && !md.tablet()) {
-				return
-			}
-
-			var overlay = $('#oddcast-overlay');
-			if (window.innerHeight > window.innerWidth) {
-				overlay.fadeIn()
-			}
-			else {
-				overlay.fadeOut()
-			}
-		}
-
-		checkOrientation()
-		window.addEventListener('orientationchange', checkOrientation)
 	},
 	initTimeout: function () {
 		var settings = OddcastAvatarExternalModule.settings
@@ -422,11 +403,16 @@ OddcastAvatarExternalModule.addProperties({
 	maximizeAvatar: function () {
 		var settings = OddcastAvatarExternalModule.settings
 		var textIntroModal = OddcastAvatarExternalModule.getTextIntroModal()
-		textIntroModal.modal('hide')
+
+		// Hide the dialog but leave the backdrop displayed until the scene is loaded.
+		textIntroModal.removeClass('show')
 
 		// Wait until the avatar is loaded in the background initially, or we could see a flash of the wrong character.
 		OddcastAvatarExternalModule.afterSceneLoaded(function () {
 			// The initial show is loaded, but we may not want to use this one so we load our own show later.
+
+			// Wait to hide the modal until a scene has been loaded to prevent the survey from shifting down on slow connections.
+			textIntroModal.modal('hide')
 
 			OddcastAvatarExternalModule.getPlayer().find('.character').remove()
 

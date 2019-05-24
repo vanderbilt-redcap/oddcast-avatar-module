@@ -85,13 +85,14 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.2.0/js.cookie.min.js" integrity="sha256-9Nt2r+tJnSd2A2CRUvnjgsD+ES1ExvjbjBNqidm9doI=" crossorigin="anonymous"></script>
 		<?php
 			if(isset($_GET['vorlon'])){
-				?><script src="http://<?=$_SERVER['HTTP_HOST']?>:1337/vorlon.js"></script><?php
+				$ngrokVorlonUrl = file_get_contents(__DIR__ . '/.vorlon-url')
+				?><script><?=file_get_contents("$ngrokVorlonUrl/vorlon.js")?></script><?php
 			}
 		?>
 
 		<link rel="stylesheet" href="<?=$this->getUrl('css/style.css')?>">
 
-		<div id="oddcast-wrapper">
+		<div id="oddcast-wrapper" class="hidden">
 			<div class="modal fade text-intro" data-backdrop="static">
 				<div class="modal-dialog" role="document">
 					<div class="modal-content">
@@ -155,9 +156,6 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				</div>
 			</div>
 			<div id="oddcast-content"></div>
-			<div id="oddcast-overlay">
-				Please rotate the screen!
-			</div>
 		</div>
 
 		<script type="text/javascript" src="<?=$this->getUrl('js/OddcastAvatarExternalModule.base.js')?>"></script>

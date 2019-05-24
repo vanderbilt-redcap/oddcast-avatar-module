@@ -20,20 +20,27 @@ body {
 }
 
 #oddcast-wrapper{
-	display: none;
+	display: flex;
 	margin: auto;
+	height: 100vh;
+	flex-direction: column;
+	justify-content: center;
 }
 
-#oddcast-wrapper > *{
-	display: table-cell;
-	vertical-align: top;
+#oddcast-wrapper.hidden{
+	display: none;
+}
+
+#oddcast-content{
+	flex: 1;
+	max-width: 721px;
 }
 
 #oddcast-content > iframe{
 	display: block; /* This prevents a few pixels of whitespace from appearing below the iframe. */
-	height: 100vh;
 	border: 0px;
-	min-width: 721px; /* After adding the width of the avatar (and borders), this will fill the screen of a landscape ipad. */
+	height: 100%;
+	width: 100%;
 }
 
 body.modal-open #oddcast-sidebar,
@@ -47,29 +54,64 @@ body.modal-open #oddcast-content{
 }
 
 #oddcast-sidebar{
-	position: relative;
+	position: relative; /* added so the controls child element are positioned relative to this element */
 	overflow: hidden; /* Prevent main_container from invisibly bleeding over into the survey. */
-	min-width: 300px; /* The width must be set on the sidebar too, so that it doesn't collapse if the avatar is hidden. */
-	min-height: 40px; /* Make sure the enable button is available when the avatar is hidden/disabled. */
+	width: 300px; /* The width must be set on the sidebar too, so that it doesn't collapse if the avatar is hidden. */
+	min-height: 38px; /* Make sure the enable button is available when the avatar is hidden/disabled. */
 	display: none; /* Hide by default, in case review mode is enabled. */
 }
 
 #oddcast-avatar{
 	background: white;
 	overflow: hidden;
-	border-right: 1px solid #cccccc;
-	border-bottom: 1px solid #afafaf;
-	width: 300px;
+	width: 100%;
 	display: none;
 }
 
-#oddcast-avatar ._html5Player,
-#oddcast-avatar ._html5Player .character{
-	margin-left: -40px;
+#oddcast-avatar ._html5Player{
+	margin-top: -35px; /* Remove a little unnecessary white space */
+	margin-left: -75px;
+}
+
+@media (max-width: 799px){
+	#oddcast-content{
+		border-top: 1px solid #bbbbbb;
+	}
+
+	#oddcast-content > iframe{
+		width: 100vw;
+	}
+
+	#oddcast-sidebar{
+		width: 100%;
+		background: white;
+	}
+
+	#oddcast-avatar{
+		height: 150px;
+	}
+
+	#oddcast-avatar ._html5Player{
+		margin-left: calc((400px - 100vw + 50px)/2*-1);
+		margin-top: -65px;
+		transform: scale(0.75, 0.75);
+	}
+}
+
+@media (min-width: 800px){
+	#oddcast-wrapper{
+		flex-direction: row;
+	}
+
+	#oddcast-avatar{
+		border-right: 1px solid #cccccc;
+		border-bottom: 1px solid #afafaf;
+	}
 }
 
 #oddcast-avatar ._html5Player .main_container{
 	z-index: 0; /* Make sure the avatar appears below REDCap popups (like required field messages). */
+	background-position-x: 160px !important; /* center the oddcast loading indicator */
 }
 
 #oddcast-avatar .vhsshtml5_button_holder{
@@ -82,7 +124,7 @@ body.modal-open #oddcast-content{
 
 #oddcast-controls{
 	z-index: 1; /* Above the avatar */
-	position: absolute;
+	position: absolute; /* remove this to make character button display on mobile? */
 	width: 100%;
 	text-align: right;
 	padding-right: 7px;
@@ -115,24 +157,6 @@ body.modal-open #oddcast-content{
 	top: 7px;
 	left: 8px;
 	z-index: 2;
-}
-
-#oddcast-overlay{
-	display: none;
-	position: fixed;
-	height: 100vh;
-	width: 100vw;
-	background: rgba(239, 239, 239, 0.96);
-	top: 0px;
-	left: 0px;
-	z-index: 1050;
-	text-align: center;
-	padding-top: 50%;
-	font-size: 40px;
-	font-weight: 700;
-	letter-spacing: 1px;
-	color: #4e4e4e;
-	font-family: sans-serif !important;
 }
 
 .oddcast-character{
