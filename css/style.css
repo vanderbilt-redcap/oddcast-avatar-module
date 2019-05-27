@@ -5,6 +5,8 @@ body {
 	width: 100vw;
 	background-color: #333; /* Override the background to prevent users from picking a lighter color which looks funny with the avatar. */
 	overflow-x: hidden; /* Removes the horizontal scrollbar on the body inside the iframe for some scenarios */
+	max-width: 1100px;
+	margin: auto;
 }
 
 #footer a {
@@ -19,7 +21,6 @@ body {
 	display: flex;
 	margin: auto;
 	flex-direction: column;
-	justify-content: center;
 }
 
 #oddcast-wrapper.hidden{
