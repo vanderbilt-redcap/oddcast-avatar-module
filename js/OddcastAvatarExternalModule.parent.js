@@ -82,12 +82,49 @@ OddcastAvatarExternalModule.addProperties({
 		}
 
 		OddcastAvatarExternalModule.initTimeout()
+		OddcastAvatarExternalModule.handleViewHeight()
+
+		// Prevent the user from scrolling the avatar and iframe container elements
+		$('body').append('<script src="https://cdnjs.cloudflare.com/ajax/libs/inobounce/0.1.6/inobounce.min.js" integrity="sha256-8Lv10+9kieliYluA+S5z1+KwnqLTX4J0FiDyx8FWM2s=" crossorigin="anonymous"></script>')
 
 		if(!OddcastAvatarExternalModule.settings.reviewModeEnabled){
 			OddcastAvatarExternalModule.startAvatar()
 		}
 
 		OddcastAvatarExternalModule.hideLoadingOverlay()
+	},
+	// This method prevents the scroll value from ever actually
+	// reaching the top or bottom to prevent the event from bubbling up
+	// and "bouncing" the container on iOS, which can interfere with iframe scrolling.
+	improveMobileScrollingBehavior: function(){
+		var content = $('#oddcast-content')
+
+		content.scrollTop(1)
+
+		content.on('scroll', function(){
+			var scrollTop = content.scrollTop()
+			var maxScrollTop = content[0].scrollHeight - content.height()
+
+			if(scrollTop === 0){
+				content.scrollTop(1)
+			}
+			else if(scrollTop === maxScrollTop){
+				content.scrollTop(maxScrollTop-1)
+			}
+		})
+	},
+	// This method accounts for the view height changes on mobile
+	// due to the address bar (and bottom bar on iOS) sometimes
+	// being visible and sometimes not.
+	handleViewHeight: function(){
+		var setViewHeight = function(){
+			$('#oddcast-wrapper').css('height', window.innerHeight + 'px')
+		}
+
+		setViewHeight()
+		window.addEventListener('resize', function(){
+			setViewHeight()
+		})
 	},
 	loadIFrame: function(){
 		var iFrameUrl = location.href.replace('&vorlon', '')
@@ -242,6 +279,8 @@ OddcastAvatarExternalModule.addProperties({
 	},
 	onIFrameInitialized: function(settings){
 		OddcastAvatarExternalModule.iFrameLoaded = true
+
+		OddcastAvatarExternalModule.improveMobileScrollingBehavior()
 		
 		var oldPageMessage = OddcastAvatarExternalModule.settings.pageMessage
 

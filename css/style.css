@@ -1,12 +1,8 @@
-/* The following two blocks prevent the user from attempting to scroll the sidebar area on iPad. */
 html {
-	position: fixed;
-	height: 100%;
-	overflow: hidden;
+	overflow-x: hidden;
 }
 body {
 	width: 100vw;
-	height: 100vh;
 	background-color: #333; /* Override the background to prevent users from picking a lighter color which looks funny with the avatar. */
 	overflow-x: hidden; /* Removes the horizontal scrollbar on the body inside the iframe for some scenarios */
 }
@@ -22,7 +18,6 @@ body {
 #oddcast-wrapper{
 	display: flex;
 	margin: auto;
-	height: 100vh;
 	flex-direction: column;
 	justify-content: center;
 }
@@ -34,6 +29,8 @@ body {
 #oddcast-content{
 	flex: 1;
 	max-width: 721px;
+	-webkit-overflow-scrolling: touch;
+	overflow-y: scroll;
 }
 
 #oddcast-content > iframe{
