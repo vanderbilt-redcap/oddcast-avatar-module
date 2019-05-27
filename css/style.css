@@ -28,9 +28,10 @@ body {
 
 #oddcast-content{
 	flex: 1;
-	max-width: 721px;
+	max-width: 800px;
 	-webkit-overflow-scrolling: touch;
-	overflow-y: scroll;
+	/*overflow-y: scroll;*/
+	overflow-x: hidden;
 }
 
 #oddcast-content > iframe{
