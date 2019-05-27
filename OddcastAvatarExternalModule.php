@@ -280,9 +280,14 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			}, 500)
 		</script>
 		<?php
+	}
+
+	function redcap_every_page_before_render()
+	{
+		// No content can be echo'ed here, or it will break REDCap's TTS features in surveys.
 
 		$reviewMode = @$_COOKIE[REVIEW_MODE];
-		if (!$this->isReviewModeEnabled() || is_null($reviewMode)) {
+		if (!$this->isSurveyPage() || !$this->isReviewModeEnabled() || is_null($reviewMode)) {
 			return;
 		}
 
