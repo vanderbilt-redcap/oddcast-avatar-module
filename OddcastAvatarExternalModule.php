@@ -93,7 +93,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		<link rel="stylesheet" href="<?=$this->getUrl('css/style.css')?>">
 
 		<div id="oddcast-wrapper" class="hidden">
-			<div class="modal fade text-intro" data-backdrop="static">
+			<div class="modal text-intro" data-backdrop="static">
 				<div class="modal-dialog" role="document">
 					<div class="modal-content">
 						<div class="modal-body">
