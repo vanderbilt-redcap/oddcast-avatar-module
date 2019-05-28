@@ -27,7 +27,7 @@ OddcastAvatarExternalModule.addProperties({
 			var textIntroModal = OddcastAvatarExternalModule.getTextIntroModal()
 			textIntroModal.find('.top-section').html('Select an eStaff member:').css('font-weight', 'bold')
 			textIntroModal.find('.bottom-section').hide()
-			textIntroModal.find('.modal-dialog').width('625px')
+			textIntroModal.find('.modal-dialog').css('max-width', '625px')
 
 			textIntroModal.modal('show')
 		})
