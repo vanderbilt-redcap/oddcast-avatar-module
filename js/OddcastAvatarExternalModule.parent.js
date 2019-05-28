@@ -160,11 +160,9 @@ OddcastAvatarExternalModule.addProperties({
 	},
 	startAvatar: function () {
 		if (OddcastAvatarExternalModule.settings.avatarDisabled) {
-			$('#oddcast-sidebar').hide()
 			return
 		}
 
-		$('#oddcast-sidebar').show() // it will be hidden by default (for review mode)
 		OddcastAvatarExternalModule.getTextIntroModal().modal('show')
 	},
 	getWrapper: function () {
@@ -301,7 +299,7 @@ OddcastAvatarExternalModule.addProperties({
 
 		if(
 			OddcastAvatarExternalModule.settings.reviewModeEnabled
-			&& !$('#oddcast-sidebar').is(':visible')  // If the sidebar is already visible then we're on a survey other than the first one.  We only want to initialize review mode on the first survey.
+			&& !OddcastAvatarExternalModule.isEnabled()  // True if the user has already exiting review mode and begun the survey
 		){
 			OddcastAvatarExternalModule.callOnIFrame('initReviewMode')
 		}
