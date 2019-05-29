@@ -57,6 +57,12 @@ OddcastAvatarExternalModule.addProperties({
 		})
 
 		$('.oddcast-character').click(function () {
+			if(!OddcastAvatarExternalModule.getTextIntroModal().hasClass('show')){
+				// Another click is already in progress
+				// Do nothing to prevent multiple page messages from being read
+				return
+			}
+
 			var showId = $(this).data('show-id')
 			OddcastAvatarExternalModule.showId = showId
 
