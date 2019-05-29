@@ -5,6 +5,10 @@ OddcastAvatarExternalModule.addProperties({
 	iFrameLoaded: false,
 	isPaused: false,
 	initializeParent: function(){
+		if(window.location.search.indexOf('&vorlon') !== -1){
+			 $('body').append("<script src='" + OddcastAvatarExternalModule.settings.vorlonUrl + "/vorlon.js'></script>")
+		}
+
 		OddcastAvatarExternalModule.loadIFrame()
 
 		$('#oddcast-maximize-avatar').click(function () {

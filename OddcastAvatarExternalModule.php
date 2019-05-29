@@ -83,12 +83,6 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 
 		<script src="//cdn.jsdelivr.net/npm/mobile-detect@1.4.1/mobile-detect.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.2.0/js.cookie.min.js" integrity="sha256-9Nt2r+tJnSd2A2CRUvnjgsD+ES1ExvjbjBNqidm9doI=" crossorigin="anonymous"></script>
-		<?php
-			if(isset($_GET['vorlon'])){
-				$ngrokVorlonUrl = file_get_contents(__DIR__ . '/.vorlon-url')
-				?><script><?=file_get_contents("$ngrokVorlonUrl/vorlon.js")?></script><?php
-			}
-		?>
 
 		<link rel="stylesheet" href="<?=$this->getUrl('css/style.css')?>">
 
@@ -197,7 +191,8 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 					'timeoutVerificationFieldName' => $this->getTimeoutVerificationFieldName(),
 					'loggingSupported' => $loggingSupported,
 					'temporaryRecordIdFieldName' => TEMPORARY_RECORD_ID_TO_DELETE,
-					'speechRate' => $this->getProjectSetting('speech-rate')
+					'speechRate' => $this->getProjectSetting('speech-rate'),
+					'vorlonUrl' => file_get_contents(__DIR__ . '/.vorlon-url')
 				])?>
 
 				var jsObjectUrl
@@ -273,6 +268,11 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				// This could be the page where return codes are entered.
 				// Go ahead and hide the loading indicator.
 				$('#oddcast-loading-overlay').fadeOut(200)
+
+				setInterval(function(){
+//					alert(1)
+//					$('#oddcast-loading-overlay').fadeOut(200)
+				}, 1000)
 			}
 		</script>
 		<?php
