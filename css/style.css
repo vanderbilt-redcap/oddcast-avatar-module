@@ -38,7 +38,7 @@ body {
 #oddcast-content > iframe{
 	display: block; /* This prevents a few pixels of whitespace from appearing below the iframe. */
 	border: 0px;
-	height: 100%;
+	min-height: 101%; /* Making the iframe always slightly larger than the screen ensures that the iframe always stays scrollable when navigating between pages on iPad (especially short and long pages) */
 	width: 100%;
 }
 
