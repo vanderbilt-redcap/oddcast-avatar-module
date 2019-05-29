@@ -112,10 +112,10 @@ OddcastAvatarExternalModule.addProperties({
 		var scrollTop = content.scrollTop()
 		var maxScrollTop = content[0].scrollHeight - content.height()
 
-		if(scrollTop <= 0){
+		if(scrollTop === 0){
 			content.scrollTop(1)
 		}
-		else if(scrollTop >= maxScrollTop){
+		else if(scrollTop === maxScrollTop){
 			content.scrollTop(maxScrollTop-1)
 		}
 	},
