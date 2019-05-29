@@ -191,8 +191,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 					'timeoutVerificationFieldName' => $this->getTimeoutVerificationFieldName(),
 					'loggingSupported' => $loggingSupported,
 					'temporaryRecordIdFieldName' => TEMPORARY_RECORD_ID_TO_DELETE,
-					'speechRate' => $this->getProjectSetting('speech-rate'),
-					'vorlonUrl' => file_get_contents(__DIR__ . '/.vorlon-url')
+					'speechRate' => $this->getProjectSetting('speech-rate')
 				])?>
 
 				var jsObjectUrl
@@ -202,6 +201,8 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				else{
 					jsObjectUrl = <?=json_encode($this->getUrl('js/OddcastAvatarExternalModule.parent.js'))?>
 				}
+
+				OddcastAvatarExternalModule.addVorlon(<?=json_encode(file_get_contents(__DIR__ . '/.vorlon-url'))?>)
 
 				$.getScript(jsObjectUrl)
 			})

@@ -45,6 +45,11 @@ var OddcastAvatarExternalModule = {
 	},
 	onActivity: function(action){
 		$(document).on('mousemove keydown mousedown touchstart touchmove', action)
+	},
+	addVorlon: function(vorlonUrl){
+		if(vorlonUrl && window.frameElement){
+			$('body').append('<script src="' + vorlonUrl + '/vorlon.js"></script>')
+		}
 	}
 }
 
