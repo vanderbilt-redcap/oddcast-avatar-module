@@ -12,6 +12,11 @@ OddcastAvatarExternalModule.addProperties({
 			OddcastAvatarExternalModule.callOnParent('onIFrameUnLoad')
 		})
 
+		OddcastAvatarExternalModule.checkScrollTop()
+		$('#pagecontainer').on('scroll', function(){
+			OddcastAvatarExternalModule.checkScrollTop()
+		})
+
 		// This must occur before review mode is initialized, so the correct page message is in place when avatar is initialized.
 		OddcastAvatarExternalModule.callOnParent('onIFrameInitialized', OddcastAvatarExternalModule.settings)
 	},
@@ -206,7 +211,23 @@ OddcastAvatarExternalModule.addProperties({
 		if (OddcastAvatarExternalModule.settings.loggingSupported) {
 			ExternalModules.Vanderbilt.OddcastAvatarExternalModule.log(message, parameters)
 		}
-	}
+	},
+	// This method prevents the scroll value from ever actually
+	// reaching the top or bottom to prevent the event from bubbling up
+	// and "bouncing" the container on iOS, which can interfere with iframe scrolling.
+	checkScrollTop: function(){
+		var content = $('#pagecontainer')
+
+		var scrollTop = content.scrollTop()
+		var maxScrollTop = content[0].scrollHeight - content.innerHeight()
+
+		if(scrollTop === 0){
+			content.scrollTop(1)
+		}
+		else if(scrollTop === maxScrollTop){
+			content.scrollTop(maxScrollTop-1)
+		}
+	},
 })
 
 OddcastAvatarExternalModule.initializeIFrame()

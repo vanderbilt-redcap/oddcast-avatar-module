@@ -3,10 +3,23 @@ html {
 }
 body {
 	width: 100vw;
+	max-height: 100vh;
 	background-color: #333; /* Override the background to prevent users from picking a lighter color which looks funny with the avatar. */
 	overflow-x: hidden; /* Removes the horizontal scrollbar on the body inside the iframe for some scenarios */
 	max-width: 1100px;
 	margin: auto;
+}
+
+/*
+	Scrolling inside the iframe seems to work much better on iPad.
+	Scrolling in the parent caused a lot of odd issues,
+	especially when navigating between pages (short & long)
+	and interacting with text fields.
+ */
+#pagecontainer{
+	max-height: 100vh;
+	overflow-y: scroll;
+	overflow-x: hidden;
 }
 
 #footer a {
@@ -30,16 +43,14 @@ body {
 #oddcast-content{
 	flex: 1;
 	max-width: 800px;
-	-webkit-overflow-scrolling: touch;
-	/*overflow-y: scroll;*/
 	overflow-x: hidden;
 }
 
 #oddcast-content > iframe{
 	display: block; /* This prevents a few pixels of whitespace from appearing below the iframe. */
 	border: 0px;
-	min-height: 101%; /* Making the iframe always slightly larger than the screen ensures that the iframe always stays scrollable when navigating between pages on iPad (especially short and long pages) */
 	width: 100%;
+	height: 100%;
 }
 
 body.modal-open #oddcast-sidebar,
