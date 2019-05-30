@@ -57,12 +57,6 @@ OddcastAvatarExternalModule.addProperties({
 		})
 
 		$('.oddcast-character').click(function () {
-			if(!OddcastAvatarExternalModule.getTextIntroModal().hasClass('show')){
-				// Another click is already in progress
-				// Do nothing to prevent multiple page messages from being read
-				return
-			}
-
 			var showId = $(this).data('show-id')
 			OddcastAvatarExternalModule.showId = showId
 
@@ -426,7 +420,7 @@ OddcastAvatarExternalModule.addProperties({
 		var textIntroModal = OddcastAvatarExternalModule.getTextIntroModal()
 
 		// Hide the dialog but leave the backdrop displayed until the scene is loaded.
-		textIntroModal.removeClass('show')
+		textIntroModal.hide()
 
 		// Wait until the avatar is loaded in the background initially, or we could see a flash of the wrong character.
 		OddcastAvatarExternalModule.afterSceneLoaded(function () {
