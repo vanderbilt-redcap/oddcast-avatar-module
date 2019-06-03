@@ -38,7 +38,7 @@ OddcastAvatarExternalModule.addProperties({
 			})
 		})
 
-		$('#oddcast-controls .fa-play-circle').click(function(){
+		this.getPlayButton().click(function(){
 			if(OddcastAvatarExternalModule.isPaused){
 				freezeToggle()
 				OddcastAvatarExternalModule.isPaused = false
@@ -50,7 +50,7 @@ OddcastAvatarExternalModule.addProperties({
 			}
 		})
 
-		$('#oddcast-controls .fa-pause-circle').click(function(){
+		this.getPauseButton().click(function(){
 			freezeToggle()
 			OddcastAvatarExternalModule.isPaused = true
 			OddcastAvatarExternalModule.togglePlayAndPauseButtons(false)
@@ -499,8 +499,8 @@ OddcastAvatarExternalModule.addProperties({
 		OddcastAvatarExternalModule.callOnTarget($('#oddcast-content > iframe')[0].contentWindow, arguments)
 	},
 	togglePlayAndPauseButtons: function(isPlaying){
-		var playButton = $('#oddcast-controls .fa-play-circle')
-		var pauseButton = $('#oddcast-controls .fa-pause-circle')
+		var playButton = this.getPlayButton()
+		var pauseButton = this.getPauseButton()
 
 		if(isPlaying){
 			playButton.hide()
@@ -510,6 +510,12 @@ OddcastAvatarExternalModule.addProperties({
 			pauseButton.hide()
 			playButton.show()
 		}
+	},
+	getPlayButton: function(){
+		return $('#oddcast-controls .fa-play-circle')
+	},
+	getPauseButton: function(){
+		return $('#oddcast-controls .fa-pause-circle')
 	}
 })
 
