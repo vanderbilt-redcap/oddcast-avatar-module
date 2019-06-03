@@ -144,6 +144,16 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 								return;
 							}
 
+							// In order to prime audio on iOS, be must hook into the play() method BEFORE Oddcast's internal <audio> element is created
+							var originalPlay = Audio.prototype.play
+							Audio.prototype.play = function(){
+								if(OddcastAvatarExternalModule.primingAudio){
+									this.src =  <?=json_encode($this->getUrl('empty.mp3'))?>;
+								}
+
+								return originalPlay.apply(this, arguments)
+							}
+
 							AC_VHost_Embed(6267283, 300, 400, '', 1, 1, <?=array_keys(OddcastAvatarExternalModule::$SHOWS)[0]?>, 0, 1, 0, '709e320dba1a392fa4e863ef0809f9f1', 0);
 						})()
 					</script>

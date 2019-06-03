@@ -300,6 +300,7 @@ OddcastAvatarExternalModule.addProperties({
 				OddcastAvatarExternalModule.sayPageMessage('page message played automatically')
 			}
 			else{
+				OddcastAvatarExternalModule.primeAudioPlayingOnIOS()
 				pageMessageButton.hide()
 			}
 		})
@@ -356,6 +357,20 @@ OddcastAvatarExternalModule.addProperties({
 
 		stopSpeech()
 		sayText(text, OddcastAvatarExternalModule.person, 1, OddcastAvatarExternalModule.engine)
+	},
+	primeAudioPlayingOnIOS: function(){
+		if(OddcastAvatarExternalModule.primingAudio !== undefined){
+			// We've already primed audio.  Do nothing.
+			return
+		}
+
+		// We must prime audio on iOS when a character is selected, since a user action is required to trigger the first audio (or video) playback after page load.
+		// If we don't, and there is no page message on page one, the page message on page two will not play.
+		OddcastAvatarExternalModule.primingAudio = true
+
+		// This text doesn't matter because it will get replaced,
+		// but we might as well go with a short message to make priming as fast as possible.
+		OddcastAvatarExternalModule.sayText("a")
 	},
 	loadShowByID: function (showId) {
 		OddcastAvatarExternalModule.scenedLoaded = false
@@ -506,10 +521,19 @@ function vh_sceneLoaded() {
 }
 
 function vh_talkStarted() {
+	if(OddcastAvatarExternalModule.primingAudio){
+		return // don't show the pause/play buttons if we're just priming audio
+	}
+
 	OddcastAvatarExternalModule.togglePlayAndPauseButtons(true)
 }
 
 function vh_talkEnded() {
+	if(OddcastAvatarExternalModule.primingAudio){
+		OddcastAvatarExternalModule.primingAudio = false // stop priming audio so the next sayText() call works
+		return // don't show the pause/play buttons if we're just priming audio
+	}
+
 	OddcastAvatarExternalModule.togglePlayAndPauseButtons(false)
 }
 
