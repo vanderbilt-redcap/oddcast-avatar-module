@@ -38,7 +38,7 @@ OddcastAvatarExternalModule.addProperties({
 			})
 		})
 
-		this.getPlayButton().click(function(){
+		OddcastAvatarExternalModule.getPlayButton().click(function(){
 			if(OddcastAvatarExternalModule.isPaused){
 				freezeToggle()
 				OddcastAvatarExternalModule.isPaused = false
@@ -50,7 +50,7 @@ OddcastAvatarExternalModule.addProperties({
 			}
 		})
 
-		this.getPauseButton().click(function(){
+		OddcastAvatarExternalModule.getPauseButton().click(function(){
 			freezeToggle()
 			OddcastAvatarExternalModule.isPaused = true
 			OddcastAvatarExternalModule.togglePlayAndPauseButtons(false)
@@ -61,6 +61,10 @@ OddcastAvatarExternalModule.addProperties({
 			OddcastAvatarExternalModule.showId = showId
 
 			OddcastAvatarExternalModule.maximizeAvatar()
+
+			// Hide the play/pause buttons since they won't work again yet if there's not a page message.
+			OddcastAvatarExternalModule.getPlayButton().hide()
+			OddcastAvatarExternalModule.getPauseButton().hide()
 
 			OddcastAvatarExternalModule.log('character selected', {
 				'show id': showId
