@@ -151,6 +151,9 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 									this.src =  <?=json_encode($this->getUrl('empty.mp3'))?>;
 								}
 
+								// Regardless of how primingAudio was set, we won't need to prime it any more after the call below,
+								OddcastAvatarExternalModule.primingAudio = false
+
 								return originalPlay.apply(this, arguments)
 							}
 

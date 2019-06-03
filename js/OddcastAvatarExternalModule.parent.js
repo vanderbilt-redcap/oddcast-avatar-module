@@ -364,12 +364,9 @@ OddcastAvatarExternalModule.addProperties({
 	},
 	primeAudioPlayingOnIOS: function(){
 		if(OddcastAvatarExternalModule.primingAudio !== undefined){
-			// We've already primed audio.  Do nothing.
 			return
 		}
 
-		// We must prime audio on iOS when a character is selected, since a user action is required to trigger the first audio (or video) playback after page load.
-		// If we don't, and there is no page message on page one, the page message on page two will not play.
 		OddcastAvatarExternalModule.primingAudio = true
 
 		// This text doesn't matter because it will get replaced,
@@ -540,7 +537,6 @@ function vh_talkStarted() {
 
 function vh_talkEnded() {
 	if(OddcastAvatarExternalModule.primingAudio){
-		OddcastAvatarExternalModule.primingAudio = false // stop priming audio so the next sayText() call works
 		return // don't show the pause/play buttons if we're just priming audio
 	}
 
