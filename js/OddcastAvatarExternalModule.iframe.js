@@ -24,10 +24,14 @@ OddcastAvatarExternalModule.addProperties({
 		var originalPlayAudioObject = window.playAudioObject
 		window.playAudioObject = function(ob,iconob,event){
 			var originalIsMobileDevice = isMobileDevice
+			var originalIsIOS = isIOS
+			var originalAgt = agt
 
-			// isMobileDevice is incorrectly detected inside the iframe, and regardless we want TTS to work even on mobile with the avatar.
-			// Temporarily reset this value just for this function call.
+			// REDCap normally doesn't support TTS on mobile/tablet.
+			// Override these flags to trick it into allowing this call anyway, since the avatar will be reading the message instead.
 			isMobileDevice = false
+			isIOS = false
+			agt = ''
 
 			var speakerIconUrl = iconob.src
 			var argumentArray = Array.prototype.slice.call(arguments)
@@ -35,6 +39,8 @@ OddcastAvatarExternalModule.addProperties({
 			iconob.src = speakerIconUrl
 
 			isMobileDevice = originalIsMobileDevice
+			isIOS = originalIsIOS
+			agt = originalAgt
 		}
 
 		window.playAudio = function(text, iconob){
