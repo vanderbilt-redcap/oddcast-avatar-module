@@ -147,12 +147,9 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 							// In order to prime audio on iOS, be must hook into the play() method BEFORE Oddcast's internal <audio> element is created
 							var originalPlay = Audio.prototype.play
 							Audio.prototype.play = function(){
-								if(OddcastAvatarExternalModule.primingAudio){
+								if(!OddcastAvatarExternalModule.isAudioPrimed){
 									this.src =  <?=json_encode($this->getUrl('empty.mp3'))?>;
 								}
-
-								// Regardless of how primingAudio was set, we won't need to prime it any more after the call below,
-								OddcastAvatarExternalModule.primingAudio = false
 
 								return originalPlay.apply(this, arguments)
 							}

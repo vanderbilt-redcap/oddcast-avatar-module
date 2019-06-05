@@ -304,7 +304,6 @@ OddcastAvatarExternalModule.addProperties({
 				OddcastAvatarExternalModule.sayPageMessage('page message played automatically')
 			}
 			else{
-				OddcastAvatarExternalModule.primeAudioPlayingOnIOS()
 				pageMessageButton.hide()
 			}
 		})
@@ -361,17 +360,6 @@ OddcastAvatarExternalModule.addProperties({
 
 		stopSpeech()
 		sayText(text, OddcastAvatarExternalModule.person, 1, OddcastAvatarExternalModule.engine)
-	},
-	primeAudioPlayingOnIOS: function(){
-		if(OddcastAvatarExternalModule.primingAudio !== undefined){
-			return
-		}
-
-		OddcastAvatarExternalModule.primingAudio = true
-
-		// This text doesn't matter because it will get replaced,
-		// but we might as well go with a short message to make priming as fast as possible.
-		OddcastAvatarExternalModule.sayText("a")
 	},
 	loadShowByID: function (showId) {
 		OddcastAvatarExternalModule.scenedLoaded = false
@@ -441,6 +429,17 @@ OddcastAvatarExternalModule.addProperties({
 		// Wait until the avatar is loaded in the background initially, or we could see a flash of the wrong character.
 		OddcastAvatarExternalModule.afterSceneLoaded(function () {
 			// The initial show is loaded, but we may not want to use this one so we load our own show later.
+
+			if(!OddcastAvatarExternalModule.isAudioPrimed){
+				// Android & iOS require a user action (not within an iframe) to trigger the initial playing of audio.
+				// In case there is not page message on the first page, we must prime audio so that the next page message will play.
+				// We prime before showing the avatar initially so users can't see it's mouth move.
+				// The text said doesn't matter because it will get replaced with silence,
+				// but we might as well go with a short message to make priming as fast as possible.
+				// We must call oddcast's method directly since the avatar isn't really enabled by our definition yet.
+				sayText('a', 7, 1, 2)
+				return
+			}
 
 			// Wait to hide the modal until a scene has been loaded to prevent the survey from shifting down on slow connections.
 			textIntroModal.modal('hide')
@@ -528,7 +527,7 @@ function vh_sceneLoaded() {
 }
 
 function vh_talkStarted() {
-	if(OddcastAvatarExternalModule.primingAudio){
+	if(!OddcastAvatarExternalModule.isAudioPrimed){
 		return // don't show the pause/play buttons if we're just priming audio
 	}
 
@@ -536,7 +535,12 @@ function vh_talkStarted() {
 }
 
 function vh_talkEnded() {
-	if(OddcastAvatarExternalModule.primingAudio){
+	if(!OddcastAvatarExternalModule.isAudioPrimed){
+		OddcastAvatarExternalModule.isAudioPrimed = true
+
+		// Call maximize again now that audio is primed
+		OddcastAvatarExternalModule.maximizeAvatar()
+
 		return // don't show the pause/play buttons if we're just priming audio
 	}
 
