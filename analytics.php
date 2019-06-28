@@ -43,6 +43,11 @@ require_once 'header.php';
 	.flatpickr-current-month .flatpickr-monthDropdown-months{
 		height: 27px;
 	}
+
+	.dataTables_length label{
+		margin-top: 3px;
+		margin-left: 10px;
+	}
 </style>
 
 <br>
@@ -111,7 +116,28 @@ while($row = db_fetch_assoc($results)){
 			columns: columns,
 			order: [[0, 'desc']],
 			data: <?=json_encode($data)?>,
-			searching: false
+			searching: false,
+			dom: 'Blftip',
+			buttons: [
+				{
+					text: 'Export Details as CSV',
+					action: function (e, dt, node, config) {
+						$.ajax({
+							"url": <?=json_encode($module->getUrl('csv.php'))?>,
+							"data": dt.ajax.params(),
+							"success": function(res, status, xhr) {
+								var csvData = new Blob([res], {type: 'text/csv;charset=utf-8;'});
+								var csvURL = window.URL.createObjectURL(csvData);
+								var tempLink = document.createElement('a');
+								var filename = <?=json_encode(REDCap::getProjectTitle())?> + " - Avatar Analytics - " + $('input[name=start-date]').val() + " to " + $('input[name=end-date]').val() + '.csv'
+								tempLink.href = csvURL;
+								tempLink.setAttribute('download', filename);
+								tempLink.click();
+							}
+						});
+					}
+				}
+			]
 		})
 
 		table.on('click', 'tbody tr', function(){
