@@ -13,6 +13,10 @@ const TEMPORARY_RECORD_ID_TO_DELETE = 'temporary-record-id-to-delete';
 
 class OddcastAvatarExternalModule extends AbstractExternalModule
 {
+	const SECONDS_PER_MINUTE = 60;
+	const SECONDS_PER_HOUR = self::SECONDS_PER_MINUTE*60;
+	const SECONDS_PER_DAY = self::SECONDS_PER_HOUR*24;
+
 	static $SHOWS = [
 		2560288 => 'female',
 		2560294 => 'female',
@@ -1389,6 +1393,28 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				?>
 			</table>
 			<?php
+		}
+	}
+
+	function formatDate($time){
+		return date('Y-m-d', $time);
+	}
+
+	function getStartDate(){
+		return $this->getPostParam('start-date', $this->formatDate(time() - self::SECONDS_PER_DAY*30));
+	}
+
+	function getEndDate(){
+		return $this->getPostParam('end-date', $this->formatDate(time()));
+	}
+
+	function getPostParam($name, $defaultValue){
+		$value = \db_real_escape_string(@$_POST[$name]);
+		if($value){
+			return $value;
+		}
+		else{
+			return $defaultValue;
 		}
 	}
 }
