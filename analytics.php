@@ -62,32 +62,6 @@ require_once 'header.php';
 
 <table id="analytics-table" class="table table-striped table-bordered"></table>
 
-<?php
-
-$startDate = $module->getStartDate();
-$endDate = $module->getEndDate();
-
-// Bump the end date to the next day so all events on the day specified are include
-$endDate = $module->formatDate(strtotime($endDate) + $module::SECONDS_PER_DAY);
-
-$sql = "
-	select timestamp, record, instrument
-	where
-		record not like 'external-modules-temporary-record-id-%'
-		and message = 'survey complete'
-		and instrument is not null
-		and timestamp >= '$startDate' and timestamp <= '$endDate'
-";
-
-$results = $module->queryLogs($sql);
-
-$data = [];
-while($row = db_fetch_assoc($results)){
-	$data[] = $row;
-}
-
-?>
-
 <script>
 	$(function() {
 		var table = $('#analytics-table')
@@ -115,7 +89,7 @@ while($row = db_fetch_assoc($results)){
 		table.DataTable({
 			columns: columns,
 			order: [[0, 'desc']],
-			data: <?=json_encode($data)?>,
+			data: <?=json_encode($module->getRecords())?>,
 			searching: false,
 			dom: 'Blftip',
 			buttons: [

@@ -1417,4 +1417,30 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			return $defaultValue;
 		}
 	}
+
+	function getRecords(){
+		$startDate = $this->getStartDate();
+		$endDate = $this->getEndDate();
+
+		// Bump the end date to the next day so all events on the day specified are include
+		$endDate = $this->formatDate(strtotime($endDate) + self::SECONDS_PER_DAY);
+
+		$sql = "
+			select timestamp, record, instrument
+			where
+				record not like 'external-modules-temporary-record-id-%'
+				and message = 'survey complete'
+				and instrument is not null
+				and timestamp >= '$startDate' and timestamp <= '$endDate'
+		";
+
+		$results = $this->queryLogs($sql);
+
+		$data = [];
+		while($row = db_fetch_assoc($results)){
+			$data[] = $row;
+		}
+
+		return $data;
+	}
 }
