@@ -76,6 +76,12 @@ OddcastAvatarExternalModule.addProperties({
 			OddcastAvatarExternalModule.minimizeAvatar()
 		})
 
+		$('#pagecontainer').hide()
+		var wrapper = OddcastAvatarExternalModule.getWrapper()
+		$('body').prepend(wrapper)
+
+		wrapper.removeClass('hidden')
+
 		OddcastAvatarExternalModule.initTimeout()
 		OddcastAvatarExternalModule.handleViewHeight()
 
