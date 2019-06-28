@@ -13,6 +13,8 @@ const TEMPORARY_RECORD_ID_TO_DELETE = 'temporary-record-id-to-delete';
 
 class OddcastAvatarExternalModule extends AbstractExternalModule
 {
+	const TIMESTAMP_COLUMN = 'UNIX_TIMESTAMP(timestamp) as timestamp';
+
 	const SECONDS_PER_MINUTE = 60;
 	const SECONDS_PER_HOUR = self::SECONDS_PER_MINUTE*60;
 	const SECONDS_PER_DAY = self::SECONDS_PER_HOUR*24;
@@ -1032,7 +1034,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			$sql = "
 				select
 					log_id,
-					" . TIMESTAMP_COLUMN . "
+					" . self::TIMESTAMP_COLUMN . "
 				where
 					record = '$record'
 					and instrument = '$instrument'
@@ -1071,7 +1073,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		$sql = $this->getQueryLogsSql("
 			select
 				log_id,
-				" . TIMESTAMP_COLUMN . ",
+				" . self::TIMESTAMP_COLUMN . ",
 				message,
 				page,
 				`show id`,
@@ -1401,15 +1403,15 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 	}
 
 	function getStartDate(){
-		return $this->getPostParam('start-date', $this->formatDate(time() - self::SECONDS_PER_DAY*30));
+		return $this->getParam('start-date', $this->formatDate(time() - self::SECONDS_PER_DAY*30));
 	}
 
 	function getEndDate(){
-		return $this->getPostParam('end-date', $this->formatDate(time()));
+		return $this->getParam('end-date', $this->formatDate(time()));
 	}
 
-	function getPostParam($name, $defaultValue){
-		$value = \db_real_escape_string(@$_POST[$name]);
+	function getParam($name, $defaultValue){
+		$value = \db_real_escape_string(@$_REQUEST[$name]);
 		if($value){
 			return $value;
 		}

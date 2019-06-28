@@ -4,8 +4,6 @@ require_once 'header.php';
 
 use Exception;
 
-const TIMESTAMP_COLUMN = 'UNIX_TIMESTAMP(timestamp) as timestamp';
-
 $module->runReportUnitTests();
 
 $record = db_escape($_GET['record']);

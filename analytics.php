@@ -4,6 +4,8 @@ namespace Vanderbilt\OddcastAvatarExternalModule;
 use REDCap;
 
 require_once 'header.php';
+
+$module->runReportUnitTests();
 ?>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -96,14 +98,17 @@ require_once 'header.php';
 				{
 					text: 'Export Details as CSV',
 					action: function (e, dt, node, config) {
+						var startDate = $('input[name=start-date]').val()
+						var endDate = $('input[name=end-date]').val();
+
 						$.ajax({
-							"url": <?=json_encode($module->getUrl('csv.php'))?>,
+							"url": <?=json_encode($module->getUrl('csv.php'))?> + '&start-date=' + startDate + '&end-date' + endDate,
 							"data": dt.ajax.params(),
 							"success": function(res, status, xhr) {
 								var csvData = new Blob([res], {type: 'text/csv;charset=utf-8;'});
 								var csvURL = window.URL.createObjectURL(csvData);
 								var tempLink = document.createElement('a');
-								var filename = <?=json_encode(REDCap::getProjectTitle())?> + " - Avatar Analytics - " + $('input[name=start-date]').val() + " to " + $('input[name=end-date]').val() + '.csv'
+								var filename = <?=json_encode(REDCap::getProjectTitle())?> + " - Avatar Analytics - " + startDate + " to " + endDate + '.csv'
 								tempLink.href = csvURL;
 								tempLink.setAttribute('download', filename);
 								tempLink.click();
