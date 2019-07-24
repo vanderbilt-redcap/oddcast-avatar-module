@@ -364,6 +364,10 @@ OddcastAvatarExternalModule.addProperties({
 		// loadShow() is designed to load by index, but we don't want to do that since index is affected by adding/removing shows in the list.
 		// Setting this window var then omitting the show index parameter will effectively load by show ID instead of index.
 		window.vhsshtml5_ss_var = showId
+
+		// Oddcast didn't used to require this to be set, but now they require it for loadShow() to trigger the vh_sceneLoaded() call.
+		vhsshtml5_vh_sceneLoaded = 0
+
 		loadShow()
 	},
 	onSceneLoaded: function () {
