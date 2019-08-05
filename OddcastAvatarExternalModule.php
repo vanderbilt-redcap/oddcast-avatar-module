@@ -278,6 +278,14 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				left: 0px;
 				z-index: 9999999;
 			}
+
+			body{
+				/*
+					Override the background to prevent users from picking a lighter color which looks funny with the avatar.
+					Defining this here also makes sure the background color matches on the page where return codes are entered.
+				*/
+				background-color: #333;
+			}
 		</style>
 		<div id="oddcast-loading-overlay"></div>
 		<script>
