@@ -258,7 +258,14 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		}
 
 		if (!$this->isSurveyPage()) {
-			return false;
+			return;
+		}
+
+		if(isset($_GET['__return'])){
+			// This is the page where return codes are entered.
+			// The redcap_survey_page hook will not get called on this page, so call loadAvatar() now.
+			$this->loadAvatar();
+			return;
 		}
 
 		?>
@@ -290,14 +297,8 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		<div id="oddcast-loading-overlay"></div>
 		<script>
 			if(window.frameElement){
-				// This could be the page where return codes are entered.
-				// Go ahead and hide the loading indicator.
+				// We're in an iframe.  Go ahead and hide the loading indicator.
 				$('#oddcast-loading-overlay').fadeOut(200)
-
-				setInterval(function(){
-//					alert(1)
-//					$('#oddcast-loading-overlay').fadeOut(200)
-				}, 1000)
 			}
 		</script>
 		<?php
