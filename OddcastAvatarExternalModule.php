@@ -679,6 +679,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				['message' => 'character selected', 'show id' => $showId],
 				['message' => 'survey complete'],
 				['message' => 'survey page loaded', 'instrument' => 'instrument2'],
+				['message' => 'this message creates a gap between the surrounding logs so that the following event is not assumed to be the initial character selection dialog'],
 				['message' => 'character selected', 'show id' => $showId2],
 				['message' => 'survey complete'],
 			],
@@ -687,12 +688,12 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				[
 					'show id' => $showId,
 					'startIndex' => 3,
-					'endIndex' => 4
+					'endIndex' => 5
 				],
 				[
 					'show id' => $showId2,
-					'startIndex' => 4,
-					'endIndex' => 5
+					'startIndex' => 5,
+					'endIndex' => 6
 				]
 			]
 		);
@@ -720,6 +721,31 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 					'show id' => $showId,
 					'startIndex' => 5,
 					'endIndex' => 6
+				]
+			]
+		);
+
+		// second of two instruments opened at different times via direct links from participant list
+		// avatar was left open on first instrument, but that avatar period should not be included on the second instrument
+		$this->assertAvatarUsagePeriods(
+			[
+				['message' => 'survey page loaded', 'instrument' => 'instrument1'],
+				['message' => 'character selected', 'show id' => $showId],
+				['message' => 'survey page loaded', 'instrument' => 'instrument2'],
+				['message' => 'character selected', 'show id' => $showId2],
+				['message' => 'some action to simulator the user staying on the survey after selecting the character'],
+			],
+			'instrument2',
+			[
+				[
+					'startIndex' => 2,
+					'endIndex' => 3,
+					'initialSelectionDialog' => true
+				],
+				[
+					'show id' => $showId2,
+					'startIndex' => 3,
+					'endIndex' => 4
 				]
 			]
 		);
@@ -771,6 +797,8 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		) = $this->analyzeLogEntries($instrument, $results);
 
 		if(count($avatarUsagePeriods) !== count($expectedPeriods)){
+			$this->dump($expectedPeriods, '$expected');
+			$this->dump($avatarUsagePeriods, '$actual');
 			throw new Exception("Expected " . count($expectedPeriods) . " usage period(s), but found " . count($avatarUsagePeriods));
 		}
 
@@ -1138,7 +1166,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			}
 
 			// Handle avatar messages for the requested instrument as well as all prior instruments on this record, to make sure we detect avatars still enabled from previous instruments.
-			$this->handleAvatarMessages($log, $firstSurveyLog, $lastSurveyLog, $avatarUsagePeriods);
+			$this->handleAvatarMessages($log, $previousLog, $firstSurveyLog, $lastSurveyLog, $avatarUsagePeriods);
 
 			if(!$firstSurveyLog){
 				// This log is for a earlier instrument on this same record.
@@ -1166,7 +1194,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		}
 
 		// Re-handle the last survey log message now that we know it's the last one
-		$this->handleAvatarMessages($lastSurveyLog, $firstSurveyLog, $lastSurveyLog, $avatarUsagePeriods);
+		$this->handleAvatarMessages($lastSurveyLog, $previousLog, $firstSurveyLog, $lastSurveyLog, $avatarUsagePeriods);
 
 		return [
 			$firstReviewModeLog,
@@ -1256,7 +1284,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		}
 	}
 
-	private function handleAvatarMessages($log, $firstSurveyLog, $lastSurveyLog, &$avatarUsagePeriods)
+	private function handleAvatarMessages($log, $previousLog, $firstSurveyLog, $lastSurveyLog, &$avatarUsagePeriods)
 	{
 		$currentAvatar = null;
 		if(!empty($avatarUsagePeriods)){
@@ -1284,17 +1312,28 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			// Remove usage periods from previous instruments.
 			$avatarUsagePeriods = [];
 
-			if(empty($currentAvatar)){
-				// No avatar period was added from a previous instrument.
-				// This must be the first instrument and the initial avatar selection popup must be displayed.
-				$initialSelectionDialog = true;
+			if($currentAvatar){
+				$avatarDisabled = $currentAvatar['disabled'];
 			}
 			else{
-				$avatarDisabled = $currentAvatar['disabled'];
+				// No avatar period was added from a previous instrument.
+			    // This must be the first instrument and the initial avatar selection popup must be displayed,
+				// but we'll detect/set that later instead so an edge case is covered.
 			}
 		}
 		else if($characterSelected){
 			$showId = $log['show id'];
+
+			if($previousLog === $firstSurveyLog && $currentAvatar){
+				// Assume the current period is the initial character selection dialog
+				// We detect the initial character selection dialog here so that it also covers the case where
+				// an avatar is left enabled on the first instrument and the second instrument is opened via a participant list link
+				// instead of the iframe where the first instrument was loaded (where the avatar could still be enabled).
+				// If no other events occur between the first survey log and the character selection event, this will incorrectly detect
+				// the reused window/iframe case as displaying an initial character selection dialog, but that's an acceptable compromise.
+				$currentAvatar['initialSelectionDialog'] = true;
+				$currentAvatar['show id'] = null;
+			}
 		}
 
 		if($currentAvatar){
