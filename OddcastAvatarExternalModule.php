@@ -466,6 +466,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 	public function runReportUnitTests()
 	{
 		$this->testGetTimePeriodString();
+		$this->testAnalyzeLogEntries_basics();
 		$this->testAnalyzeLogEntries_avatar();
 		$this->testAnalyzeLogEntries_video();
 	}
@@ -477,6 +478,35 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		echo "</pre>";
 	}
 
+	private function testAnalyzeLogEntries_basics()
+	{
+		$instrument = 'instrument1';
+
+		$logs = [
+			['message' => 'survey page loaded', 'instrument' => 'instrument1'],
+			['message' => 'survey page loaded', 'instrument' => 'instrument1'],
+		];
+
+		$logs = $this->flushOutMockLogs($logs);
+
+		$results = new MockMySQLResult($logs);
+
+		list(
+			$firstReviewModeLog,
+			$firstSurveyLog,
+			$lastSurveyLog,
+			$avatarUsagePeriods
+		) = $this->analyzeLogEntries($instrument, $results);
+
+		$this->assertSame(1, $lastSurveyLog['timestamp'] - $firstSurveyLog['timestamp']);
+	}
+
+	private function assertSame($expected, $actual){
+		if($expected !== $actual){
+			throw new Exception("The value '$actual' is not the same (or not the same type) as '$expected'.");
+		}
+	}
+
 	private function testAnalyzeLogEntries_avatar()
 	{
 		$showId = rand();
@@ -485,12 +515,33 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		// basic usage
 		$this->assertAvatarUsagePeriods(
 			[
-				['message' => 'survey page loaded'],
+				['message' => 'survey page loaded', 'instrument' => 'instrument1'],
 				['message' => 'character selected', 'show id' => $showId],
 				['message' => 'survey complete'],
 			],
-			0,
-			2,
+			'instrument1',
+			[
+				[
+					'startIndex' => 0,
+					'endIndex' => 1,
+					'initialSelectionDialog' => true
+				],
+				[
+					'show id' => $showId,
+					'startIndex' => 1,
+					'endIndex' => 2
+				]
+			]
+		);
+
+		// basic usage without survey complete event
+		$this->assertAvatarUsagePeriods(
+			[
+				['message' => 'survey page loaded', 'instrument' => 'instrument1'],
+				['message' => 'character selected', 'show id' => $showId],
+				['message' => 'survey page loaded', 'instrument' => 'instrument1'],
+			],
+			'instrument1',
 			[
 				[
 					'startIndex' => 0,
@@ -508,13 +559,12 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		// different character selections
 		$this->assertAvatarUsagePeriods(
 			[
-				['message' => 'survey page loaded'],
+				['message' => 'survey page loaded', 'instrument' => 'instrument1'],
 				['message' => 'character selected', 'show id' => $showId],
 				['message' => 'character selected', 'show id' => $showId2],
 				['message' => 'survey complete'],
 			],
-			0,
-			3,
+			'instrument1',
 			[
 				[
 					'startIndex' => 0,
@@ -537,13 +587,12 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		// repeated character selections
 		$this->assertAvatarUsagePeriods(
 			[
-				['message' => 'survey page loaded'],
+				['message' => 'survey page loaded', 'instrument' => 'instrument1'],
 				['message' => 'character selected', 'show id' => $showId],
 				['message' => 'character selected', 'show id' => $showId],
 				['message' => 'survey complete'],
 			],
-			0,
-			3,
+			'instrument1',
 			[
 				[
 					'startIndex' => 0,
@@ -566,14 +615,13 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		// disabling and enabling
 		$this->assertAvatarUsagePeriods(
 			[
-				['message' => 'survey page loaded'],
+				['message' => 'survey page loaded', 'instrument' => 'instrument1'],
 				['message' => 'character selected', 'show id' => $showId],
 				['message' => 'avatar disabled'],
 				['message' => 'avatar enabled'],
 				['message' => 'survey complete'],
 			],
-			0,
-			4,
+			'instrument1',
 			[
 				[
 					'startIndex' => 0,
@@ -602,15 +650,14 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		// first of two instruments
 		$this->assertAvatarUsagePeriods(
 			[
-				['message' => 'survey page loaded'],
+				['message' => 'survey page loaded', 'instrument' => 'instrument1'],
 				['message' => 'character selected', 'show id' => $showId],
 				['message' => 'survey complete'],
-				['message' => 'survey page loaded'],
+				['message' => 'survey page loaded', 'instrument' => 'instrument2'],
 				['message' => 'character selected', 'show id' => $showId2],
 				['message' => 'survey complete'],
 			],
-			0,
-			2,
+			'instrument1',
 			[
 				[
 					'startIndex' => 0,
@@ -628,15 +675,14 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		// second of two instruments, and avatar left enabled from first
 		$this->assertAvatarUsagePeriods(
 			[
-				['message' => 'survey page loaded'],
+				['message' => 'survey page loaded', 'instrument' => 'instrument1'],
 				['message' => 'character selected', 'show id' => $showId],
 				['message' => 'survey complete'],
-				['message' => 'survey page loaded'],
+				['message' => 'survey page loaded', 'instrument' => 'instrument2'],
 				['message' => 'character selected', 'show id' => $showId2],
 				['message' => 'survey complete'],
 			],
-			3,
-			5,
+			'instrument2',
 			[
 				[
 					'show id' => $showId,
@@ -654,16 +700,15 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		// second of two instruments, and avatar left disabled from first
 		$this->assertAvatarUsagePeriods(
 			[
-				['message' => 'survey page loaded'],
+				['message' => 'survey page loaded', 'instrument' => 'instrument1'],
 				['message' => 'character selected', 'show id' => $showId],
 				['message' => 'avatar disabled'],
 				['message' => 'survey complete'],
-				['message' => 'survey page loaded'],
+				['message' => 'survey page loaded', 'instrument' => 'instrument2'],
 				['message' => 'avatar enabled'],
 				['message' => 'survey complete'],
 			],
-			4,
-			6,
+			'instrument2',
 			[
 				[
 					'show id' => $showId,
@@ -712,21 +757,18 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		return $logs;
 	}
 
-	private function assertAvatarUsagePeriods($logs, $firstSurveyIndex, $surveyCompleteIndex, $expectedPeriods)
+	private function assertAvatarUsagePeriods($logs, $instrument, $expectedPeriods)
 	{
 		$logs = $this->flushOutMockLogs($logs);
-
-		$firstSurveyLog = $logs[$firstSurveyIndex];
-		$surveyCompleteLog = $logs[$surveyCompleteIndex];
 
 		$results = new MockMySQLResult($logs);
 
 		list(
 			$firstReviewModeLog,
 			$firstSurveyLog,
-			$surveyCompleteLog,
+			$lastSurveyLog,
 			$avatarUsagePeriods
-		) = $this->analyzeLogEntries($firstSurveyLog, $surveyCompleteLog, $results);
+		) = $this->analyzeLogEntries($instrument, $results);
 
 		if(count($avatarUsagePeriods) !== count($expectedPeriods)){
 			throw new Exception("Expected " . count($expectedPeriods) . " usage period(s), but found " . count($avatarUsagePeriods));
@@ -791,11 +833,11 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			[]
 		);
 
-		// tess all messages that stop play
+		// test all messages that stop play
 		$this->assertVideoStats(
 			[
+				// survey page loaded messages will be added and tested automatically
 				['message' => 'video played'],
-				// survey page loaded & complete messages will be added and tested automatically
 			],
 			[
 				'video_1' => [
@@ -827,6 +869,25 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 					'playCount' => 1,
 				]
 			]
+		);
+
+		// assert stats only for the current instrument are used
+		$this->assertVideoStats(
+			[
+				['message' => 'survey page loaded', 'instrument' => 'previous_instrument'],
+				['message' => 'video played', 'field' => 'video_in_previous_instrument'],
+				['message' => 'survey page loaded', 'instrument' => 'instrument1'],
+				['message' => 'video played'],
+				['message' => 'some other action while video is still playing'],
+				['message' => 'survey page loaded', 'instrument' => 'instrument1'],
+			],
+			[
+				'video_1' => [
+					'playTime' => 2,
+					'playCount' => 1,
+				]
+			],
+			false
 		);
 
 		// test two play events in a row
@@ -934,8 +995,8 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				['message' => 'foo'],
 				['message' => 'foo'],
 
-				['message' => 'survey page loaded'],
-				['message' => 'survey page loaded'],
+				['message' => 'survey page loaded', 'instrument' => 'instrument1'],
+				['message' => 'survey page loaded', 'instrument' => 'instrument1'],
 				['message' => 'video played', 'seconds' => 0],
 				['message' => 'video paused'],
 			],
@@ -986,35 +1047,27 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		);
 	}
 
-	private function assertVideoStats($logs, $expectedStats, $addTrailingSurveyPageLog = null)
+	private function assertVideoStats($logs, $expectedStats, $wrapInPageLoadLogs = true)
 	{
-		if($addTrailingSurveyPageLog === null){
-			// Run this method twice, both with and without a trailing survey page log.
-			$this->assertVideoStats($logs, $expectedStats, true);
-			$this->assertVideoStats($logs, $expectedStats, false);
-			return;
-		}
+		$instrument = 'instrument1';
 
-		if($addTrailingSurveyPageLog){
-			array_unshift($logs, ['message' => 'survey page loaded']);
+		if($wrapInPageLoadLogs){
+			$pageLoadLog = ['message' => 'survey page loaded', 'instrument' => $instrument];
+			array_unshift($logs, $pageLoadLog);
+			array_push($logs, $pageLoadLog);
 		}
-
-		array_push($logs, ['message' => 'survey complete']);
 
 		$logs = $this->flushOutMockLogs($logs);
-
-		$firstSurveyLog = $logs[0];
-		$surveyCompleteLog = $logs[count($logs)-1];
 
 		$results = new MockMySQLResult($logs);
 
 		list(
 			$firstReviewModeLog,
 			$firstSurveyLog,
-			$surveyCompleteLog,
+			$lastSurveyLog,
 			$avatarUsagePeriods,
 			$videoStats
-		) = $this->analyzeLogEntries($firstSurveyLog, $surveyCompleteLog, $results);
+		) = $this->analyzeLogEntries($instrument, $results);
 
 		foreach($videoStats as &$stats){
 			// Remove unused temporary stats that we don't want to compare.
@@ -1031,51 +1084,12 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 
 	public function analyzeSurvey($record, $instrument)
 	{
-		$getLogs = function ($whereClauses) use ($record, $instrument){
-			$sql = "
-				select
-					log_id,
-					" . self::TIMESTAMP_COLUMN . "
-				where
-					record = '$record'
-					and instrument = '$instrument'
-					and $whereClauses
-				order by log_id asc
-			";
-
-			$result = $this->queryLogs($sql);
-
-			$logs = [];
-			while($row = db_fetch_assoc($result)){
-				$logs[] = $row;
-			}
-
-			return $logs;
-		};
-
-		$pageOneLogs = $getLogs("
-			message = 'survey page loaded'
-			and page = 1
-		");
-
-		$firstSurveyLog = $pageOneLogs[0];
-
-		$surveyCompleteLogs = $getLogs("
-			message = 'survey complete'
-		");
-
-		$count = count($surveyCompleteLogs);
-		if($count !== 1){
-			throw new Exception("Expected 1 but found $count survey complete logs for record $record and instrument $instrument.");
-		}
-
-		$surveyCompleteLog = $surveyCompleteLogs[0];
-
 		$sql = $this->getQueryLogsSql("
 			select
 				log_id,
 				" . self::TIMESTAMP_COLUMN . ",
 				message,
+				instrument,
 				page,
 				`show id`,
 				field,
@@ -1090,26 +1104,44 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 
 		$results = $this->query($sql);
 
-		return $this->analyzeLogEntries($firstSurveyLog, $surveyCompleteLog, $results);
+		return $this->analyzeLogEntries($instrument, $results);
 	}
 
-	private function analyzeLogEntries($firstSurveyLog, $surveyCompleteLog, $results)
+	private function analyzeLogEntries($instrument, $results)
 	{
 //		$this->dump('analyzeLogEntries');
 
+		$firstSurveyLog = null;
+		$lastSurveyLog = null;
 		$firstReviewModeLog = null;
+		$previousLog = null;
 		$avatarUsagePeriods = [];
 		$videoStats = [];
 		$popupStats = [];
 		while($log = $results->fetch_assoc()){
-			// Handle avatar messages for all instruments on this record, to make sure we detect avatar's still enabled from the previous instrument.
-			$this->handleAvatarMessages($log, $firstSurveyLog, $surveyCompleteLog, $avatarUsagePeriods);
+//			$this->dump($log, '$log');
+
+			$isPageLoad = $log['message'] === 'survey page loaded';
+
+			if(!$firstSurveyLog && $isPageLoad && $log['instrument'] === $instrument){
+				$firstSurveyLog = $log;
+			}
+
+			if($firstSurveyLog && !$lastSurveyLog && $isPageLoad && $log['instrument'] !== $instrument){
+				$lastSurveyLog = $previousLog;
+			}
 
 			$logId = $log['log_id'];
+			if($lastSurveyLog && $logId > $lastSurveyLog['log_id']){
+				// This log is for a later instrument on this same record.
+				continue;
+			}
 
-			if($logId < $firstSurveyLog['log_id'] ||
-			   $logId > $surveyCompleteLog['log_id']){
-				// This log is for a different instrument on this same record.
+			// Handle avatar messages for the requested instrument as well as all prior instruments on this record, to make sure we detect avatars still enabled from previous instruments.
+			$this->handleAvatarMessages($log, $firstSurveyLog, $lastSurveyLog, $avatarUsagePeriods);
+
+			if(!$firstSurveyLog){
+				// This log is for a earlier instrument on this same record.
 				continue;
 			}
 
@@ -1124,12 +1156,22 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				$videoStats = [];
 				$popupStats = [];
 			}
+
+			$previousLog = $log;
 		}
+
+		if(!$lastSurveyLog){
+			// The user must have just dropped off.  Consider whatever the last log was to be the last one.
+			$lastSurveyLog = $previousLog;
+		}
+
+		// Re-handle the last survey log message now that we know it's the last one
+		$this->handleAvatarMessages($lastSurveyLog, $firstSurveyLog, $lastSurveyLog, $avatarUsagePeriods);
 
 		return [
 			$firstReviewModeLog,
 			$firstSurveyLog,
-			$surveyCompleteLog,
+			$lastSurveyLog,
 			$avatarUsagePeriods,
 			$videoStats,
 			$popupStats
@@ -1214,14 +1256,8 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		}
 	}
 
-	private function handleAvatarMessages($log, $firstSurveyLog, $surveyCompleteLog, &$avatarUsagePeriods)
+	private function handleAvatarMessages($log, $firstSurveyLog, $lastSurveyLog, &$avatarUsagePeriods)
 	{
-		if($log['log_id'] > $surveyCompleteLog['log_id']){
-			// We are in an instrument after the requested instrument.
-			// Ignore avatar events after this point;
-			return;
-		}
-
 		$currentAvatar = null;
 		if(!empty($avatarUsagePeriods)){
 			$currentAvatar = &$avatarUsagePeriods[count($avatarUsagePeriods)-1];
@@ -1234,10 +1270,10 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		$avatarDisabled = $message === 'avatar disabled';
 		$avatarEnabled = $message === 'avatar enabled';
 
-		$isFirstSurveyLog = $log['log_id'] === $firstSurveyLog['log_id'];
-		$isSurveyCompleteLog = $log['log_id'] === $surveyCompleteLog['log_id'];
+		$isFirstSurveyLog = $log['log_id'] === @$firstSurveyLog['log_id'];
+		$isLastSurveyLog = $log['log_id'] === @$lastSurveyLog['log_id'];
 
-		if(!($isFirstSurveyLog || $characterSelected || $avatarDisabled || $avatarEnabled || $isSurveyCompleteLog)){
+		if(!($isFirstSurveyLog || $characterSelected || $avatarDisabled || $avatarEnabled || $isLastSurveyLog)){
 			return;
 		}
 
@@ -1265,7 +1301,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			$currentAvatar['end'] = $timestamp;
 		}
 
-		if(!$isSurveyCompleteLog){
+		if(!$isLastSurveyLog){
 			$avatarUsagePeriods[] = [
 				'show id' => $showId,
 				'initialSelectionDialog' => $initialSelectionDialog,

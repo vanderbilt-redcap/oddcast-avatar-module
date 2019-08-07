@@ -12,7 +12,7 @@ $instrument = db_escape($_GET['instrument']);
 list(
 	$firstReviewModeLog,
 	$firstSurveyLog,
-	$surveyCompleteLog,
+	$lastSurveyLog,
 	$avatarUsagePeriods,
 	$videoStats,
 	$popupStats,
@@ -71,7 +71,7 @@ if($firstReviewModeLog) {
 			</tr>
 			<tr>
 				<th>Time spent in survey<?=$timeSpentInSurveySuffix?>:</th>
-				<td><?=$module->getTimePeriodString($surveyCompleteLog['timestamp'] - $firstSurveyLog['timestamp'])?></td>
+				<td><?=$module->getTimePeriodString($lastSurveyLog['timestamp'] - $firstSurveyLog['timestamp'])?></td>
 			</tr>
 		</table>
 

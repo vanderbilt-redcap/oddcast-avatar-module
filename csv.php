@@ -15,7 +15,7 @@ foreach($records as $record){
 	list(
 		$firstReviewModeLog,
 		$firstSurveyLog,
-		$surveyCompleteLog,
+		$lastSurveyLog,
 		$avatarUsagePeriods,
 		$videoStats,
 		$popupStats,
