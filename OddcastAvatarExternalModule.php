@@ -1465,12 +1465,12 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		$endDate = $this->formatDate(strtotime($endDate) + self::SECONDS_PER_DAY);
 
 		$sql = "
-			select timestamp, record, instrument
+			select min(timestamp) as timestamp, record, instrument
 			where
 				record not like 'external-modules-temporary-record-id-%'
-				and message = 'survey complete'
-				and instrument is not null
+				and message = 'survey page loaded'
 				and timestamp >= '$startDate' and timestamp <= '$endDate'
+			group by record, instrument
 		";
 
 		$results = $this->queryLogs($sql);
