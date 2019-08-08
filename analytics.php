@@ -52,7 +52,53 @@ $module->runReportUnitTests();
 		margin-top: 3px;
 		margin-left: 10px;
 	}
+	
+	#characters-modal .modal-dialog{
+		max-width: 650px;
+		text-align: center;
+		font-size: 16px;
+		font-weight: 500;
+	}
+
+	#characters-modal .character-wrapper{
+		display: inline-block;
+		margin: 10px 0px;
+	}
+
+	#characters-modal .oddcast-character{
+		width: 125px;
+		margin: 5px 5px;
+		display: inline-block;
+		border: 1px solid #dedede;
+		border-radius: 4px;
+		box-shadow: 0px 1px 4px -1px #cacaca;
+	}
 </style>
+
+<div class="modal" tabindex="-1" role="dialog" id="characters-modal">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">List of Avatar Characters With IDs</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <?php
+		foreach (OddcastAvatarExternalModule::$SHOWS as $id => $gender) {
+			?>
+			<div class="character-wrapper">
+				<img src="<?=$module->getUrl("images/$id.png")?>" data-show-id="<?=$id?>" class="oddcast-character" />
+				<div><?=$id?></div>
+			</div>
+			<?php
+		}
+		?>
+      </div>
+    </div>
+  </div>
+</div>
 
 <br>
 
@@ -120,6 +166,12 @@ $module->runReportUnitTests();
 								$.LoadingOverlay('hide')
 							}
 						});
+					}
+				},
+				{
+					text: 'View Avatar Character IDs',
+					action: function (e, dt, node, config) {
+						$('#characters-modal').modal('show');
 					}
 				}
 			]
