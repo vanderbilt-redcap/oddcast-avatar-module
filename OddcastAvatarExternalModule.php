@@ -941,6 +941,20 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			false
 		);
 
+		// assert that page loads are considered to stop video playback
+		$this->assertVideoStats(
+			[
+				['message' => 'video played'],
+				['message' => 'survey page loaded', 'instrument' => 'instrument1'],
+			],
+			[
+				'video_1' => [
+					'playTime' => 1,
+					'playCount' => 1,
+				]
+			]
+		);
+
 		// test two play events in a row
 		$this->assertVideoStats(
 			[
