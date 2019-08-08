@@ -1510,6 +1510,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				and message = 'survey page loaded'
 				and timestamp >= '$startDate' and timestamp <= '$endDate'
 			group by record, instrument
+			order by log_id desc
 		";
 
 		$results = $this->queryLogs($sql);
@@ -1520,5 +1521,45 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		}
 
 		return $data;
+	}
+
+	function getLongestPeriod($period1, $period2){
+		$length1 = $period1['end'] - $period1['start'];
+		$length2 = $period2['end'] - $period2['start'];
+
+		if($length1 > $length2){
+			return $period1;
+		}
+		else{
+			return $period2;
+		}
+	}
+
+	function getVideoUrl($fieldName){
+		$result = $this->query("
+			select video_url
+			from redcap_metadata
+			where
+				project_id = " . $this->getProjectId() . "
+				and field_name = '$fieldName'
+		");
+
+		$row = $result->fetch_assoc();
+
+		return @$row['video_url'];
+	}
+
+	function isInstrumentComplete($recordId, $instrument){
+		$result = $this->query("
+			select value from redcap_data
+			where
+				project_id = " . $this->getProjectId() . "
+				and record = $recordId
+				and field_name = '{$instrument}_complete'
+		");
+
+		$row = $result->fetch_assoc();
+
+		return $row['value'] == 2;
 	}
 }

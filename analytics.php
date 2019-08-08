@@ -96,7 +96,7 @@ $module->runReportUnitTests();
 			dom: 'Blftip',
 			buttons: [
 				{
-					text: 'Export Details as CSV',
+					text: 'Export In Repository Format',
 					action: function (e, dt, node, config) {
 						var startDate = $('input[name=start-date]').val()
 						var endDate = $('input[name=end-date]').val();
