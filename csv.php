@@ -106,7 +106,7 @@ foreach($records as $record){
 		$data['popups_viewed'] += intval($count);
 	}
 
-	$data['consent_time'] = $lastSurveyLog['timestamp'] - $firstReviewModeLog['timestamp'];
+	$data['consent_time'] = $lastSurveyLog['timestamp'] - $firstSurveyLog['timestamp'];
 	$data['consented'] = $module->isInstrumentComplete($recordId, $instrument);
 
 	$exportData = [];
