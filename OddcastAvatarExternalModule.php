@@ -647,6 +647,29 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			]
 		);
 
+		// disabling to begin with
+		$this->assertAvatarUsagePeriods(
+			[
+				['message' => 'survey page loaded', 'instrument' => 'instrument1'],
+				['message' => 'avatar disabled', 'show id' => $showId],
+				['message' => 'survey page loaded', 'instrument' => 'instrument1'],
+			],
+			'instrument1',
+			[
+				[
+					'startIndex' => 0,
+					'endIndex' => 1,
+					'initialSelectionDialog' => true
+				],
+				[
+					'startIndex' => 1,
+					'endIndex' => 2,
+					'disabled' => true
+				]
+			]
+		);
+
+
 		// first of two instruments
 		$this->assertAvatarUsagePeriods(
 			[
@@ -1317,8 +1340,8 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			}
 			else{
 				// No avatar period was added from a previous instrument.
-			    // This must be the first instrument and the initial avatar selection popup must be displayed,
-				// but we'll detect/set that later instead so an edge case is covered.
+			    // This must be the first instrument and the initial avatar selection popup must be displayed.
+				$initialSelectionDialog = true;
 			}
 		}
 		else if($characterSelected){
@@ -1326,9 +1349,9 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 
 			if($previousLog === $firstSurveyLog && $currentAvatar){
 				// Assume the current period is the initial character selection dialog
-				// We detect the initial character selection dialog here so that it also covers the case where
+				// We also detect the initial character selection dialog here to cover the case where
 				// an avatar is left enabled on the first instrument and the second instrument is opened via a participant list link
-				// instead of the iframe where the first instrument was loaded (where the avatar could still be enabled).
+				// instead of within the iframe where the first instrument was loaded (where the avatar could still be enabled).
 				// If no other events occur between the first survey log and the character selection event, this will incorrectly detect
 				// the reused window/iframe case as displaying an initial character selection dialog, but that's an acceptable compromise.
 				$currentAvatar['initialSelectionDialog'] = true;
