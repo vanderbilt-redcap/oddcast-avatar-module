@@ -102,7 +102,7 @@ foreach($records as $record){
 	}
 
 	$data['popups_viewed'] = 0;
-	foreach($videoStats as $term => $count){
+	foreach($popupStats as $term => $count){
 		$data['popups_viewed'] += intval($count);
 	}
 
