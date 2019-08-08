@@ -922,6 +922,20 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			]
 		);
 
+		// make sure review mode events are included
+		$this->assertVideoStats(
+			[
+				['message' => 'video played'],
+				['message' => 'review mode exited'],
+			],
+			[
+				'video_1' => [
+					'playTime' => 2,
+					'playCount' => 1,
+				]
+			]
+		);
+
 		// assert stats only for the current instrument are used
 		$this->assertVideoStats(
 			[
@@ -1213,14 +1227,15 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			$this->handleVideoMessages($log, $videoStats);
 			$this->handlePopupMessages($log, $popupStats);
 
-			if($log['message'] === 'review mode exited'){
-				$firstReviewModeLog = $firstSurveyLog;
-				$firstSurveyLog = $log;
-
-				// Ignore any stats from review mode
-				$videoStats = [];
-				$popupStats = [];
-			}
+// Include stats from review mode (at least for now, we may want to change that and uncomment the following in the future).
+//			if($log['message'] === 'review mode exited'){
+//				$firstReviewModeLog = $firstSurveyLog;
+//				$firstSurveyLog = $log;
+//
+//				// Ignore any stats from review mode
+//				$videoStats = [];
+//				$popupStats = [];
+//			}
 
 			$previousLog = $log;
 		}
