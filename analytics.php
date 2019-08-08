@@ -11,6 +11,8 @@ $module->runReportUnitTests();
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
+<script src="https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.0/dist/loadingoverlay.min.js" integrity="sha384-MySkuCDi7dqpbJ9gSTKmmDIdrzNbnjT6QZ5cAgqdf1PeAYvSUde3uP8MGnBzuhUx" crossorigin="anonymous"></script>
+
 <style>
 	#analytics-table_wrapper{
 		margin-top: 30px;
@@ -101,6 +103,8 @@ $module->runReportUnitTests();
 						var startDate = $('input[name=start-date]').val()
 						var endDate = $('input[name=end-date]').val();
 
+						$.LoadingOverlay('show')
+
 						$.ajax({
 							"url": <?=json_encode($module->getUrl('csv.php'))?> + '&start-date=' + startDate + '&end-date' + endDate,
 							"data": dt.ajax.params(),
@@ -112,6 +116,8 @@ $module->runReportUnitTests();
 								tempLink.href = csvURL;
 								tempLink.setAttribute('download', filename);
 								tempLink.click();
+
+								$.LoadingOverlay('hide')
 							}
 						});
 					}
