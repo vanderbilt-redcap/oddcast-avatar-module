@@ -921,6 +921,18 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				]
 			]
 		);
+		$this->assertVideoStats(
+			[
+				['message' => 'video played'],
+				['message' => 'video popup closed'],
+			],
+			[
+				'video_1' => [
+					'playTime' => 1,
+					'playCount' => 1,
+				]
+			]
+		);
 
 		// make sure review mode events are included
 		$this->assertVideoStats(
@@ -1310,7 +1322,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 					}
 				}
 			}
-			else if (in_array($message, ['video paused', 'video ended'])) {
+			else if (in_array($message, ['video paused', 'video ended', 'video popup closed'])) {
 				$onPlayStopped($currentVideoStats);
 			}
 
