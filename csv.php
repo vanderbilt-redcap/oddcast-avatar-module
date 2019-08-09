@@ -26,14 +26,6 @@ $columnNames = [
 	'avatar_selected',
 	'avatar_disabled',
 	'avatar_seconds',
-	'video_url_1',
-	'video_seconds_1',
-	'video_url_2',
-	'video_seconds_2',
-	'video_url_3',
-	'video_seconds_3',
-	'video_url_4',
-	'video_seconds_4',
 	'popups_viewed',
 	'consent_viewed',
 	'consent_time',
@@ -51,7 +43,26 @@ $printHeaderRow = function($data) use ($fp, &$columnNames){
 	fputcsv($fp, $columnNames);
 };
 
+$getVideoFieldNumber = function($fieldName){
+	$parts = explode('_', $fieldName);
+	$number = @$parts[1];
+	if(count($parts) === 2 && $parts[0] === 'video' && ctype_digit($number)){
+		return $number;
+	}
+	else{
+		return null;
+	}
+};
 
+$videoFieldNames = [];
+foreach(REDCap::getFieldNames() as $fieldName){
+	$videoNumber = $getVideoFieldNumber($fieldName);
+	if($videoNumber){
+		$columnNames[] = "video_url_$videoNumber";
+		$columnNames[] = "video_seconds_$videoNumber";
+		$videoFieldNames[] = $fieldName;
+	}
+}
 
 $domainName = $_SERVER['HTTP_HOST'];
 $projectId = $module->getProjectId();
@@ -110,10 +121,10 @@ foreach($records as $record){
 		$data['avatar_selected'] = $longestPeriod['show id'];
 	}
 
-	for($i=0; $i<=4; $i++){
-		$fieldName = "video_$i";
-		$data["video_url_$i"] = @$module->getVideoUrl($fieldName);
-		$data["video_seconds_$i"] = @$videoStats[$fieldName]['playTime'];
+	foreach($videoFieldNames as $fieldName){
+		$videoNumber = $getVideoFieldNumber($fieldName);
+		$data["video_url_$videoNumber"] = @$module->getVideoUrl($fieldName);
+		$data["video_seconds_$videoNumber"] = @$videoStats[$fieldName]['playTime'];
 	}
 
 	$data['popups_viewed'] = 0;
