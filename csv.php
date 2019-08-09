@@ -37,16 +37,26 @@ $columnNames = [
 	'popups_viewed',
 	'consent_viewed',
 	'consent_time',
-	'procedures_consented',
 	'consented',
 	'retention',
 ];
 
-fputcsv($fp, $columnNames);
+$printHeaderRow = function($data) use ($fp, &$columnNames){
+	foreach($data as $fieldName=>$value){
+		if(strpos($fieldName, 'procedures_consented___') === 0){
+			$columnNames[] = $fieldName;
+		}
+	}
+
+	fputcsv($fp, $columnNames);
+};
+
+
 
 $domainName = $_SERVER['HTTP_HOST'];
 $projectId = $module->getProjectId();
 
+$headerRowPrinted = false;
 $records = $module->getRecords();
 foreach($records as $record){
 	$recordId = $record['record'];
@@ -54,6 +64,11 @@ foreach($records as $record){
 
 	$data = json_decode(REDCap::getData($module->getProjectId(), 'json', $recordId), true);
 	$data = $data[0];
+
+	if(!$headerRowPrinted){
+		$printHeaderRow($data);
+		$headerRowPrinted = true;
+	}
 
 	$data['stride_id'] = "$domainName-$projectId-$recordId-$instrument";
 	$data['institution_id'] = $domainName;
