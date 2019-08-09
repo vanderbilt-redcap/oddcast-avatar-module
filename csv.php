@@ -4,11 +4,11 @@ use REDCap;
 $fp = fopen("php://output",'w');
 
 $columnNames = [
-	'stride_id', // maybe combine other ids
-	'institution_id', // maybe exclude since included in stride id
-	'project_id', // maybe exclude since included in stride id
-	'record_id', // maybe exclude since included in stride id
-	'instrument_id', // maybe exclude since included in stride id
+	'stride_id',
+	'institution_id',
+	'project_id',
+	'record_id',
+	'instrument_id',
 	'visit_dt',
 	'refused',
 	'race',
