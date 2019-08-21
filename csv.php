@@ -10,6 +10,7 @@ $columnNames = [
 	'stride_id',
 	'record_id',
 	'instrument_id',
+	'session_start',
 	'visit_dt',
 	'refused',
 	'race',
@@ -91,11 +92,13 @@ foreach($sessions as $session){
 		$popupStats,
 	) = $module->analyzeLogEntries($session['logs']);
 
-	$data['session_id'] = "$domainName-$projectId-$recordId-$instrument-" . date('Y-m-d-H-i', $firstSurveyLog['timestamp']);
+	$sessionStart = date('Y-m-d-H-i', $firstSurveyLog['timestamp']);
+	$data['session_id'] = "$domainName-$projectId-$recordId-$instrument-" . $sessionStart;
 	$data['institution_id'] = $domainName;
 	$data['project_id'] = $projectId;
 	$data['record_id'] = $recordId;
 	$data['instrument_id'] = $instrument;
+	$data['session_start'] = $sessionStart;
 
 	$data['avatar_selected_yn'] = 0;
 	$data['avatar_disabled'] = 0;
