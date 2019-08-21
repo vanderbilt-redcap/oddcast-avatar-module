@@ -475,6 +475,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		$this->testAnalyzeLogEntries_avatar();
 		$this->testAnalyzeLogEntries_video();
 		$this->testGetSessionsFromLogs();
+		$this->testSetAvatarAnalyticsFields();
 	}
 
 	public function dump($var, $label)
@@ -650,7 +651,9 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		$this->assertAvatarUsagePeriods(
 			[
 				['message' => 'survey page loaded', 'instrument' => 'instrument1'],
-				['message' => 'avatar disabled', 'show id' => $showId],
+				['message' => 'avatar disabled'],
+				['message' => 'avatar enabled'], // the selection dialog will be displayed again here
+				['message' => 'character selected', 'show id' => $showId],
 				['message' => 'survey page loaded', 'instrument' => 'instrument1'],
 			],
 			[
@@ -663,6 +666,15 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 					'startIndex' => 1,
 					'endIndex' => 2,
 					'disabled' => true
+				],
+				[
+					'startIndex' => 2,
+					'endIndex' => 3,
+				],
+				[
+					'show id' => $showId,
+					'startIndex' => 3,
+					'endIndex' => 4,
 				]
 			]
 		);
@@ -1390,7 +1402,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			$currentAvatar['end'] = $timestamp;
 		}
 
-		if(!$isLastSurveyLog){
+		if(!$isLastSurveyLog ){
 			$avatarUsagePeriods[] = [
 				'show id' => $showId,
 				'initialSelectionDialog' => $initialSelectionDialog,
@@ -1739,16 +1751,146 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		);
 	}
 
-	function getLongestPeriod($period1, $period2){
-		$length1 = $period1['end'] - $period1['start'];
-		$length2 = $period2['end'] - $period2['start'];
+	function setAvatarAnalyticsFields($avatarUsagePeriods, &$data){
+		$data['avatar_disabled'] = 0;
 
-		if($length1 > $length2){
-			return $period1;
+		$secondsByShowId = [];
+		foreach($avatarUsagePeriods as $period){
+			if($period['initialSelectionDialog']){
+				continue;
+			}
+
+			if($period['disabled']){
+				$data['avatar_disabled'] = 1;
+				continue;
+			}
+
+			$showId = $period['show id'];
+			if(!$showId){
+				// This is subsequent selection dialog
+				continue;
+			}
+
+			$secondsByShowId[$showId] += $period['end'] - $period['start'];
 		}
-		else{
-			return $period2;
+
+		arsort($secondsByShowId);
+
+		$avatarNumber = 1;
+		foreach($secondsByShowId as $showId=>$seconds){
+			if($avatarNumber <= 3){
+				$data["avatar_id_$avatarNumber"] = $showId;
+				$data["avatar_seconds_$avatarNumber"] = $seconds;
+			}
+			else{
+				$data["avatar_seconds_other"] += $seconds;
+			}
+
+			$avatarNumber++;
 		}
+	}
+
+	private function testSetAvatarAnalyticsFields(){
+		$assert = function($periods, $expectedData){
+			if(!isset($expectedData['avatar_disabled'])){
+				$expectedData = ['avatar_disabled' => 0] + $expectedData;
+			}
+
+			$actualData = [];
+			$this->setAvatarAnalyticsFields($periods, $actualData);
+			$this->assertSame($expectedData, $actualData);
+		};
+
+		// basic
+		$assert(
+			[
+				['show id' => 1, 'start' => 1, 'end' => 2],
+			],
+			[
+				'avatar_id_1' => 1,
+				'avatar_seconds_1' => 1
+			]
+		);
+
+		// assert multiple period times combined
+		$assert(
+			[
+				['show id' => 1, 'start' => 1, 'end' => 2],
+				['show id' => 2, 'start' => 1, 'end' => 2],
+				['show id' => 1, 'start' => 1, 'end' => 2],
+			],
+			[
+				'avatar_id_1' => 1,
+				'avatar_seconds_1' => 2,
+				'avatar_id_2' => 2,
+				'avatar_seconds_2' => 1
+			]
+		);
+
+		// assert disabled works
+		$assert(
+			[
+				['disabled' => true],
+			],
+			[
+				'avatar_disabled' => 1
+			]
+		);
+
+		// assert avatars ordered by most used
+		$assert(
+			[
+				['show id' => 1, 'start' => 1, 'end' => 2],
+				['show id' => 2, 'start' => 1, 'end' => 3],
+			],
+			[
+				'avatar_id_1' => 2,
+				'avatar_seconds_1' => 2,
+				'avatar_id_2' => 1,
+				'avatar_seconds_2' => 1
+			]
+		);
+
+		// assert other works as expected
+		$assert(
+			[
+				['show id' => 1, 'start' => 1, 'end' => 2],
+				['show id' => 2, 'start' => 1, 'end' => 2],
+				['show id' => 3, 'start' => 1, 'end' => 2],
+				['show id' => 4, 'start' => 1, 'end' => 3],
+				['show id' => 5, 'start' => 1, 'end' => 4],
+				['show id' => 6, 'start' => 1, 'end' => 5],
+			],
+			[
+				'avatar_id_1' => 6,
+				'avatar_seconds_1' => 4,
+				'avatar_id_2' => 5,
+				'avatar_seconds_2' => 3,
+				'avatar_id_3' => 4,
+				'avatar_seconds_3' => 2,
+				'avatar_seconds_other' => 3,
+			]
+		);
+
+		// assert initialSelectionDialog skipped
+		$assert(
+			[
+				['initialSelectionDialog' => true],
+			],
+			[]
+		);
+
+		// assert subsequent selection dialogs are skipped
+		$assert(
+			[
+				[
+					'initialSelectionDialog' => false,
+					'disabled' => false,
+					'show id' => null
+				]
+			],
+			[]
+		);
 	}
 
 	function getVideoUrl($fieldName){

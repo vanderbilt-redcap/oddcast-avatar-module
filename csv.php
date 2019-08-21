@@ -24,10 +24,14 @@ $columnNames = [
 	'ethnicity_ra',
 	'gender_ra',
 	'age_ra',
-	'avatar_selected_yn',
-	'avatar_selected',
+	'avatar_id_1',
+	'avatar_seconds_1',
+	'avatar_id_2',
+	'avatar_seconds_2',
+	'avatar_id_3',
+	'avatar_seconds_3',
+	'avatar_seconds_other',
 	'avatar_disabled',
-	'avatar_seconds',
 	'popups_viewed',
 	'consent_viewed',
 	'consent_time',
@@ -100,30 +104,7 @@ foreach($sessions as $session){
 	$data['instrument_id'] = $instrument;
 	$data['session_start'] = $sessionStart;
 
-	$data['avatar_selected_yn'] = 0;
-	$data['avatar_disabled'] = 0;
-	$data['avatar_seconds'] = 0;
-	$longestPeriod = null;
-	foreach($avatarUsagePeriods as $period){
-		if($period['initialSelectionDialog']){
-			continue;
-		}
-
-		if($period['disabled']){
-			$data['avatar_disabled'] = 1;
-		}
-		else{
-			$data['avatar_selected_yn'] = 1;
-			$data['avatar_seconds'] = 5;
-			$data['avatar_seconds'] += $period['end'] - $period['start'];
-			$longestPeriod = $module->getLongestPeriod($period, $longestPeriod);
-		}
-	}
-
-	$data['avatar_selected'] = null;
-	if($longestPeriod){
-		$data['avatar_selected'] = $longestPeriod['show id'];
-	}
+	$module->setAvatarAnalyticsFields($avatarUsagePeriods, $data);
 
 	foreach($videoFieldNames as $fieldName){
 		$videoNumber = $getVideoFieldNumber($fieldName);
