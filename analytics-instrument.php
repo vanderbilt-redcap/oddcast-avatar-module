@@ -6,8 +6,7 @@ use Exception;
 
 $module->runReportUnitTests();
 
-$record = db_escape($_GET['record']);
-$instrument = db_escape($_GET['instrument']);
+$sessions = $module->getSessionsForLogIdParams();
 
 list(
 	$firstReviewModeLog,
@@ -16,7 +15,7 @@ list(
 	$avatarUsagePeriods,
 	$videoStats,
 	$popupStats,
-) = $module->analyzeSurvey($record, $instrument);
+) = $module->analyzeLogEntries($sessions[0]['logs']);
 
 if($firstReviewModeLog) {
 	$timeSpentInReviewMode = $module->getTimePeriodString($firstSurveyLog['timestamp'] - $firstReviewModeLog['timestamp']);
@@ -59,11 +58,11 @@ if($firstReviewModeLog) {
 		<table id="general-info">
 			<tr>
 				<th>Record ID:</th>
-				<td><?=$record?></td>
+				<td><?=$firstSurveyLog['record']?></td>
 			</tr>
 			<tr>
 				<th>Instrument:</th>
-				<td><?=$instrument?></td>
+				<td><?=$firstSurveyLog['instrument']?></td>
 			</tr>
 			<tr>
 				<th>Time spent in review mode:</th>

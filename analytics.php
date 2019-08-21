@@ -13,10 +13,12 @@ $module->runReportUnitTests();
 
 <script src="https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.0/dist/loadingoverlay.min.js" integrity="sha384-MySkuCDi7dqpbJ9gSTKmmDIdrzNbnjT6QZ5cAgqdf1PeAYvSUde3uP8MGnBzuhUx" crossorigin="anonymous"></script>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+
 <style>
 	#analytics-table_wrapper{
 		margin-top: 30px;
-		max-width: 700px;
+		max-width: 900px;
 	}
 
 	#analytics-table_wrapper tbody tr:hover{
@@ -117,8 +119,11 @@ $module->runReportUnitTests();
 		var table = $('#analytics-table')
 		var columns = [
 			{
-				title: "Date & Time",
-				data: 'timestamp'
+				title: "Session Start<br>Date & Time",
+				data: 'timestamp',
+				render: function(data){
+					return moment(data*1000).format('YYYY-MM-DD HH:mm:ss')
+				}
 			},
 			{
 				title: "Record ID",
@@ -129,6 +134,15 @@ $module->runReportUnitTests();
 				title: "Instrument",
 				data: 'instrument',
 				orderable: false
+			},
+			{
+				title: "Actions",
+				data: 'logs',
+				render: function(logs){
+					var firstLog = logs[0]
+					var lastLog = logs.slice(-1)[0]
+					return "<a target='_blank' href='<?=$module->getUrl('analytics-instrument.php')?>&first-log-id=" + firstLog.log_id + "&last-log-id=" + lastLog.log_id + "'><button>View Session Report</button></a>"
+				}
 			}
 		]
 
@@ -139,7 +153,7 @@ $module->runReportUnitTests();
 		table.DataTable({
 			columns: columns,
 			order: [[0, 'desc']],
-			data: <?=json_encode($module->getRecords())?>,
+			data: <?=json_encode($module->getSessionsForDateParams())?>,
 			searching: false,
 			dom: 'Blftip',
 			buttons: [
@@ -152,7 +166,7 @@ $module->runReportUnitTests();
 						$.LoadingOverlay('show')
 
 						$.ajax({
-							"url": <?=json_encode($module->getUrl('csv.php'))?> + '&start-date=' + startDate + '&end-date' + endDate,
+							"url": <?=json_encode($module->getUrl('csv.php'))?> + '&start-date=' + startDate + '&end-date=' + endDate,
 							"data": dt.ajax.params(),
 							"success": function(res, status, xhr) {
 								var csvData = new Blob([res], {type: 'text/csv;charset=utf-8;'});
@@ -175,13 +189,6 @@ $module->runReportUnitTests();
 					}
 				}
 			]
-		})
-
-		table.on('click', 'tbody tr', function(){
-			var recordId = $(this).find('.cell-record').html()
-			var instrument = $(this).find('.cell-instrument').html()
-
-			location = <?=json_encode($module->getUrl('analytics-instrument.php'))?> + '&record=' + recordId + '&instrument=' + instrument
 		})
 
 		flatpickr('input.flatpickr')

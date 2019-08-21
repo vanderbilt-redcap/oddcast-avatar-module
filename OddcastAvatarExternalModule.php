@@ -6,6 +6,7 @@ require_once __DIR__ . '/classes/MockMySQLResult.php';
 use ExternalModules\AbstractExternalModule;
 use ExternalModules\ExternalModules;
 use Exception;
+use stdClass;
 
 const REVIEW_MODE = 'review-mode';
 const TURNING_OFF = 'turning-off';
@@ -18,6 +19,8 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 	const SECONDS_PER_MINUTE = 60;
 	const SECONDS_PER_HOUR = self::SECONDS_PER_MINUTE*60;
 	const SECONDS_PER_DAY = self::SECONDS_PER_HOUR*24;
+
+	const SESSION_TIMEOUT = self::SECONDS_PER_HOUR;
 
 	static $SHOWS = [
 		2560288 => 'female',
@@ -33,6 +36,8 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		2613264 => 'female',
 		2613267 => 'male',
 	];
+
+	private $spoofedPrecedingAvatarLogs = null;
 
 	function redcap_survey_page($project_id, $record, $instrument)
 	{
@@ -469,6 +474,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		$this->testAnalyzeLogEntries_basics();
 		$this->testAnalyzeLogEntries_avatar();
 		$this->testAnalyzeLogEntries_video();
+		$this->testGetSessionsFromLogs();
 	}
 
 	public function dump($var, $label)
@@ -480,8 +486,6 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 
 	private function testAnalyzeLogEntries_basics()
 	{
-		$instrument = 'instrument1';
-
 		$logs = [
 			['message' => 'survey page loaded', 'instrument' => 'instrument1'],
 			['message' => 'survey page loaded', 'instrument' => 'instrument1'],
@@ -489,21 +493,21 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 
 		$logs = $this->flushOutMockLogs($logs);
 
-		$results = new MockMySQLResult($logs);
-
 		list(
 			$firstReviewModeLog,
 			$firstSurveyLog,
 			$lastSurveyLog,
 			$avatarUsagePeriods
-		) = $this->analyzeLogEntries($instrument, $results);
+		) = $this->analyzeLogEntries($logs);
 
 		$this->assertSame(1, $lastSurveyLog['timestamp'] - $firstSurveyLog['timestamp']);
 	}
 
 	private function assertSame($expected, $actual){
 		if($expected !== $actual){
-			throw new Exception("The value '$actual' is not the same (or not the same type) as '$expected'.");
+			$this->dump($expected, '$expected');
+			$this->dump($actual, '$actual');
+			throw new Exception("The expected and actual values are not the same (or not the same type).");
 		}
 	}
 
@@ -519,7 +523,6 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				['message' => 'character selected', 'show id' => $showId],
 				['message' => 'survey complete'],
 			],
-			'instrument1',
 			[
 				[
 					'startIndex' => 0,
@@ -541,7 +544,6 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				['message' => 'character selected', 'show id' => $showId],
 				['message' => 'survey page loaded', 'instrument' => 'instrument1'],
 			],
-			'instrument1',
 			[
 				[
 					'startIndex' => 0,
@@ -564,7 +566,6 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				['message' => 'character selected', 'show id' => $showId2],
 				['message' => 'survey complete'],
 			],
-			'instrument1',
 			[
 				[
 					'startIndex' => 0,
@@ -592,7 +593,6 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				['message' => 'character selected', 'show id' => $showId],
 				['message' => 'survey complete'],
 			],
-			'instrument1',
 			[
 				[
 					'startIndex' => 0,
@@ -621,7 +621,6 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				['message' => 'avatar enabled'],
 				['message' => 'survey complete'],
 			],
-			'instrument1',
 			[
 				[
 					'startIndex' => 0,
@@ -654,7 +653,6 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				['message' => 'avatar disabled', 'show id' => $showId],
 				['message' => 'survey page loaded', 'instrument' => 'instrument1'],
 			],
-			'instrument1',
 			[
 				[
 					'startIndex' => 0,
@@ -669,82 +667,54 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			]
 		);
 
-
-		// first of two instruments
-		$this->assertAvatarUsagePeriods(
-			[
-				['message' => 'survey page loaded', 'instrument' => 'instrument1'],
-				['message' => 'character selected', 'show id' => $showId],
-				['message' => 'survey complete'],
-				['message' => 'survey page loaded', 'instrument' => 'instrument2'],
-				['message' => 'character selected', 'show id' => $showId2],
-				['message' => 'survey complete'],
-			],
-			'instrument1',
-			[
-				[
-					'startIndex' => 0,
-					'endIndex' => 1,
-					'initialSelectionDialog' => true
-				],
-				[
-					'show id' => $showId,
-					'startIndex' => 1,
-					'endIndex' => 2
-				]
-			]
-		);
-
 		// second of two instruments, and avatar left enabled from first
 		$this->assertAvatarUsagePeriods(
 			[
-				['message' => 'survey page loaded', 'instrument' => 'instrument1'],
-				['message' => 'character selected', 'show id' => $showId],
-				['message' => 'survey complete'],
 				['message' => 'survey page loaded', 'instrument' => 'instrument2'],
 				['message' => 'this message creates a gap between the surrounding logs so that the following event is not assumed to be the initial character selection dialog'],
 				['message' => 'character selected', 'show id' => $showId2],
 				['message' => 'survey complete'],
 			],
-			'instrument2',
 			[
 				[
 					'show id' => $showId,
-					'startIndex' => 3,
-					'endIndex' => 5
+					'startIndex' => 0,
+					'endIndex' => 2
 				],
 				[
 					'show id' => $showId2,
-					'startIndex' => 5,
-					'endIndex' => 6
+					'startIndex' => 2,
+					'endIndex' => 3
 				]
+			],
+			[
+				['message' => 'character selected', 'show id' => $showId]
 			]
 		);
 
 		// second of two instruments, and avatar left disabled from first
 		$this->assertAvatarUsagePeriods(
 			[
-				['message' => 'survey page loaded', 'instrument' => 'instrument1'],
-				['message' => 'character selected', 'show id' => $showId],
-				['message' => 'avatar disabled'],
-				['message' => 'survey complete'],
 				['message' => 'survey page loaded', 'instrument' => 'instrument2'],
 				['message' => 'avatar enabled'],
 				['message' => 'survey complete'],
 			],
-			'instrument2',
 			[
 				[
 					'show id' => $showId,
-					'startIndex' => 4,
-					'endIndex' => 5,
+					'startIndex' => 0,
+					'endIndex' => 1,
 					'disabled' => true
 				],
 				[
 					'show id' => $showId,
-					'startIndex' => 5,
-					'endIndex' => 6
+					'startIndex' => 1,
+					'endIndex' => 2
 				]
+			],
+			[
+				['message' => 'character selected', 'show id' => $showId],
+				['message' => 'avatar disabled'],
 			]
 		);
 
@@ -752,37 +722,50 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		// avatar was left open on first instrument, but that avatar period should not be included on the second instrument
 		$this->assertAvatarUsagePeriods(
 			[
-				['message' => 'survey page loaded', 'instrument' => 'instrument1'],
-				['message' => 'character selected', 'show id' => $showId],
 				['message' => 'survey page loaded', 'instrument' => 'instrument2'],
 				['message' => 'character selected', 'show id' => $showId2],
-				['message' => 'some action to simulator the user staying on the survey after selecting the character'],
+				['message' => 'some action to simulate the user staying on the survey after selecting the character'],
 			],
-			'instrument2',
 			[
 				[
-					'startIndex' => 2,
-					'endIndex' => 3,
+					'startIndex' => 0,
+					'endIndex' => 1,
 					'initialSelectionDialog' => true
 				],
 				[
 					'show id' => $showId2,
-					'startIndex' => 3,
-					'endIndex' => 4
+					'startIndex' => 1,
+					'endIndex' => 2
 				]
+			],
+			[
+				['message' => 'character selected', 'show id' => $showId],
 			]
 		);
 	}
 
-	private function flushOutMockLogs($logs)
+	private function flushOutMockLogs($logs, $lastLog = null)
 	{
-		$lastId = 1;
-		$lastTimestamp = time();
-		$createLog = function($params) use (&$lastId, &$lastTimestamp){
+		if($logs === null){
+			return null;
+		}
+
+		if($lastLog){
+			$lastId = $lastLog['log_id'];
+			$lastTimestamp = $lastLog['timestamp'];
+		}
+		else{
+			$lastId = 0;
+			$lastTimestamp = time();
+		}
+
+		$nextId = $lastId+1;
+
+		$createLog = function($params) use (&$nextId, &$lastTimestamp){
 			$isVideoMessage = strpos($params['message'], 'video ') === 0;
 			if($isVideoMessage){
 				if(!isset($params['seconds'])){
-					$params['seconds'] = $lastId - 1;
+					$params['seconds'] = $nextId - 1;
 				}
 
 				if(!isset($params['field'])){
@@ -790,8 +773,8 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				}
 			}
 
-			$params['log_id'] = $lastId;
-			$lastId++;
+			$params['log_id'] = $nextId;
+			$nextId++;
 
 			$params['timestamp'] = $lastTimestamp;
 			$lastTimestamp++;
@@ -806,18 +789,17 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		return $logs;
 	}
 
-	private function assertAvatarUsagePeriods($logs, $instrument, $expectedPeriods)
+	private function assertAvatarUsagePeriods($logs, $expectedPeriods, $spoofedPrecedingAvatarLogs = null)
 	{
-		$logs = $this->flushOutMockLogs($logs);
-
-		$results = new MockMySQLResult($logs);
+		$this->spoofedPrecedingAvatarLogs = $spoofedPrecedingAvatarLogs = $this->flushOutMockLogs($spoofedPrecedingAvatarLogs);
+		$logs = $this->flushOutMockLogs($logs, end($spoofedPrecedingAvatarLogs));
 
 		list(
 			$firstReviewModeLog,
 			$firstSurveyLog,
 			$lastSurveyLog,
 			$avatarUsagePeriods
-		) = $this->analyzeLogEntries($instrument, $results);
+		) = $this->analyzeLogEntries($logs);
 
 		if(count($avatarUsagePeriods) !== count($expectedPeriods)){
 			$this->dump($expectedPeriods, '$expected');
@@ -862,17 +844,18 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			unset($expected['endIndex']);
 
 			if($expected['start'] >= $expected['end']){
+				$this->dump($expected, '$expected');
 				throw new Exception("The expected start is not before the expected end for index $i");
 			}
 
 			if($expected !== $actual){
-				$this->dump($startIndex, 'expected startIndex');
-				$this->dump($endIndex, 'expected endIndex');
 				$this->dump($expected, '$expected');
 				$this->dump($actual, '$actual');
 				throw new Exception("The expected and actual periods did not match!");
 			}
 		}
+
+		$this->spoofedPrecedingAvatarLogs = null;
 	}
 
 
@@ -946,25 +929,6 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 					'playCount' => 1,
 				]
 			]
-		);
-
-		// assert stats only for the current instrument are used
-		$this->assertVideoStats(
-			[
-				['message' => 'survey page loaded', 'instrument' => 'previous_instrument'],
-				['message' => 'video played', 'field' => 'video_in_previous_instrument'],
-				['message' => 'survey page loaded', 'instrument' => 'instrument1'],
-				['message' => 'video played'],
-				['message' => 'some other action while video is still playing'],
-				['message' => 'survey page loaded', 'instrument' => 'instrument1'],
-			],
-			[
-				'video_1' => [
-					'playTime' => 2,
-					'playCount' => 1,
-				]
-			],
-			false
 		);
 
 		// assert that page loads are considered to stop video playback
@@ -1150,15 +1114,13 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 
 		$logs = $this->flushOutMockLogs($logs);
 
-		$results = new MockMySQLResult($logs);
-
 		list(
 			$firstReviewModeLog,
 			$firstSurveyLog,
 			$lastSurveyLog,
 			$avatarUsagePeriods,
 			$videoStats
-		) = $this->analyzeLogEntries($instrument, $results);
+		) = $this->analyzeLogEntries($logs);
 
 		foreach($videoStats as &$stats){
 			// Remove unused temporary stats that we don't want to compare.
@@ -1173,52 +1135,30 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		}
 	}
 
-	public function analyzeSurvey($record, $instrument)
-	{
-		$sql = $this->getQueryLogsSql("
-			select
-				log_id,
-				" . self::TIMESTAMP_COLUMN . ",
-				message,
-				instrument,
-				page,
-				`show id`,
-				field,
-				seconds,
-				`link text`
-			where
-				record = '$record'
-		");
-
-		// The table name prefix is required until EM framework commit a386287 is in place on UAB's servers.
-		$sql .= " order by redcap_external_modules_log.log_id asc ";
-
-		$results = $this->query($sql);
-
-		return $this->analyzeLogEntries($instrument, $results);
-	}
-
-	private function analyzeLogEntries($instrument, $results)
+	public function analyzeLogEntries($logsToAnalyze)
 	{
 //		$this->dump('analyzeLogEntries');
 
-		$firstSurveyLog = null;
+		$firstSurveyLog = $logsToAnalyze[0];
+		$instrument = $firstSurveyLog['instrument'];
+		if(!$instrument){
+			throw new Exception("The first log entry did not define an instrument.  The first log entry is typically a page load event.  We may need to add support for additional scenarios.  Here is the first log message: " . json_encode($firstSurveyLog));
+		}
+
+		$logsToAnalyze = array_merge($this->getPrecedingAvatarRecordLogs($firstSurveyLog), $logsToAnalyze);
+
 		$lastSurveyLog = null;
 		$firstReviewModeLog = null;
 		$previousLog = null;
 		$avatarUsagePeriods = [];
 		$videoStats = [];
 		$popupStats = [];
-		while($log = $results->fetch_assoc()){
+		foreach($logsToAnalyze as $log){
 //			$this->dump($log, '$log');
 
 			$isPageLoad = $log['message'] === 'survey page loaded';
 
-			if(!$firstSurveyLog && $isPageLoad && $log['instrument'] === $instrument){
-				$firstSurveyLog = $log;
-			}
-
-			if($firstSurveyLog && !$lastSurveyLog && $isPageLoad && $log['instrument'] !== $instrument){
+			if(!$lastSurveyLog && $isPageLoad && $log['instrument'] !== $instrument){
 				$lastSurveyLog = $previousLog;
 			}
 
@@ -1260,6 +1200,22 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		// Re-handle the last survey log message now that we know it's the last one
 		$this->handleAvatarMessages($lastSurveyLog, $previousLog, $firstSurveyLog, $lastSurveyLog, $avatarUsagePeriods);
 
+		// Remove avatar periods outside the range of logs analyzed
+		// We must analyze outside the range to start so that we can account for avatars previously left enabled.
+		$newAvatarUsagePeriods = [];
+		foreach($avatarUsagePeriods as $period){
+			if($period['end'] > $firstSurveyLog['timestamp']){
+				// This period is within the range of logs
+				if($period['start'] < $firstSurveyLog['timestamp']){
+					// This period started before the log range.  Adjust it to start at the first log
+					$period['start'] = $firstSurveyLog;
+				}
+
+				$newAvatarUsagePeriods[] = $period;
+			}
+		}
+		$avatarUsagePeriods = $newAvatarUsagePeriods;
+
 		return [
 			$firstReviewModeLog,
 			$firstSurveyLog,
@@ -1268,6 +1224,30 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			$videoStats,
 			$popupStats
 		];
+	}
+
+	private function getPrecedingAvatarRecordLogs($firstSurveyLog)
+	{
+		$logs = $this->spoofedPrecedingAvatarLogs;
+		if($logs){
+			return $logs;
+		}
+
+		$recordId = db_real_escape_string($firstSurveyLog['record']);
+		$firstLogId = db_real_escape_string($firstSurveyLog['log_id']);
+
+		$results = $this->queryLogsForWhereClause("
+			record = '$recordId'
+			and log_id < '$firstLogId'
+			and message in ('character selected', 'avatar disabled', 'avatar enabled')
+		");
+
+		$logs = [];
+		while($row = $results->fetch_assoc()){
+			$logs[] = $row;
+		}
+
+		return $logs;
 	}
 
 	private function handleVideoMessages($log, &$allVideoStats)
@@ -1350,6 +1330,12 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 
 	private function handleAvatarMessages($log, $previousLog, $firstSurveyLog, $lastSurveyLog, &$avatarUsagePeriods)
 	{
+//		$this->dump($log, '$log');
+
+		if(!$log['log_id']){
+			throw new Exception('A log id must be specified, even if this is a unit test: ' . json_encode($log));
+		}
+
 		$currentAvatar = null;
 		if(!empty($avatarUsagePeriods)){
 			$currentAvatar = &$avatarUsagePeriods[count($avatarUsagePeriods)-1];
@@ -1413,8 +1399,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			];
 		}
 
-//		$this->dump($message, '$message');
-//		$this->dump($avatarUsagePeriods, '$avatarUsagePeriods');
+//		$this->dump($avatarUsagePeriods, '$avatarUsagePeriods end of handleAvatarMessages');
 	}
 
 	public function displayAvatarStats($avatarUsagePeriods)
@@ -1550,7 +1535,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		return $this->getParam('end-date', $this->formatDate(time()));
 	}
 
-	function getParam($name, $defaultValue){
+	function getParam($name, $defaultValue = null){
 		$value = \db_real_escape_string(@$_REQUEST[$name]);
 		if($value){
 			return $value;
@@ -1560,31 +1545,198 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		}
 	}
 
-	function getRecords(){
+	function getSessionsForDateParams(){
 		$startDate = $this->getStartDate();
 		$endDate = $this->getEndDate();
 
 		// Bump the end date to the next day so all events on the day specified are include
 		$endDate = $this->formatDate(strtotime($endDate) + self::SECONDS_PER_DAY);
 
-		$sql = "
-			select min(timestamp) as timestamp, record, instrument
+		return $this->getSessionsForWhereClause("timestamp >= '$startDate' and timestamp < '$endDate'");
+	}
+
+	function getSessionsForLogIdParams(){
+		$firstLogId = $this->getParam('first-log-id');
+		$lastLogId = $this->getParam('last-log-id');
+
+		return $this->getSessionsForWhereClause("log_id >= '$firstLogId' and log_id <= '$lastLogId'");
+	}
+
+	private function queryLogsForWhereClause($whereClause){
+		return $this->queryLogs("
+			select
+				log_id,
+				" . self::TIMESTAMP_COLUMN . ",
+				timestamp as timestamp_raw,
+				message,
+				record,
+				instrument,
+				page,
+				`show id`,
+				field,
+				seconds,
+				`link text`
 			where
 				record not like 'external-modules-temporary-record-id-%'
-				and message = 'survey page loaded'
-				and timestamp >= '$startDate' and timestamp <= '$endDate'
-			group by record, instrument
-			order by log_id desc
-		";
+				and $whereClause
+			order by log_id
+		");
+	}
 
-		$results = $this->queryLogs($sql);
+	private function getSessionsForWhereClause($whereClause){
+		$results = $this->queryLogsForWhereClause($whereClause);
+		return array_reverse($this->getSessionsFromLogs($results));
+	}
 
-		$data = [];
-		while($row = db_fetch_assoc($results)){
-			$data[] = $row;
+	private function getSessionsFromLogs($logQueryResults){
+		$lastSessionByRecordId = [];
+		$sessions = [];
+		while($log = $logQueryResults->fetch_assoc()){
+			$recordId = $log['record'];
+			$instrument = $log['instrument'];
+
+			$currentSession = &$lastSessionByRecordId[$recordId];
+
+			$addNewSession = false;
+			if(!$currentSession){
+				if(!$instrument){
+					// The logs must have started in the middle of a session.
+					// Continue until we hit the next log that defines an instrument so we can actually start the session.
+					continue;
+				}
+
+				$addNewSession = true;
+			}
+			else if($instrument && $instrument != $currentSession['lastInstrument']){
+				$addNewSession = true;
+			}
+			else {
+				$lastLog = end($currentSession['logs']);
+				$timeSinceLastLog = $log['timestamp'] - $lastLog['timestamp'];
+				if($timeSinceLastLog >= self::SESSION_TIMEOUT){
+					$addNewSession = true;
+
+					if(!$instrument){
+						// New sessions must have an instrument set.
+						// Use the one from the current (soon to be previous) session.
+						$instrument = $currentSession['lastInstrument'];
+					}
+				}
+			}
+
+			if($addNewSession){
+				unset($currentSession); // this is required to break the old reference before reusing this variable
+
+				if(empty($instrument)){
+					throw new Exception("Log {$log['log_id']} started a session, but an instrument for the session couldn't be detected.");
+				}
+
+				$currentSession = [
+					'timestamp' => $log['timestamp'],
+					'record' => $log['record'],
+					'instrument' => $instrument,
+					'logs' => []
+				];
+
+				$sessions[] = &$currentSession;
+				$lastSessionByRecordId[$recordId] = &$currentSession;
+			}
+
+			$currentSession['logs'][] = $log;
+
+			if($instrument){
+				$currentSession['lastInstrument'] = $instrument;
+			}
 		}
 
-		return $data;
+		return $sessions;
+	}
+
+	private function testGetSessionsFromLogs(){
+		$assert = function($logs){
+			$expectedSessions = [];
+			for($i=0; $i<count($logs); $i++){
+				$log = &$logs[$i];
+				$log['log_id'] = $i;
+
+				$sessionIndex = @$log['session'];
+				if($sessionIndex === null){
+					continue; // don't include this log in a session
+				}
+
+				$instrument = @$log['instrument'];
+				if(@$log['copy-previous-instrument']){
+					$instrument = $expectedSessions[$sessionIndex-1]['instrument'];
+				}
+
+				$session = &$expectedSessions[$sessionIndex];
+				if(!$session){
+					$session = [
+						'timestamp' => $log['timestamp'],
+						'record' => $log['record'],
+						'instrument' => $instrument
+					];
+
+					$expectedSessions[$sessionIndex] = &$session;
+				}
+
+				// This value is only used to generate the expected sessions for testing.
+				// It should not be included in the log data passed to getSessionsFromLogs() since sessions should be determined independently (the point of this test).
+				unset($log['session']);
+
+				$session['logs'][] = $log;
+				if($instrument){
+					$session['lastInstrument'] = $instrument;
+				}
+			}
+
+			$results = new MockMySQLResult($logs);
+			$actualSessions = $this->getSessionsFromLogs($results);
+
+			$this->assertSame($expectedSessions, $actualSessions);
+		};
+
+		// two basic sessions
+		$assert(
+			[
+				['session' => 0, 'record' => 1, 'instrument' => 'a'],
+				['session' => 0, 'record' => 1], // simulate a message without an instrument set
+				['session' => 1, 'record' => 1, 'instrument' => 'b'],
+			]
+		);
+
+		// two overlapped records
+		$assert(
+			[
+				['session' => 0, 'record' => 1, 'instrument' => 'a'],
+				['session' => 0, 'record' => 1],
+				['session' => 1, 'record' => 2, 'instrument' => 'a'],
+				['session' => 0, 'record' => 1],
+				['session' => 1, 'record' => 2],
+			]
+		);
+
+		// sessions split by a timeout
+		$time1 = 1;
+		$time2 = $time1 + self::SESSION_TIMEOUT -1;
+		$time3 = $time2 + self::SESSION_TIMEOUT;
+		$assert(
+			[
+				['session' => 0, 'record' => 1, 'timestamp' => $time1, 'instrument' => 'a'],
+				['session' => 0, 'record' => 1, 'timestamp' => $time2],
+				['session' => 1, 'record' => 1, 'timestamp' => $time3, 'copy-previous-instrument' => true],
+			]
+		);
+
+		// logs start in the middle of a session
+		// The first session log must have an instrument set for analyzeLogEntries() to work properly.
+		$assert(
+			[
+				[], // simulate a record from the middle of a session that doesn't have an instrument
+				['session' => 0, 'record' => 1, 'instrument' => 'a'],
+				['session' => 0, 'record' => 1],
+			]
+		);
 	}
 
 	function getLongestPeriod($period1, $period2){

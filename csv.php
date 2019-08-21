@@ -4,9 +4,10 @@ use REDCap;
 $fp = fopen("php://output",'w');
 
 $columnNames = [
-	'stride_id',
+	'session_id',
 	'institution_id',
 	'project_id',
+	'stride_id',
 	'record_id',
 	'instrument_id',
 	'visit_dt',
@@ -68,10 +69,10 @@ $domainName = $_SERVER['HTTP_HOST'];
 $projectId = $module->getProjectId();
 
 $headerRowPrinted = false;
-$records = $module->getRecords();
-foreach($records as $record){
-	$recordId = $record['record'];
-	$instrument = $record['instrument'];
+$sessions = $module->getSessionsForDateParams();
+foreach($sessions as $session){
+	$recordId = $session['record'];
+	$instrument = $session['instrument'];
 
 	$data = json_decode(REDCap::getData($module->getProjectId(), 'json', $recordId), true);
 	$data = $data[0];
@@ -81,12 +82,6 @@ foreach($records as $record){
 		$headerRowPrinted = true;
 	}
 
-	$data['stride_id'] = "$domainName-$projectId-$recordId-$instrument";
-	$data['institution_id'] = $domainName;
-	$data['project_id'] = $projectId;
-	$data['record_id'] = $recordId;
-	$data['instrument_id'] = $instrument;
-
 	list(
 		$firstReviewModeLog,
 		$firstSurveyLog,
@@ -94,7 +89,13 @@ foreach($records as $record){
 		$avatarUsagePeriods,
 		$videoStats,
 		$popupStats,
-	) = $module->analyzeSurvey($recordId, $instrument);
+	) = $module->analyzeLogEntries($session['logs']);
+
+	$data['session_id'] = "$domainName-$projectId-$recordId-$instrument-" . date('Y-m-d-H-i', $firstSurveyLog['timestamp']);
+	$data['institution_id'] = $domainName;
+	$data['project_id'] = $projectId;
+	$data['record_id'] = $recordId;
+	$data['instrument_id'] = $instrument;
 
 	$data['avatar_selected_yn'] = 0;
 	$data['avatar_disabled'] = 0;
