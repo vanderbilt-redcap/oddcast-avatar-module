@@ -21,8 +21,7 @@ $module->runReportUnitTests();
 		max-width: 900px;
 	}
 
-	#analytics-table_wrapper tbody tr:hover{
-		background: #c6e4f9;
+	button{
 		cursor: pointer;
 	}
 
