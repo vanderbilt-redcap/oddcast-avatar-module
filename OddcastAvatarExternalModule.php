@@ -20,7 +20,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 	const SECONDS_PER_HOUR = self::SECONDS_PER_MINUTE*60;
 	const SECONDS_PER_DAY = self::SECONDS_PER_HOUR*24;
 
-	const SESSION_TIMEOUT = self::SECONDS_PER_HOUR*12;
+	const SESSION_TIMEOUT = self::SECONDS_PER_HOUR;
 
 	static $SHOWS = [
 		2560288 => 'female',
