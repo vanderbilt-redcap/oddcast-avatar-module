@@ -33,7 +33,7 @@
 	"project-settings": [
 		{
 			"key": "disable",
-			"name": "Disable Avatar",
+			"name": "Disable the avatar",
 			"type": "checkbox"
 		},
 		{
