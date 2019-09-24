@@ -38,6 +38,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 	];
 
 	private $spoofedPrecedingAvatarLogs = null;
+	private $debugLogging = null;
 
 	function redcap_survey_page($project_id, $record, $instrument)
 	{
@@ -481,12 +482,18 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 
 	public function runReportUnitTests()
 	{
+		// Disable debug logging during testing.
+		$this->debugLogging = false;
+
 		$this->testGetTimePeriodString();
 		$this->testAnalyzeLogEntries_basics();
 		$this->testAnalyzeLogEntries_avatar();
 		$this->testAnalyzeLogEntries_video();
 		$this->testGetSessionsFromLogs();
 		$this->testSetAvatarAnalyticsFields();
+
+		// Reset debug logging to null so it gets re-initialized from the DB.
+		$this->debugLogging = null;
 	}
 
 	public function dump($var, $label)
@@ -1590,7 +1597,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 	}
 
 	private function queryLogsForWhereClause($whereClause){
-		return $this->queryLogs("
+		$sql = "
 			select
 				log_id,
 				" . self::TIMESTAMP_COLUMN . ",
@@ -1607,7 +1614,16 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				record not like 'external-modules-temporary-record-id-%'
 				and $whereClause
 			order by log_id
-		");
+		";
+
+		if($this->isDebugLoggingEnabled()){
+			$this->log('log query', [
+				'pseudo sql' => $sql,
+				'sql' => $this->getQueryLogsSql($sql)
+			]);
+		}
+
+		return $this->queryLogs($sql);
 	}
 
 	private function getSessionsForWhereClause($whereClause){
@@ -1615,11 +1631,23 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		return array_reverse($this->getSessionsFromLogs($results));
 	}
 
+	private function isDebugLoggingEnabled(){
+		if($this->debugLogging === null){
+			$this->debugLogging = $this->getProjectSetting('enable-debug-logging') === true;
+		}
+
+		return $this->debugLogging;
+	}
+
 	private function getSessionsFromLogs($logQueryResults){
 		$lastSessionByRecordId = [];
 		$sessions = [];
 		while($log = $logQueryResults->fetch_assoc()){
-			// echo "Processing {$log['log_id']}<br>\n";
+			if($this->isDebugLoggingEnabled()){
+				$this->log('processing session log', [
+					'log json' => json_encode($log)
+				]);
+			}
 
 			$recordId = $log['record'];
 			$instrument = $log['instrument'];
@@ -1680,6 +1708,22 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			if($instrument){
 				$currentSession['lastInstrument'] = $instrument;
 			}
+		}
+
+		if($this->isDebugLoggingEnabled()){
+			$sessionSummaries = $sessions;
+			foreach($sessionSummaries as &$summary){
+				$newIds = [];
+				foreach($summary['logs'] as $log){
+					$newIds[] = (int)$log['log_id'];
+				}
+
+				$summary['logs'] = $newIds;
+			}
+
+			$this->log('sessions', [
+				'session json' => json_encode($sessionSummaries)
+			]);
 		}
 
 		return $sessions;
