@@ -94,7 +94,7 @@ foreach($sessions as $session){
 		$avatarUsagePeriods,
 		$videoStats,
 		$popupStats,
-	) = $module->analyzeLogEntries($session['logs']);
+	) = $module->analyzeLogEntries($session['logs'], $session['instrument']);
 
 	$sessionStart = date('Y-m-d-H-i', $firstSurveyLog['timestamp']);
 	$data['session_id'] = "$domainName-$projectId-$recordId-$instrument-" . $sessionStart;

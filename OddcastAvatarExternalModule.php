@@ -487,9 +487,11 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 
 	private function testAnalyzeLogEntries_basics()
 	{
+		$instrument = 'instrument1';
+
 		$logs = [
-			['message' => 'survey page loaded', 'instrument' => 'instrument1'],
-			['message' => 'survey page loaded', 'instrument' => 'instrument1'],
+			['message' => 'survey page loaded', 'instrument' => $instrument],
+			['message' => 'survey page loaded', 'instrument' => $instrument],
 		];
 
 		$logs = $this->flushOutMockLogs($logs);
@@ -499,7 +501,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			$firstSurveyLog,
 			$lastSurveyLog,
 			$avatarUsagePeriods
-		) = $this->analyzeLogEntries($logs);
+		) = $this->analyzeLogEntries($logs, $instrument);
 
 		$this->assertSame(1, $lastSurveyLog['timestamp'] - $firstSurveyLog['timestamp']);
 	}
@@ -811,7 +813,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			$firstSurveyLog,
 			$lastSurveyLog,
 			$avatarUsagePeriods
-		) = $this->analyzeLogEntries($logs);
+		) = $this->analyzeLogEntries($logs, $logs[0]['instrument']);
 
 		if(count($avatarUsagePeriods) !== count($expectedPeriods)){
 			$this->dump($expectedPeriods, '$expected');
@@ -1132,7 +1134,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			$lastSurveyLog,
 			$avatarUsagePeriods,
 			$videoStats
-		) = $this->analyzeLogEntries($logs);
+		) = $this->analyzeLogEntries($logs, $instrument);
 
 		foreach($videoStats as &$stats){
 			// Remove unused temporary stats that we don't want to compare.
@@ -1147,16 +1149,18 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		}
 	}
 
-	public function analyzeLogEntries($logsToAnalyze)
+	public function analyzeLogEntries($logsToAnalyze, $instrument)
 	{
 //		$this->dump('analyzeLogEntries');
 
-		$firstSurveyLog = $logsToAnalyze[0];
-		$instrument = $firstSurveyLog['instrument'];
+		// The instrument used to be detected from the first log entry,
+		// but we changed it to a parameter to support sessions where the instrument is carried over from a previous session
+		// and is not necessarily present on the first log entry in the current session.
 		if(!$instrument){
-			throw new Exception("The first log entry did not define an instrument.  The first log entry is typically a page load event.  We may need to add support for additional scenarios.  Here is the first log message: " . json_encode($firstSurveyLog));
+			throw new Exception("An instrument is required to analyze log entries.  Here is the first log entry being analyzed: " . json_encode($logsToAnalyze[0]));
 		}
 
+		$firstSurveyLog = $logsToAnalyze[0];
 		$logsToAnalyze = array_merge($this->getPrecedingAvatarRecordLogs($firstSurveyLog), $logsToAnalyze);
 
 		$lastSurveyLog = null;
@@ -1604,6 +1608,8 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		$lastSessionByRecordId = [];
 		$sessions = [];
 		while($log = $logQueryResults->fetch_assoc()){
+			// echo "Processing {$log['log_id']}<br>\n";
+
 			$recordId = $log['record'];
 			$instrument = $log['instrument'];
 
@@ -1617,20 +1623,24 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 					continue;
 				}
 
+				// echo "Starting first session<br>\n";
 				$addNewSession = true;
 			}
 			else if($instrument && $instrument != $currentSession['lastInstrument']){
+				// echo "Starting new session because instrument changed<br>\n";
 				$addNewSession = true;
 			}
 			else {
 				$lastLog = end($currentSession['logs']);
 				$timeSinceLastLog = $log['timestamp'] - $lastLog['timestamp'];
 				if($timeSinceLastLog >= self::SESSION_TIMEOUT){
+					// echo "Starting new session because the last one timed out<br>\n";
 					$addNewSession = true;
 
 					if(!$instrument){
 						// New sessions must have an instrument set.
 						// Use the one from the current (soon to be previous) session.
+						// echo "Using instrument from previous session<br>\n";
 						$instrument = $currentSession['lastInstrument'];
 					}
 				}

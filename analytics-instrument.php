@@ -7,6 +7,7 @@ use Exception;
 $module->runReportUnitTests();
 
 $sessions = $module->getSessionsForLogIdParams();
+$firstSession = $sessions[0];
 
 list(
 	$firstReviewModeLog,
@@ -15,7 +16,7 @@ list(
 	$avatarUsagePeriods,
 	$videoStats,
 	$popupStats,
-) = $module->analyzeLogEntries($sessions[0]['logs']);
+) = $module->analyzeLogEntries($firstSession['logs'], $firstSession['instrument']);
 
 if($firstReviewModeLog) {
 	$timeSpentInReviewMode = $module->getTimePeriodString($firstSurveyLog['timestamp'] - $firstReviewModeLog['timestamp']);
