@@ -189,6 +189,15 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				if(empty($maleVoice)){
 					$maleVoice = '3,2';
 				}
+
+				$avatarDisabled = $this->getProjectSetting('disable');
+				if(!$avatarDisabled){
+					// Filter out the default null value.
+					$avatarForms = array_filter($this->getProjectSetting('avatar-forms'));
+					if(!empty($avatarForms)){
+						$avatarDisabled = !in_array($instrument, $avatarForms);
+					}
+				}
 				?>
 
 				OddcastAvatarExternalModule.settings = <?=json_encode([
@@ -198,7 +207,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 					],
 					'shows' => OddcastAvatarExternalModule::$SHOWS,
 					'isInitialLoad' => $_SERVER['REQUEST_METHOD'] == 'GET',
-					'avatarDisabled' => $this->getProjectSetting('disable'),
+					'avatarDisabled' => $avatarDisabled,
 					'reviewModeEnabled' => $this->isReviewModeEnabled($instrument),
 					'reviewModeCookieName' => REVIEW_MODE,
 					'reviewModeTurningOffValue' => TURNING_OFF,

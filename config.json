@@ -37,6 +37,12 @@
 			"type": "checkbox"
 		},
 		{
+			"key": "avatar-forms",
+			"name": "Limit the avatar to specific form(s)",
+			"type": "form-list",
+			"repeatable": true
+		},
+		{
 			"key": "enable-review-mode",
 			"name": "Enable \"Review Mode\"",
 			"type": "checkbox"
