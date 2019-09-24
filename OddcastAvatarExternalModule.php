@@ -251,7 +251,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		return '';
 	}
 
-	function redcap_every_page_top()
+	function redcap_every_page_top($project_id)
 	{
 		// The following check has been disabled since PHP 5.4 is buggy (hangs) in UniServer on Windows.
 		if(false && $_SERVER['HTTP_HOST'] === 'localhost' && (PHP_MAJOR_VERSION !== 5 || PHP_MINOR_VERSION !== 4)){
@@ -269,7 +269,9 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		if(isset($_GET['__return'])){
 			// This is the page where return codes are entered.
 			// The redcap_survey_page hook will not get called on this page, so call loadAvatar() now.
-			$this->loadAvatar();
+			// This page could be loaded both in and outside of the iframe.
+			// We have to initialize the avatar in case it's loaded outside the iframe.
+			$this->loadAvatar($project_id, null, 'return_code_page');
 			return;
 		}
 
