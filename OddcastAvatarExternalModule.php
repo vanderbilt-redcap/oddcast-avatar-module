@@ -1479,6 +1479,9 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				</tr>
 				<?php
 				foreach($avatarUsageTotals as $showId=>$total){
+					if(!$showId){
+						continue;
+					}
 					?>
 					<tr>
 						<td class="character"><img src="<?=$this->getUrl("images/$showId.png")?>"</td>
