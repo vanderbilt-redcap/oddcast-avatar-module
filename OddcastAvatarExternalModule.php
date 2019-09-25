@@ -1711,14 +1711,15 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		}
 
 		if($this->isDebugLoggingEnabled()){
-			$sessionSummaries = $sessions;
-			foreach($sessionSummaries as &$summary){
+			$sessionSummaries = [];
+			foreach($sessions as $summary){
 				$newIds = [];
 				foreach($summary['logs'] as $log){
 					$newIds[] = (int)$log['log_id'];
 				}
 
 				$summary['logs'] = $newIds;
+				$sessionSummaries[] = $summary;
 			}
 
 			$this->log('sessions', [
