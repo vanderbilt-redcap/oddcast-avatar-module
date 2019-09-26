@@ -426,18 +426,6 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			strpos($url, '__passthru=DataEntry%2Fimage_view.php') === false; // Prevent hooks from firing for survey logo URLs (and breaking them).
 	}
 
-	public function getQueryLogsSql($sql)
-	{
-		$sql = parent::getQueryLogsSql($sql);
-
-		// Remove the current module restriction.
-		// On 9/21/18 the ability to override the module id clause was added to the framework.
-		// We should make sure whatever REDCap version that change makes it into is deployed on UAB's servers before refactoring this to use this new feature.
-		$sql = str_replace("redcap_external_modules_log.external_module_id = (SELECT external_module_id FROM redcap_external_modules WHERE directory_prefix = 'vanderbilt_oddcast-avatar') and", '', $sql);
-
-		return $sql;
-	}
-
 	public function getTimePeriodString($seconds)
 	{
 		$minutes = (int)($seconds/60);
@@ -1616,7 +1604,8 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			where
 				record not like 'external-modules-temporary-record-id-%'
 				and $whereClause
-			order by log_id
+				and external_module_id is not null " // return logs from all modules
+			. " order by log_id
 		";
 
 		if($this->isDebugLoggingEnabled()){

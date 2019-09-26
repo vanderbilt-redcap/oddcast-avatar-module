@@ -3,6 +3,10 @@
 
 	"namespace": "Vanderbilt\\OddcastAvatarExternalModule",
 
+	"compatibility": {
+        "redcap-version-min": "8.10.1"
+    },
+
 	"authors": [
 		{
 			"name": "Mark McEver",
