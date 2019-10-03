@@ -136,11 +136,6 @@ OddcastAvatarExternalModule.addProperties({
 			Cookies.set(cookieName, value, {expires: 1})
 		}
 
-		var startAvatar = function () {
-			getSubmitButton().prop('disabled', false)
-			OddcastAvatarExternalModule.callOnParent('startAvatar')
-		}
-
 		var reviewModeFooter = $('<div id="oddcast-review-mode-footer">You are currently in Review Mode.<br><button>Click here to begin consent</button></div>')
 
 		var clickPreviousButton = function () {
@@ -149,7 +144,8 @@ OddcastAvatarExternalModule.addProperties({
 				Cookies.remove(cookieName)
 				reviewModeFooter.remove() // Important if we're already on the first page
 				
-				startAvatar()
+				getSubmitButton().prop('disabled', false)
+				OddcastAvatarExternalModule.callOnParent('startAvatar')
 
 				OddcastAvatarExternalModule.log('review mode exited')
 			}
