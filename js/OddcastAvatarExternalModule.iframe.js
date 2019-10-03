@@ -148,8 +148,7 @@ OddcastAvatarExternalModule.addProperties({
 			if (previousButton.length == 0) {
 				Cookies.remove(cookieName)
 				reviewModeFooter.remove() // Important if we're already on the first page
-				OddcastAvatarExternalModule.hideLoadingOverlay()
-
+				
 				startAvatar()
 
 				OddcastAvatarExternalModule.log('review mode exited')

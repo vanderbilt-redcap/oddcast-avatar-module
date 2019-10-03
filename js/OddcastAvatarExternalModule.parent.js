@@ -87,12 +87,6 @@ OddcastAvatarExternalModule.addProperties({
 
 		// Prevent the user from scrolling the avatar and iframe container elements
 		$('body').append('<script src="https://cdnjs.cloudflare.com/ajax/libs/inobounce/0.1.6/inobounce.min.js" integrity="sha256-8Lv10+9kieliYluA+S5z1+KwnqLTX4J0FiDyx8FWM2s=" crossorigin="anonymous"></script>')
-
-		if(!OddcastAvatarExternalModule.settings.reviewModeEnabled){
-			OddcastAvatarExternalModule.startAvatar()
-		}
-
-		OddcastAvatarExternalModule.hideLoadingOverlay()
 	},
 	// This method accounts for the view height changes on mobile
 	// due to the address bar (and bottom bar on iOS) sometimes
@@ -140,11 +134,22 @@ OddcastAvatarExternalModule.addProperties({
 		})
 	},
 	startAvatar: function () {
+		OddcastAvatarExternalModule.callOnIFrame('hideLoadingOverlay')	
+
 		if (OddcastAvatarExternalModule.settings.avatarDisabled) {
+			$('#oddcast-sidebar').css('visibility', 'hidden')
 			return
 		}
 
-		OddcastAvatarExternalModule.getTextIntroModal().modal('show')
+		$('#oddcast-sidebar').css('visibility', 'visible')
+
+		if(!OddcastAvatarExternalModule.showId){
+			// This is the first time the avatar has been started.  Show the intro modal.
+			OddcastAvatarExternalModule.getTextIntroModal().modal('show')
+		}
+		else{
+			// The avatar has been started before (perhaps on a prior instrument in the same window).
+		}
 	},
 	getWrapper: function () {
 		return $('#oddcast-wrapper')
@@ -264,6 +269,18 @@ OddcastAvatarExternalModule.addProperties({
 		// Update all the settings for the current page
 		OddcastAvatarExternalModule.settings = settings
 
+		if(
+			OddcastAvatarExternalModule.settings.reviewModeEnabled
+			&& !OddcastAvatarExternalModule.isEnabled()  // True if the user has already exited review mode and begun the survey
+		){
+			OddcastAvatarExternalModule.callOnIFrame('initReviewMode')
+		}
+		else{
+			OddcastAvatarExternalModule.startAvatar()
+		}
+
+		OddcastAvatarExternalModule.hideLoadingOverlay()
+
 		if(settings.pageMessage === oldPageMessage){
 			// This is likely the IFrame initializing on the first page.
 			// Do nothing, since this page message should already have been handled when the avatar was initially maximized.
@@ -275,16 +292,6 @@ OddcastAvatarExternalModule.addProperties({
 		// Make sure the iFrame's enabled flag is up to date, in case the iFrame wasn't loaded when it last changed.
 		// This can be reproduced by simulating a "Slow 3G" connection in Chrome's developer tools and immediately selecting an avatar when the dialog is displayed.
 		OddcastAvatarExternalModule.setEnabledOnIFrame()
-
-		if(
-			OddcastAvatarExternalModule.settings.reviewModeEnabled
-			&& !OddcastAvatarExternalModule.isEnabled()  // True if the user has already exiting review mode and begun the survey
-		){
-			OddcastAvatarExternalModule.callOnIFrame('initReviewMode')
-		}
-		else{
-			OddcastAvatarExternalModule.callOnIFrame('hideLoadingOverlay')
-		}
 	},
 	onIFrameUnLoad: function(){
 		OddcastAvatarExternalModule.iFrameLoaded = false
@@ -401,7 +408,7 @@ OddcastAvatarExternalModule.addProperties({
 		return $('._html5Player')
 	},
 	isEnabled: function () {
-		return OddcastAvatarExternalModule.getAvatar().is(':visible')
+		return OddcastAvatarExternalModule.getAvatar().is(':visible') && $('#oddcast-sidebar').css('visibility') === 'visible'
 	},
 	getPageMessageButton: function () {
 		return $('#oddcast-controls .fa-comment')
