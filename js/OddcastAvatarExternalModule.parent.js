@@ -136,19 +136,12 @@ OddcastAvatarExternalModule.addProperties({
 	startAvatar: function () {
 		OddcastAvatarExternalModule.callOnIFrame('hideLoadingOverlay')	
 
-		if (OddcastAvatarExternalModule.settings.avatarDisabled) {
-			$('#oddcast-sidebar').css('visibility', 'hidden')
-			return
-		}
-
-		$('#oddcast-sidebar').css('visibility', 'visible')
-
-		if(!OddcastAvatarExternalModule.showId){
+		if(!OddcastAvatarExternalModule.settings.avatarDisabled && !OddcastAvatarExternalModule.showId){
 			// This is the first time the avatar has been started.  Show the intro modal.
 			OddcastAvatarExternalModule.getTextIntroModal().modal('show')
 		}
 		else{
-			// The avatar has been started before (perhaps on a prior instrument in the same window).
+			// The avatar is disabled or has been started before (perhaps on a prior instrument in the same window).
 		}
 	},
 	getWrapper: function () {
@@ -261,37 +254,35 @@ OddcastAvatarExternalModule.addProperties({
 
 		OddcastAvatarExternalModule.timeoutVerificationValue = value.trim().toLowerCase()
 	},
+	updateSidebarVisibility: function () {
+		var visibility
+		if (OddcastAvatarExternalModule.settings.avatarDisabled) {
+			visibility = 'hidden'
+		}
+		else{
+			visibility = 'visible'
+		}
+
+		$('#oddcast-sidebar').css('visibility', visibility)
+	},
 	onIFrameInitialized: function(settings){
 		OddcastAvatarExternalModule.iFrameLoaded = true
 		
-		var oldPageMessage = OddcastAvatarExternalModule.settings.pageMessage
-
 		// Update all the settings for the current page
 		OddcastAvatarExternalModule.settings = settings
+		
+		OddcastAvatarExternalModule.updateSidebarVisibility()
 
-		if(
-			OddcastAvatarExternalModule.settings.reviewModeEnabled
-			&& !OddcastAvatarExternalModule.isEnabled()  // True if the user has already exited review mode and begun the survey
-		){
-			OddcastAvatarExternalModule.callOnIFrame('initReviewMode')
-		}
-		else{
-			OddcastAvatarExternalModule.startAvatar()
-		}
+		// Even if the sidebar visibility hasn't changed, we need to Make sure the iFrame's enabled flag is up to date
+		// in case the iFrame wasn't loaded when it last changed.  This can be reproduced by simulating a "Slow 3G" connection
+		// in Chrome's developer tools and immediately selecting an avatar when the dialog is displayed.
+		OddcastAvatarExternalModule.setEnabledOnIFrame()
+
+		OddcastAvatarExternalModule.handlePageMessage()
+
+		OddcastAvatarExternalModule.callOnIFrame('initReviewMode')
 
 		OddcastAvatarExternalModule.hideLoadingOverlay()
-
-		if(settings.pageMessage === oldPageMessage){
-			// This is likely the IFrame initializing on the first page.
-			// Do nothing, since this page message should already have been handled when the avatar was initially maximized.
-		}
-		else{
-			OddcastAvatarExternalModule.handlePageMessage()
-		}
-
-		// Make sure the iFrame's enabled flag is up to date, in case the iFrame wasn't loaded when it last changed.
-		// This can be reproduced by simulating a "Slow 3G" connection in Chrome's developer tools and immediately selecting an avatar when the dialog is displayed.
-		OddcastAvatarExternalModule.setEnabledOnIFrame()
 	},
 	onIFrameUnLoad: function(){
 		OddcastAvatarExternalModule.iFrameLoaded = false

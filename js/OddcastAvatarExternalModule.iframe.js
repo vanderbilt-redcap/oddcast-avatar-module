@@ -118,6 +118,9 @@ OddcastAvatarExternalModule.addProperties({
 			OddcastAvatarExternalModule.callOnParent('updateTimeoutVerificationValue', field.val())
 		})
 	},
+	startAvatar: function() {
+		OddcastAvatarExternalModule.callOnParent('startAvatar')
+	},
 	initReviewMode: function () {
 		var settings = OddcastAvatarExternalModule.settings
 
@@ -129,8 +132,6 @@ OddcastAvatarExternalModule.addProperties({
 			// This was switched to a function instead of a variable since the submit button is replaced when the avatar is loaded.
 			return $('button[name=submit-btn-saverecord]:contains("Submit")')
 		}
-
-		getSubmitButton().prop('disabled', true)
 
 		var setCookie = function (value) {
 			Cookies.set(cookieName, value, {expires: 1})
@@ -145,7 +146,7 @@ OddcastAvatarExternalModule.addProperties({
 				reviewModeFooter.remove() // Important if we're already on the first page
 				
 				getSubmitButton().prop('disabled', false)
-				OddcastAvatarExternalModule.callOnParent('startAvatar')
+				OddcastAvatarExternalModule.startAvatar()
 
 				OddcastAvatarExternalModule.log('review mode exited')
 			}
@@ -171,6 +172,7 @@ OddcastAvatarExternalModule.addProperties({
 			})
 
 			$('#pagecontent').append(reviewModeFooter)
+			getSubmitButton().prop('disabled', true)
 
 			// Remove the econsent checkbox's id (if present) so it can't be initialized.  Clicking this checkbox would re-enable the submit button.
 			$('#econsent_confirm_checkbox').removeAttr('id')
@@ -181,8 +183,7 @@ OddcastAvatarExternalModule.addProperties({
 			clickPreviousButton()
 		}
 		else{
-			// Review mode has been exited, and we're on a page other than one.
-			OddcastAvatarExternalModule.hideLoadingOverlay()
+			OddcastAvatarExternalModule.startAvatar()
 		}
 	},
 	// This method is referenced by the Inline Popups module.
