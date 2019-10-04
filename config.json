@@ -37,7 +37,7 @@
 	"project-settings": [
 		{
 			"key": "disable",
-			"name": "Disable the avatar",
+			"name": "Disable the avatar on all forms",
 			"type": "checkbox"
 		},
 		{
@@ -52,15 +52,15 @@
 			"type": "checkbox"
 		},
 		{
-			"key": "enable-debug-logging",
-			"name": "Enable debug logging",
-			"type": "checkbox"
-		},
-		{
 			"key": "review-mode-forms",
 			"name": "Limit \"Review Mode\" to specific form(s)",
 			"type": "form-list",
 			"repeatable": true
+		},
+		{
+			"key": "enable-debug-logging",
+			"name": "Enable debug logging",
+			"type": "checkbox"
 		},
 		{
 			"key": "voice",
