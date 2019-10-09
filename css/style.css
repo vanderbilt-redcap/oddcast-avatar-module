@@ -189,6 +189,7 @@ body.modal-open #oddcast-content{
 
 #oddcast-wrapper .modal{
 	display: none;
+	-webkit-overflow-scrolling: touch;
 }
 
 #oddcast-wrapper .modal,
