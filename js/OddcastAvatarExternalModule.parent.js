@@ -159,12 +159,13 @@ OddcastAvatarExternalModule.addProperties({
 	startAvatar: function () {
 		OddcastAvatarExternalModule.callOnIFrame('hideLoadingOverlay')	
 
-		if(!OddcastAvatarExternalModule.settings.avatarDisabled && !OddcastAvatarExternalModule.showId){
+		if(!OddcastAvatarExternalModule.settings.avatarDisabled && !OddcastAvatarExternalModule.introModalInitiallyDisplayed){
 			// This is the first time the avatar has been started.  Show the intro modal.
+			OddcastAvatarExternalModule.introModalInitiallyDisplayed = true
 			OddcastAvatarExternalModule.getTextIntroModal().modal('show')
 		}
 		else{
-			// The avatar is disabled or has been started before (perhaps on a prior instrument in the same window).
+			// The user clicked "no thanks", the avatar is disabled via settings, or the intro modal has been displayed before (perhaps on a prior instrument in the same window).
 		}
 	},
 	getWrapper: function () {
