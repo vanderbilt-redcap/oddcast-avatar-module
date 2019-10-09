@@ -57,18 +57,41 @@ OddcastAvatarExternalModule.addProperties({
 		})
 
 		$('.oddcast-character').click(function () {
+			if(!OddcastAvatarExternalModule.isAudioPrimed){
+				if(!OddcastAvatarExternalModule.scenedLoaded){
+					// We need to wait until the scene is loaded before trying to respond to a click event by playing audio.
+					// If we don't, iOS & Android may not allow audio playback at all.
+					return
+				}
+	
+				// Android & iOS require a user action (not within an iframe) to trigger the initial playing of audio.
+				// In case there is not page message on the first page, we must prime audio so that the next page message will play.
+				// We prime before showing the avatar initially so users can't see it's mouth move.
+				// The text said doesn't matter because it will get replaced with silence,
+				// but we might as well go with a short message to make priming as fast as possible.
+				// We must call oddcast's method directly since the avatar isn't really enabled by our definition yet.
+				sayText('a', 7, 1, 2)
+			}
+
 			var showId = $(this).data('show-id')
-			OddcastAvatarExternalModule.showId = showId
-
-			OddcastAvatarExternalModule.maximizeAvatar()
-
-			// Hide the play/pause buttons since they won't work again yet if there's not a page message.
-			OddcastAvatarExternalModule.getPlayButton().hide()
-			OddcastAvatarExternalModule.getPauseButton().hide()
-
-			OddcastAvatarExternalModule.log('character selected', {
-				'show id': showId
-			})
+			OddcastAvatarExternalModule.until(
+				function(){
+					return OddcastAvatarExternalModule.isAudioPrimed
+				},
+				function(){
+					OddcastAvatarExternalModule.showId = showId
+					
+					OddcastAvatarExternalModule.maximizeAvatar()
+		
+					// Hide the play/pause buttons since they won't work again yet if there's not a page message.
+					OddcastAvatarExternalModule.getPlayButton().hide()
+					OddcastAvatarExternalModule.getPauseButton().hide()
+		
+					OddcastAvatarExternalModule.log('character selected', {
+						'show id': showId
+					})
+				}
+			)
 		})
 
 		OddcastAvatarExternalModule.getTextIntroModal().find('button').click(function () {
@@ -369,8 +392,6 @@ OddcastAvatarExternalModule.addProperties({
 		loadShow()
 	},
 	onSceneLoaded: function () {
-		window.mobile_events = 1 // Required for sayText() to work on iOS/Android
-
 		OddcastAvatarExternalModule.scenedLoaded = true
 
 		var postInit = function (runCount) {
@@ -428,17 +449,6 @@ OddcastAvatarExternalModule.addProperties({
 		// Wait until the avatar is loaded in the background initially, or we could see a flash of the wrong character.
 		OddcastAvatarExternalModule.afterSceneLoaded(function () {
 			// The initial show is loaded, but we may not want to use this one so we load our own show later.
-
-			if(!OddcastAvatarExternalModule.isAudioPrimed){
-				// Android & iOS require a user action (not within an iframe) to trigger the initial playing of audio.
-				// In case there is not page message on the first page, we must prime audio so that the next page message will play.
-				// We prime before showing the avatar initially so users can't see it's mouth move.
-				// The text said doesn't matter because it will get replaced with silence,
-				// but we might as well go with a short message to make priming as fast as possible.
-				// We must call oddcast's method directly since the avatar isn't really enabled by our definition yet.
-				sayText('a', 7, 1, 2)
-				return
-			}
 
 			// Wait to hide the modal until a scene has been loaded to prevent the survey from shifting down on slow connections.
 			textIntroModal.modal('hide')
@@ -522,7 +532,14 @@ OddcastAvatarExternalModule.addProperties({
 // http://www.oddcast.com/support/docs/vhost_API_Reference.pdf
 
 function vh_sceneLoaded() {
-	OddcastAvatarExternalModule.onSceneLoaded()
+	OddcastAvatarExternalModule.until(
+		function(){
+			// Oddcast is not fully initialized until the following flags are both set.
+			// We must wait or audio sometimes won't prime correctly on mobile.
+			return window.vhsshtml5_characterLoaded && window.mobile_events
+		},
+		OddcastAvatarExternalModule.onSceneLoaded
+	)
 }
 
 function vh_talkStarted() {
@@ -536,9 +553,6 @@ function vh_talkStarted() {
 function vh_talkEnded() {
 	if(!OddcastAvatarExternalModule.isAudioPrimed){
 		OddcastAvatarExternalModule.isAudioPrimed = true
-
-		// Call maximize again now that audio is primed
-		OddcastAvatarExternalModule.maximizeAvatar()
 
 		return // don't show the pause/play buttons if we're just priming audio
 	}
