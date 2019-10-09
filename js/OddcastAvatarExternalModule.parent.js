@@ -73,6 +73,9 @@ OddcastAvatarExternalModule.addProperties({
 				sayText('a', 7, 1, 2)
 			}
 
+			// Hide the modal, but leave the background in place (poor man's loading indicator).
+			OddcastAvatarExternalModule.getTextIntroModal().hide()
+
 			var showId = $(this).data('show-id')
 			OddcastAvatarExternalModule.until(
 				function(){
