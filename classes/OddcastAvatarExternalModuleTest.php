@@ -12,6 +12,7 @@ class OddcastAvatarExternalModuleTest{
         $this->testGetTimePeriodString();
         $this->testAnalyzeLogEntries_basics();
         $this->testAnalyzeLogEntries_video();
+        $this->testGetSessionsFromLogs();
         $this->testPageStats();
     }
 
@@ -330,6 +331,93 @@ class OddcastAvatarExternalModuleTest{
 			$this->dump($videoStats, 'actual stats');
 			throw new Exception("Actual video stats did not match expected");
 		}
+	}
+
+	private function testGetSessionsFromLogs(){
+		$assert = function($logs){
+			$expectedSessions = [];
+			for($i=0; $i<count($logs); $i++){
+				$log = &$logs[$i];
+				$log['log_id'] = $i;
+
+				$sessionIndex = @$log['session'];
+				if($sessionIndex === null){
+					continue; // don't include this log in a session
+				}
+
+				$instrument = @$log['instrument'];
+				if(@$log['copy-previous-instrument']){
+					$instrument = $expectedSessions[$sessionIndex-1]['instrument'];
+				}
+
+				$session = &$expectedSessions[$sessionIndex];
+				if(!$session){
+					$session = [
+						'timestamp' => $log['timestamp'],
+						'record' => $log['record'],
+						'instrument' => $instrument
+					];
+
+					$expectedSessions[$sessionIndex] = &$session;
+				}
+
+				// This value is only used to generate the expected sessions for testing.
+				// It should not be included in the log data passed to getSessionsFromLogs() since sessions should be determined independently (the point of this test).
+				unset($log['session']);
+
+				$session['logs'][] = $log;
+				if($instrument){
+					$session['lastInstrument'] = $instrument;
+				}
+			}
+
+			$results = new MockMySQLResult($logs);
+			$actualSessions = $this->getSessionsFromLogs($results);
+
+			$this->assertSame($expectedSessions, $actualSessions);
+		};
+
+		// two basic sessions
+		$assert(
+			[
+				['session' => 0, 'record' => 1, 'instrument' => 'a'],
+				['session' => 0, 'record' => 1], // simulate a message without an instrument set
+				['session' => 1, 'record' => 1, 'instrument' => 'b'],
+			]
+		);
+
+		// two overlapped records
+		$assert(
+			[
+				['session' => 0, 'record' => 1, 'instrument' => 'a'],
+				['session' => 0, 'record' => 1],
+				['session' => 1, 'record' => 2, 'instrument' => 'a'],
+				['session' => 0, 'record' => 1],
+				['session' => 1, 'record' => 2],
+			]
+		);
+
+		// sessions split by a timeout
+		$time1 = 1;
+		$time2 = $time1 + OddcastAvatarExternalModule::SESSION_TIMEOUT -1;
+		$time3 = $time2 + OddcastAvatarExternalModule::SESSION_TIMEOUT;
+		$assert(
+			[
+				['session' => 0, 'record' => 1, 'timestamp' => $time1, 'instrument' => 'a'],
+				['session' => 0, 'record' => 1, 'timestamp' => $time2],
+				['session' => 1, 'record' => 1, 'timestamp' => $time3, 'copy-previous-instrument' => true],
+			]
+		);
+
+		// logs start in the middle of a session
+		// The first session log must have an instrument set for analyzeLogEntries() to work properly.
+		$assert(
+			[
+				[], // simulate a record from the middle of a session that doesn't have an instrument
+				['session' => 0, 'record' => 1, 'instrument' => 'a'],
+				['session' => 0, 'record' => 1],
+			]
+		);
 	}
 
 	private function testPageStats(){
