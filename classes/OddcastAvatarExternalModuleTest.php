@@ -11,6 +11,7 @@ class OddcastAvatarExternalModuleTest{
     function runReportUnitTests(){
         $this->testGetTimePeriodString();
         $this->testAnalyzeLogEntries_basics();
+		$this->testAnalyzeLogEntries_avatar();
         $this->testAnalyzeLogEntries_video();
         $this->testGetSessionsFromLogs();
         $this->testSetAvatarAnalyticsFields();
@@ -56,6 +57,364 @@ class OddcastAvatarExternalModuleTest{
 		) = $this->analyzeLogEntries($logs, $instrument);
 
 		$this->assertSame(1, $lastSurveyLog['timestamp'] - $firstSurveyLog['timestamp']);
+	}
+
+	private function testAnalyzeLogEntries_avatar()
+	{
+		$showId = rand();
+		$showId2 = rand();
+
+		// basic usage
+		$this->assertAvatarUsagePeriods(
+			[
+				['message' => 'survey page loaded', 'instrument' => 'instrument1'],
+				['message' => 'character selected', 'show id' => $showId],
+				['message' => 'survey complete'],
+			],
+			[
+				[
+					'startIndex' => 0,
+					'endIndex' => 1,
+					'initialSelectionDialog' => true
+				],
+				[
+					'show id' => $showId,
+					'startIndex' => 1,
+					'endIndex' => 2
+				]
+			]
+		);
+
+		// basic usage without survey complete event
+		$this->assertAvatarUsagePeriods(
+			[
+				['message' => 'survey page loaded', 'instrument' => 'instrument1'],
+				['message' => 'character selected', 'show id' => $showId],
+				['message' => 'survey page loaded', 'instrument' => 'instrument1'],
+			],
+			[
+				[
+					'startIndex' => 0,
+					'endIndex' => 1,
+					'initialSelectionDialog' => true
+				],
+				[
+					'show id' => $showId,
+					'startIndex' => 1,
+					'endIndex' => 2
+				]
+			]
+		);
+
+		// different character selections
+		$this->assertAvatarUsagePeriods(
+			[
+				['message' => 'survey page loaded', 'instrument' => 'instrument1'],
+				['message' => 'character selected', 'show id' => $showId],
+				['message' => 'character selected', 'show id' => $showId2],
+				['message' => 'survey complete'],
+			],
+			[
+				[
+					'startIndex' => 0,
+					'endIndex' => 1,
+					'initialSelectionDialog' => true
+				],
+				[
+					'show id' => $showId,
+					'startIndex' => 1,
+					'endIndex' => 2
+				],
+				[
+					'show id' => $showId2,
+					'startIndex' => 2,
+					'endIndex' => 3
+				]
+			]
+		);
+
+		// repeated character selections
+		$this->assertAvatarUsagePeriods(
+			[
+				['message' => 'survey page loaded', 'instrument' => 'instrument1'],
+				['message' => 'character selected', 'show id' => $showId],
+				['message' => 'character selected', 'show id' => $showId],
+				['message' => 'survey complete'],
+			],
+			[
+				[
+					'startIndex' => 0,
+					'endIndex' => 1,
+					'initialSelectionDialog' => true
+				],
+				[
+					'show id' => $showId,
+					'startIndex' => 1,
+					'endIndex' => 2
+				],
+				[
+					'show id' => $showId,
+					'startIndex' => 2,
+					'endIndex' => 3
+				]
+			]
+		);
+
+		// disabling and enabling
+		$this->assertAvatarUsagePeriods(
+			[
+				['message' => 'survey page loaded', 'instrument' => 'instrument1'],
+				['message' => 'character selected', 'show id' => $showId],
+				['message' => 'avatar disabled'],
+				['message' => 'avatar enabled'],
+				['message' => 'survey complete'],
+			],
+			[
+				[
+					'startIndex' => 0,
+					'endIndex' => 1,
+					'initialSelectionDialog' => true
+				],
+				[
+					'show id' => $showId,
+					'startIndex' => 1,
+					'endIndex' => 2
+				],
+				[
+					'show id' => $showId,
+					'startIndex' => 2,
+					'endIndex' => 3,
+					'disabled' => true
+				],
+				[
+					'show id' => $showId,
+					'startIndex' => 3,
+					'endIndex' => 4
+				]
+			]
+		);
+
+		// disabling to begin with
+		$this->assertAvatarUsagePeriods(
+			[
+				['message' => 'survey page loaded', 'instrument' => 'instrument1'],
+				['message' => 'avatar disabled'],
+				['message' => 'avatar enabled'], // the selection dialog will be displayed again here
+				['message' => 'character selected', 'show id' => $showId],
+				['message' => 'survey page loaded', 'instrument' => 'instrument1'],
+			],
+			[
+				[
+					'startIndex' => 0,
+					'endIndex' => 1,
+					'initialSelectionDialog' => true
+				],
+				[
+					'startIndex' => 1,
+					'endIndex' => 2,
+					'disabled' => true
+				],
+				[
+					'startIndex' => 2,
+					'endIndex' => 3,
+				],
+				[
+					'show id' => $showId,
+					'startIndex' => 3,
+					'endIndex' => 4,
+				]
+			]
+		);
+
+		// second of two instruments, and avatar left enabled from first
+		$this->assertAvatarUsagePeriods(
+			[
+				['message' => 'survey page loaded', 'instrument' => 'instrument2'],
+				['message' => 'this message creates a gap between the surrounding logs so that the following event is not assumed to be the initial character selection dialog'],
+				['message' => 'character selected', 'show id' => $showId2],
+				['message' => 'survey complete'],
+			],
+			[
+				[
+					'show id' => $showId,
+					'startIndex' => 0,
+					'endIndex' => 2
+				],
+				[
+					'show id' => $showId2,
+					'startIndex' => 2,
+					'endIndex' => 3
+				]
+			],
+			[
+				['message' => 'character selected', 'show id' => $showId]
+			]
+		);
+
+		// second of two instruments, and avatar left disabled from first
+		$this->assertAvatarUsagePeriods(
+			[
+				['message' => 'survey page loaded', 'instrument' => 'instrument2'],
+				['message' => 'avatar enabled'],
+				['message' => 'survey complete'],
+			],
+			[
+				[
+					'show id' => $showId,
+					'startIndex' => 0,
+					'endIndex' => 1,
+					'disabled' => true
+				],
+				[
+					'show id' => $showId,
+					'startIndex' => 1,
+					'endIndex' => 2
+				]
+			],
+			[
+				['message' => 'character selected', 'show id' => $showId],
+				['message' => 'avatar disabled'],
+			]
+		);
+
+		// second of two instruments opened at different times via direct links from participant list
+		// avatar was left open on first instrument, but that avatar period should not be included on the second instrument
+		$this->assertAvatarUsagePeriods(
+			[
+				['message' => 'survey page loaded', 'instrument' => 'instrument2'],
+				['message' => 'character selected', 'show id' => $showId2],
+				['message' => 'some action to simulate the user staying on the survey after selecting the character'],
+			],
+			[
+				[
+					'startIndex' => 0,
+					'endIndex' => 1,
+					'initialSelectionDialog' => true
+				],
+				[
+					'show id' => $showId2,
+					'startIndex' => 1,
+					'endIndex' => 2
+				]
+			],
+			[
+				['message' => 'character selected', 'show id' => $showId],
+			]
+		);
+	}
+
+	private function assertAvatarUsagePeriods($logs, $expectedPeriods, $spoofedPrecedingAvatarLogs = null)
+	{
+		$this->module->spoofedPrecedingAvatarLogs = $spoofedPrecedingAvatarLogs = $this->flushOutMockLogs($spoofedPrecedingAvatarLogs);
+		$logs = $this->flushOutMockLogs($logs, end($spoofedPrecedingAvatarLogs));
+
+		list(
+			$firstReviewModeLog,
+			$firstSurveyLog,
+			$lastSurveyLog,
+			$avatarUsagePeriods
+		) = $this->analyzeLogEntries($logs, $logs[0]['instrument']);
+
+		if(count($avatarUsagePeriods) !== count($expectedPeriods)){
+			$this->dump($expectedPeriods, '$expected');
+			$this->dump($avatarUsagePeriods, '$actual');
+			throw new Exception("Expected " . count($expectedPeriods) . " usage period(s), but found " . count($avatarUsagePeriods));
+		}
+
+		// Used to specifically order keys such that the triple equals check works as expected below.
+		$moveKeyToEnd = function(&$array, $key){
+			if(isset($array[$key])){
+				$value = $array[$key];
+			}
+			else{
+				// Make values default to false
+				$value = false;
+			}
+
+			unset($array[$key]);
+			$array[$key] = $value;
+		};
+
+		for($i=0; $i<count($expectedPeriods); $i++){
+			$expected = $expectedPeriods[$i];
+			$actual = $avatarUsagePeriods[$i];
+
+			if(!isset($expected['show id'])){
+				$expected['show id'] = null;
+			}
+
+			$moveKeyToEnd($expected, 'initialSelectionDialog');
+
+			$startIndex = $expected['startIndex'];
+			$endIndex = $expected['endIndex'];
+
+			$expected['start'] = $logs[$startIndex]['timestamp'];
+
+			$moveKeyToEnd($expected, 'disabled');
+
+			$expected['end'] = $logs[$endIndex]['timestamp'];
+
+			unset($expected['startIndex']);
+			unset($expected['endIndex']);
+
+			if($expected['start'] >= $expected['end']){
+				$this->dump($expected, '$expected');
+				throw new Exception("The expected start is not before the expected end for index $i");
+			}
+
+			if($expected !== $actual){
+				$this->dump($expected, '$expected');
+				$this->dump($actual, '$actual');
+				throw new Exception("The expected and actual periods did not match!");
+			}
+		}
+
+		$this->module->spoofedPrecedingAvatarLogs = null;
+	}
+
+	private function flushOutMockLogs($logs, $lastLog = null)
+	{
+		if($logs === null){
+			return null;
+		}
+
+		if($lastLog){
+			$lastId = $lastLog['log_id'];
+			$lastTimestamp = $lastLog['timestamp'];
+		}
+		else{
+			$lastId = 0;
+			$lastTimestamp = time();
+		}
+
+		$nextId = $lastId+1;
+
+		$createLog = function($params) use (&$nextId, &$lastTimestamp){
+			$isVideoMessage = strpos($params['message'], 'video ') === 0;
+			if($isVideoMessage){
+				if(!isset($params['seconds'])){
+					$params['seconds'] = $nextId - 1;
+				}
+
+				if(!isset($params['field'])){
+					$params['field'] = 'video_1';
+				}
+			}
+
+			$params['log_id'] = $nextId;
+			$nextId++;
+
+			$params['timestamp'] = $lastTimestamp;
+			$lastTimestamp++;
+
+			return $params;
+		};
+
+		for($i=0; $i<count($logs); $i++){
+			$logs[$i] = $createLog($logs[$i]);
+		}
+
+		return $logs;
 	}
 
 	private function testAnalyzeLogEntries_video()
