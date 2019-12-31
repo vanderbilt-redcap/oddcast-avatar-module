@@ -13,6 +13,7 @@ class OddcastAvatarExternalModuleTest{
         $this->testAnalyzeLogEntries_basics();
         $this->testAnalyzeLogEntries_video();
         $this->testGetSessionsFromLogs();
+        $this->testSetAvatarAnalyticsFields();
         $this->testPageStats();
     }
 
@@ -417,6 +418,109 @@ class OddcastAvatarExternalModuleTest{
 				['session' => 0, 'record' => 1, 'instrument' => 'a'],
 				['session' => 0, 'record' => 1],
 			]
+		);
+	}
+
+	private function testSetAvatarAnalyticsFields(){
+		$assert = function($periods, $expectedData){
+			if(!isset($expectedData['avatar_disabled'])){
+				$expectedData = ['avatar_disabled' => 0] + $expectedData;
+			}
+
+            $actualData = [];
+            $this->module->setAvatarAnalyticsFields($periods, $actualData);
+			$this->assertSame($expectedData, $actualData);
+		};
+
+		// basic
+		$assert(
+			[
+				['show id' => 1, 'start' => 1, 'end' => 2],
+			],
+			[
+				'avatar_id_1' => 1,
+				'avatar_seconds_1' => 1
+			]
+		);
+
+		// assert multiple period times combined
+		$assert(
+			[
+				['show id' => 1, 'start' => 1, 'end' => 2],
+				['show id' => 2, 'start' => 1, 'end' => 2],
+				['show id' => 1, 'start' => 1, 'end' => 2],
+			],
+			[
+				'avatar_id_1' => 1,
+				'avatar_seconds_1' => 2,
+				'avatar_id_2' => 2,
+				'avatar_seconds_2' => 1
+			]
+		);
+
+		// assert disabled works
+		$assert(
+			[
+				['disabled' => true],
+			],
+			[
+				'avatar_disabled' => 1
+			]
+		);
+
+		// assert avatars ordered by most used
+		$assert(
+			[
+				['show id' => 1, 'start' => 1, 'end' => 2],
+				['show id' => 2, 'start' => 1, 'end' => 3],
+			],
+			[
+				'avatar_id_1' => 2,
+				'avatar_seconds_1' => 2,
+				'avatar_id_2' => 1,
+				'avatar_seconds_2' => 1
+			]
+		);
+
+		// assert other works as expected
+		$assert(
+			[
+				['show id' => 1, 'start' => 1, 'end' => 2],
+				['show id' => 2, 'start' => 1, 'end' => 2],
+				['show id' => 3, 'start' => 1, 'end' => 2],
+				['show id' => 4, 'start' => 1, 'end' => 3],
+				['show id' => 5, 'start' => 1, 'end' => 4],
+				['show id' => 6, 'start' => 1, 'end' => 5],
+			],
+			[
+				'avatar_id_1' => 6,
+				'avatar_seconds_1' => 4,
+				'avatar_id_2' => 5,
+				'avatar_seconds_2' => 3,
+				'avatar_id_3' => 4,
+				'avatar_seconds_3' => 2,
+				'avatar_seconds_other' => 3,
+			]
+		);
+
+		// assert initialSelectionDialog skipped
+		$assert(
+			[
+				['initialSelectionDialog' => true],
+			],
+			[]
+		);
+
+		// assert subsequent selection dialogs are skipped
+		$assert(
+			[
+				[
+					'initialSelectionDialog' => false,
+					'disabled' => false,
+					'show id' => null
+				]
+			],
+			[]
 		);
 	}
 
