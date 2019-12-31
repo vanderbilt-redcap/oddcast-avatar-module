@@ -10,6 +10,7 @@ class OddcastAvatarExternalModuleTest{
 
     function runReportUnitTests(){
         $this->testGetTimePeriodString();
+        $this->testAnalyzeLogEntries_basics();
         $this->testPageStats();
     }
 
@@ -33,7 +34,28 @@ class OddcastAvatarExternalModuleTest{
 		$assert('2 minutes, 0 seconds', 60*2);
 	}
 
-    private function testPageStats(){
+    private function testAnalyzeLogEntries_basics()
+	{
+		$instrument = 'instrument1';
+
+		$logs = [
+			['message' => 'survey page loaded', 'instrument' => $instrument],
+            ['message' => 'survey page loaded', 'instrument' => $instrument],
+		];
+
+		$logs = $this->flushOutMockLogs($logs);
+
+		list(
+			$firstReviewModeLog,
+			$firstSurveyLog,
+			$lastSurveyLog,
+			$avatarUsagePeriods
+		) = $this->analyzeLogEntries($logs, $instrument);
+
+		$this->assertSame(1, $lastSurveyLog['timestamp'] - $firstSurveyLog['timestamp']);
+	}
+
+	private function testPageStats(){
         $instrument = 'some_instrument';
 
         $logs = [

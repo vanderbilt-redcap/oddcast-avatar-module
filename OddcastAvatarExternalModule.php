@@ -459,7 +459,6 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		$testInstance = new OddcastAvatarExternalModuleTest($this);
 		$testInstance->runReportUnitTests();
 
-		$this->testAnalyzeLogEntries_basics();
 		$this->testAnalyzeLogEntries_avatar();
 		$this->testAnalyzeLogEntries_video();
 		$this->testGetSessionsFromLogs();
@@ -474,27 +473,6 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		echo "<pre>$label\n";
 		var_dump($var);
 		echo "</pre>";
-	}
-
-	private function testAnalyzeLogEntries_basics()
-	{
-		$instrument = 'instrument1';
-
-		$logs = [
-			['message' => 'survey page loaded', 'instrument' => $instrument],
-			['message' => 'survey page loaded', 'instrument' => $instrument],
-		];
-
-		$logs = $this->flushOutMockLogs($logs);
-
-		list(
-			$firstReviewModeLog,
-			$firstSurveyLog,
-			$lastSurveyLog,
-			$avatarUsagePeriods
-		) = $this->analyzeLogEntries($logs, $instrument);
-
-		$this->assertSame(1, $lastSurveyLog['timestamp'] - $firstSurveyLog['timestamp']);
 	}
 
 	function assertSame($expected, $actual){
