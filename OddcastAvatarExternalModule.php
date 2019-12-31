@@ -459,7 +459,6 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		$testInstance = new OddcastAvatarExternalModuleTest($this);
 		$testInstance->runReportUnitTests();
 
-		
 		// Reset debug logging to null so it gets re-initialized from the DB.
 		$this->debugLogging = null;
 	}
@@ -469,14 +468,6 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		echo "<pre>$label\n";
 		var_dump($var);
 		echo "</pre>";
-	}
-
-	function assertSame($expected, $actual){
-		if($expected !== $actual){
-			$this->dump($expected, '$expected');
-			$this->dump($actual, '$actual');
-			throw new Exception("The expected and actual values are not the same (or not the same type).");
-		}
 	}
 
 	public function analyzeLogEntries($logsToAnalyze, $instrument)

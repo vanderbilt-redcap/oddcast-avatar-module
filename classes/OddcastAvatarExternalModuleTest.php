@@ -21,7 +21,7 @@ class OddcastAvatarExternalModuleTest{
     private function testGetTimePeriodString()
 	{
 		$assert = function($expected, $seconds){
-			$actual = $this->getTimePeriodString($seconds);
+			$actual = $this->module->getTimePeriodString($seconds);
 			if($expected !== $actual){
 				throw new Exception("Expected '$expected' but got '$actual'!");
 			}
@@ -54,7 +54,7 @@ class OddcastAvatarExternalModuleTest{
 			$firstSurveyLog,
 			$lastSurveyLog,
 			$avatarUsagePeriods
-		) = $this->analyzeLogEntries($logs, $instrument);
+		) = $this->module->analyzeLogEntries($logs, $instrument);
 
 		$this->assertSame(1, $lastSurveyLog['timestamp'] - $firstSurveyLog['timestamp']);
 	}
@@ -313,7 +313,7 @@ class OddcastAvatarExternalModuleTest{
 			$firstSurveyLog,
 			$lastSurveyLog,
 			$avatarUsagePeriods
-		) = $this->analyzeLogEntries($logs, $logs[0]['instrument']);
+		) = $this->module->analyzeLogEntries($logs, $logs[0]['instrument']);
 
 		if(count($avatarUsagePeriods) !== count($expectedPeriods)){
 			$this->dump($expectedPeriods, '$expected');
@@ -678,7 +678,7 @@ class OddcastAvatarExternalModuleTest{
 			$lastSurveyLog,
 			$avatarUsagePeriods,
 			$videoStats
-		) = $this->analyzeLogEntries($logs, $instrument);
+		) = $this->module->analyzeLogEntries($logs, $instrument);
 
 		foreach($videoStats as &$stats){
 			// Remove unused temporary stats that we don't want to compare.
@@ -732,7 +732,7 @@ class OddcastAvatarExternalModuleTest{
 			}
 
 			$results = new MockMySQLResult($logs);
-			$actualSessions = $this->getSessionsFromLogs($results);
+			$actualSessions = $this->module->getSessionsFromLogs($results);
 
 			$this->assertSame($expectedSessions, $actualSessions);
 		};
@@ -904,7 +904,7 @@ class OddcastAvatarExternalModuleTest{
             $videoStats,
             $popupStats,
             $pageStats
-        ) = $this->analyzeLogEntries($logs, $instrument);
+        ) = $this->module->analyzeLogEntries($logs, $instrument);
 
 		$this->assertSame([
             '1' => ['seconds' => 3],
@@ -912,7 +912,11 @@ class OddcastAvatarExternalModuleTest{
         ], $pageStats);
     }
 
-    function __call($name, $arguments){
-		return call_user_func_array([$this->module, $name], $arguments);
+    private function assertSame($expected, $actual){
+		if($expected !== $actual){
+			$this->dump($expected, '$expected');
+			$this->dump($actual, '$actual');
+			throw new Exception("The expected and actual values are not the same (or not the same type).");
+		}
 	}
 }
