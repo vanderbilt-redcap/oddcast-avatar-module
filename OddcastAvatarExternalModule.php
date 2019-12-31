@@ -449,25 +449,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		return "$timePeriodNumber $timePeriodWord" . $suffix;
 	}
 
-	private function testGetTimePeriodString()
-	{
-		$assert = function($expected, $seconds){
-			$actual = $this->getTimePeriodString($seconds);
-			if($expected !== $actual){
-				throw new Exception("Expected '$expected' but got '$actual'!");
-			}
-		};
-
-		$assert('0 seconds', 0);
-		$assert('1 second', 1);
-		$assert('2 seconds', 2);
-		$assert('59 seconds', 59);
-		$assert('1 minute, 0 seconds', 60);
-		$assert('1 minute, 1 second', 61);
-		$assert('1 minute, 2 seconds', 62);
-		$assert('1 minute, 59 seconds', 60+59);
-		$assert('2 minutes, 0 seconds', 60*2);
-	}
+	
 
 	public function runReportUnitTests()
 	{
@@ -477,7 +459,6 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		$testInstance = new OddcastAvatarExternalModuleTest($this);
 		$testInstance->runReportUnitTests();
 
-		$this->testGetTimePeriodString();
 		$this->testAnalyzeLogEntries_basics();
 		$this->testAnalyzeLogEntries_avatar();
 		$this->testAnalyzeLogEntries_video();
