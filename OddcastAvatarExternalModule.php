@@ -2,6 +2,7 @@
 namespace Vanderbilt\OddcastAvatarExternalModule;
 
 require_once __DIR__ . '/classes/MockMySQLResult.php';
+require_once __DIR__ . '/classes/OddcastAvatarExternalModuleTest.php';
 
 use ExternalModules\AbstractExternalModule;
 use ExternalModules\ExternalModules;
@@ -473,6 +474,9 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		// Disable debug logging during testing.
 		$this->debugLogging = false;
 
+		$testInstance = new OddcastAvatarExternalModuleTest($this);
+		$testInstance->runReportUnitTests();
+
 		$this->testGetTimePeriodString();
 		$this->testAnalyzeLogEntries_basics();
 		$this->testAnalyzeLogEntries_avatar();
@@ -512,7 +516,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		$this->assertSame(1, $lastSurveyLog['timestamp'] - $firstSurveyLog['timestamp']);
 	}
 
-	private function assertSame($expected, $actual){
+	function assertSame($expected, $actual){
 		if($expected !== $actual){
 			$this->dump($expected, '$expected');
 			$this->dump($actual, '$actual');
@@ -764,7 +768,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		);
 	}
 
-	private function flushOutMockLogs($logs, $lastLog = null)
+	function flushOutMockLogs($logs, $lastLog = null)
 	{
 		if($logs === null){
 			return null;
@@ -1169,16 +1173,27 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		$firstSurveyLog = $logsToAnalyze[0];
 		$logsToAnalyze = array_merge($this->getPrecedingAvatarRecordLogs($firstSurveyLog), $logsToAnalyze);
 
+		$lastPageLoadLog = null;
 		$lastSurveyLog = null;
 		$firstReviewModeLog = null;
 		$previousLog = null;
 		$avatarUsagePeriods = [];
 		$videoStats = [];
 		$popupStats = [];
+		$pageStats = [];
+
 		foreach($logsToAnalyze as $log){
 //			$this->dump($log, '$log');
+			
+			$message = $log['message'];
+			$isPageLoad = $message === 'survey page loaded';
+			if($isPageLoad || $message === 'survey complete'){
+				if($lastPageLoadLog){
+					$pageStats[$lastPageLoadLog['page']]['seconds'] += $log['timestamp'] - $lastPageLoadLog['timestamp'];
+				}
 
-			$isPageLoad = $log['message'] === 'survey page loaded';
+				$lastPageLoadLog = $log;
+			}
 
 			if(!$lastSurveyLog && $isPageLoad && $log['instrument'] !== $instrument){
 				$lastSurveyLog = $previousLog;
@@ -1244,7 +1259,8 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			$lastSurveyLog,
 			$avatarUsagePeriods,
 			$videoStats,
-			$popupStats
+			$popupStats,
+			$pageStats
 		];
 	}
 
@@ -1446,6 +1462,10 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		else{
 			?>
 			<style>
+				table.avatar{
+					margin-bottom: 50px
+				}
+
 				table.avatar tr:not(:first-child),
 				table.avatar td.character img{
 					height: 100px;
@@ -1474,7 +1494,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 					<tr>
 						<td class="character"><img src="<?=$this->getUrl("images/$showId.png")?>"</td>
 						<td class="align-middle"><?=ucfirst(OddcastAvatarExternalModule::$SHOWS[$showId])?></td>
-						<td class="align-middle"><?=str_replace(', ', '<br>and ', $this->getTimePeriodString($total))?></td>
+						<td class="align-middle"><?=$this->getTimePeriodString($total)?></td>
 					</tr>
 					<?php
 				}
@@ -1482,6 +1502,30 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			</table>
 			<?php
 		}
+	}
+
+	public function displayPageStats($pageStats)
+	{
+		?>
+		<h5>Page Details</h5>
+		<table class="table table-striped table-bordered">
+			<tr>
+				<th>Page</th>
+				<th>Time Spent</th>
+			</tr>
+			<?php
+			foreach($pageStats as $page=>$stats){
+				$timePeriodString = $this->getTimePeriodString($stats['seconds']);
+				echo "
+					<tr>
+						<td>$page</td>
+						<td>$timePeriodString</td>
+					</tr>
+				";
+			}
+			?>
+		</table>
+		<?php
 	}
 
 	public function displayVideoStats($videoStats)

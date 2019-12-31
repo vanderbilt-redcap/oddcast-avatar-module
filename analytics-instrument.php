@@ -16,6 +16,7 @@ list(
 	$avatarUsagePeriods,
 	$videoStats,
 	$popupStats,
+	$pageStats
 ) = $module->analyzeLogEntries($firstSession['logs'], $firstSession['instrument']);
 
 if($firstReviewModeLog) {
@@ -89,5 +90,10 @@ if($firstReviewModeLog) {
 		<br>
 		<br>
 	</div>
-	<div class="col-12 col-lg-6"><?php $module->displayAvatarStats($avatarUsagePeriods); ?></div>
+	<div class="col-12 col-lg-6">
+		<?php
+		$module->displayAvatarStats($avatarUsagePeriods);
+		$module->displayPageStats($pageStats);
+		?>
+	</div>
 </div>
