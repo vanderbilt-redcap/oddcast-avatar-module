@@ -38,8 +38,14 @@ OddcastAvatarExternalModule.addProperties({
 			agt = originalAgt
 		}
 
+		var originalPlayAudio = window.playAudio
 		window.playAudio = function(text, iconob){
-			OddcastAvatarExternalModule.sayText(text)
+			if(OddcastAvatarExternalModule.isEnabled()){
+				OddcastAvatarExternalModule.sayText(text)
+			}
+			else{
+				originalPlayAudio(text, iconob)
+			}
 		}
 	},
 	initMessagesForValues: function () {
