@@ -74,6 +74,10 @@ $module->runReportUnitTests();
 		border-radius: 4px;
 		box-shadow: 0px 1px 4px -1px #cacaca;
 	}
+
+	table#stats tr:first-child th{
+		text-decoration: underline;
+	}
 </style>
 
 <div class="modal" tabindex="-1" role="dialog" id="characters-modal">
@@ -111,6 +115,86 @@ $module->runReportUnitTests();
 	<input class="flatpickr" name="end-date" value="<?=$module->getEndDate()?>">
 </form>
 
+<?php
+
+$sessions = $module->getSessionsForDateParams();
+$stats = $module->getAggregateStats($sessions);
+
+$echoTableCells = function($items, $header = false){
+	if($header){
+		$tagName = 'th';
+	}
+	else{
+		$tagName = 'td';
+	}
+
+	foreach($items as $item){
+		echo "<$tagName>" . $item . "</$tagName>";
+	}
+};
+
+?>
+
+<br>
+<h5>Stats For All Records</h5>
+<p><?=count($stats['records'])?> records were found in the specified date range.</p>
+
+<table id='stats' class="table table-striped table-bordered" style='width: auto'>
+	<tr>
+		<?php
+		$echoTableCells([
+			'Instrument',
+			'Page Number(s)',
+			'Record Count',
+			'Average Time Spent Per Record'
+		], true);
+		?>
+	</tr>
+	<?php
+
+	foreach($stats['instruments'] as $instrumentName=>$instrument){
+		$instrumentDisplayName = \REDCap::getInstrumentNames($instrumentName);
+		$instrumentRowData = [];
+
+		foreach($instrument['pages'] as $pageNumber=>$page){
+			$pageRecordCount = count($page['records']);
+			$instrumentRowData[] = [
+				$pageNumber,
+				$pageRecordCount,
+				$module->getTimePeriodString($page['seconds']/$pageRecordCount)
+			];
+		}
+
+		$instrumentRecordCount = count($instrument['records']);
+		$instrumentRowData[] = [
+			'All',
+			$instrumentRecordCount,
+			$module->getTimePeriodString($instrument['seconds']/$instrumentRecordCount)
+		];
+
+		$rowCount = count($instrumentRowData);
+		for($i=0; $i<$rowCount; $i++){
+			echo "<tr>";
+
+			if($i === 0){
+				echo "<td rowspan='$rowCount'>$instrumentDisplayName</td>";
+			}
+
+			$lastRow = $i === $rowCount-1;
+			$echoTableCells($instrumentRowData[$i], $lastRow);
+
+			echo "</tr>";
+		}
+	}
+	?>
+</table>
+
+<?php
+
+?>
+<br>
+<br>
+<h5>Sessions</h5>
 <table id="analytics-table" class="table table-striped table-bordered"></table>
 
 <script>
@@ -152,7 +236,7 @@ $module->runReportUnitTests();
 		table.DataTable({
 			columns: columns,
 			order: [[0, 'desc']],
-			data: <?=json_encode($module->getSessionsForDateParams())?>,
+			data: <?=json_encode($sessions)?>,
 			searching: false,
 			dom: 'Blftip',
 			buttons: [

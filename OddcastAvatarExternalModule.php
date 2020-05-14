@@ -463,7 +463,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		$this->debugLogging = null;
 	}
 
-	public function dump($var, $label)
+	public function dump($var, $label = '')
 	{
 		echo "<pre>$label\n";
 		var_dump($var);
@@ -1142,5 +1142,40 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		$row = $result->fetch_assoc();
 
 		return $row['value'] == 2;
+	}
+
+	function getAggregateStats($sessions){
+		$stats = [];
+
+		foreach($sessions as $session){
+			$recordId = $session['record'];
+			$stats['records'][$recordId] = true;
+
+			$instrumentName = $session['instrument'];
+			$instrument = &$stats['instruments'][$instrumentName];
+			$instrument['records'][$recordId] = true;
+
+			list(
+				$firstReviewModeLog,
+				$firstSurveyLog,
+				$lastSurveyLog,
+				$avatarUsagePeriods,
+				$videoStats,
+				$popupStats,
+				$pageStats
+			) = $this->analyzeLogEntries($session['logs'], $instrumentName);
+			
+			foreach($pageStats as $pageNumber=>$details){
+				$seconds = $details['seconds'];
+
+				$instrument['seconds'] += $seconds;		
+
+				$page = &$instrument['pages'][$pageNumber];
+				$page['seconds'] += $seconds;
+				$page['records'][$recordId] = true;
+			}
+		}
+
+		return $stats;
 	}
 }

@@ -15,8 +15,186 @@ class OddcastAvatarExternalModuleTest{
         $this->testAnalyzeLogEntries_video();
         $this->testGetSessionsFromLogs();
         $this->testSetAvatarAnalyticsFields();
-        $this->testPageStats();
-    }
+		$this->testPageStats();
+		$this->testGetAggregateStats_mixedInstruments();
+		$this->testGetAggregateStats_mixedRecords();
+		$this->testGetAggregateStats_partials();
+	}
+
+	private function testGetAggregateStats_mixedInstruments()
+	{
+		$logs = [
+			['message' => 'survey page loaded', 'record' => 1, 'instrument' => 'a', 'page' => 1],
+			['message' => 'survey page loaded', 'record' => 1, 'instrument' => 'a', 'page' => 2],
+			['message' => 'survey complete',   'record' => 1, 'instrument' => 'a' ],
+			['message' => 'survey page loaded', 'record' => 1, 'instrument' => 'b', 'page' => 1],
+			['message' => 'survey page loaded', 'record' => 1, 'instrument' => 'b', 'page' => 2],
+			['message' => 'survey complete',   'record' => 1, 'instrument' => 'b' ],
+			['message' => 'survey page loaded', 'record' => 2, 'instrument' => 'a', 'page' => 1],
+			['message' => 'survey page loaded', 'record' => 2, 'instrument' => 'a', 'page' => 2],
+			[],
+			['message' => 'survey complete',   'record' => 2, 'instrument' => 'a' ],
+			['message' => 'survey page loaded', 'record' => 2, 'instrument' => 'b', 'page' => 1],
+			[],
+			[],
+			['message' => 'survey page loaded', 'record' => 2, 'instrument' => 'b', 'page' => 2],
+			[],
+			[],
+			[],
+			['message' => 'survey complete',   'record' => 2, 'instrument' => 'b' ],
+		];
+
+		$records = [1 => true, 2 => true];
+		$expected = [
+			'records' => $records,
+			'instruments' => [
+				'a' => [
+					'records' => $records,
+					'seconds' => 5,
+					'pages' => [
+						1 => [
+							'seconds' => 2,
+							'records' => $records,
+						],
+						2 => [
+							'seconds' => 3,
+							'records' => $records,
+						],
+					]
+				],
+				'b' => [
+					'records' => $records,
+					'seconds' => 9,
+					'pages' => [
+						1 => [
+							'seconds' => 4,
+							'records' => $records,
+						],
+						2 => [
+							'seconds' => 5,
+							'records' => $records,
+						],
+					]
+				],
+			]
+		];
+		
+		$this->assertAggregateStats($logs, $expected);
+	}
+
+	private function testGetAggregateStats_mixedRecords(){
+		$logs = [
+			['message' => 'survey page loaded', 'record' => 1, 'instrument' => 'a', 'page' => 1],
+			['message' => 'survey page loaded', 'record' => 2, 'instrument' => 'a', 'page' => 1],
+			['message' => 'survey page loaded', 'record' => 1, 'instrument' => 'a', 'page' => 2],
+			['message' => 'survey page loaded', 'record' => 2, 'instrument' => 'a', 'page' => 2],
+			['message' => 'survey complete',   'record' => 1, 'instrument' => 'a' ],
+			[],
+			['message' => 'survey complete',   'record' => 2, 'instrument' => 'a' ],
+			['message' => 'survey page loaded', 'record' => 1, 'instrument' => 'b', 'page' => 1],
+			[],
+			['message' => 'survey page loaded', 'record' => 2, 'instrument' => 'b', 'page' => 1],
+			['message' => 'survey page loaded', 'record' => 1, 'instrument' => 'b', 'page' => 2],
+			[],
+			['message' => 'survey page loaded', 'record' => 2, 'instrument' => 'b', 'page' => 2],
+			[],
+			['message' => 'survey complete',   'record' => 1, 'instrument' => 'b' ],
+			['message' => 'survey complete',   'record' => 2, 'instrument' => 'b' ],
+		];
+
+		$records = [1 => true, 2 => true];
+		$expected = [
+			'records' => $records,
+			'instruments' => [
+				'a' => [
+					'records' => $records,
+					'seconds' => 9,
+					'pages' => [
+						1 => [
+							'seconds' => 4,
+							'records' => $records,
+						],
+						2 => [
+							'seconds' => 5,
+							'records' => $records,
+						],
+					]
+				],
+				'b' => [
+					'records' => $records,
+					'seconds' => 13,
+					'pages' => [
+						1 => [
+							'seconds' => 6,
+							'records' => $records,
+						],
+						2 => [
+							'seconds' => 7,
+							'records' => $records,
+						],
+					]
+				],
+			]
+		];
+
+		$this->assertAggregateStats($logs, $expected);
+	}
+
+	private function testGetAggregateStats_partials(){
+		$logs = [
+			['message' => 'survey page loaded', 'record' => 1, 'instrument' => 'a', 'page' => 1],
+			['message' => 'survey complete',   'record' => 1, 'instrument' => 'a' ],
+			['message' => 'survey page loaded', 'record' => 1, 'instrument' => 'b', 'page' => 1],
+			[],
+			[],
+			['message' => 'survey complete',   'record' => 1, 'instrument' => 'b' ],
+			// In most cases a report would not contain page 2 without containing page 1,
+			// but this is still a a good test to make sure logs are being analyzed properly.
+			['message' => 'survey page loaded', 'record' => 2, 'instrument' => 'a', 'page' => 2],
+			[],
+			['message' => 'survey complete',   'record' => 2, 'instrument' => 'a' ],
+		];
+
+		$expected = [
+			'records' => [1 => true, 2 => true],
+			'instruments' => [
+				'a' => [
+					'records' => [1 => true, 2 => true],
+					'seconds' => 3,
+					'pages' => [
+						1 => [
+							'seconds' => 1,
+							'records' => [1 => true],
+						],
+						2 => [
+							'seconds' => 2,
+							'records' => [2 => true],
+						],
+					]
+				],
+				'b' => [
+					'records' => [1 => true],
+					'seconds' => 3,
+					'pages' => [
+						1 => [
+							'seconds' => 3,
+							'records' => [1 => true],
+						],
+					]
+				],
+			]
+		];
+
+		$this->assertAggregateStats($logs, $expected);
+	}
+
+	private function assertAggregateStats($logs, $expected){
+		$logs = $this->flushOutMockLogs($logs);
+		$results = new MockMySQLResult($logs);
+		$actual = $this->module->getAggregateStats($this->module->getSessionsFromLogs($results));		
+		
+		$this->assertSame($expected, $actual);
+	}
 
     private function testGetTimePeriodString()
 	{
@@ -406,6 +584,11 @@ class OddcastAvatarExternalModuleTest{
 
 			$params['timestamp'] = $lastTimestamp;
 			$lastTimestamp++;
+
+			if(isset($params['page'])){
+				// Values are stored in the database as strings, so this makes tests more valid.
+				$params['page'] = (string) $params['page'];
+			}
 
 			return $params;
 		};
@@ -918,5 +1101,9 @@ class OddcastAvatarExternalModuleTest{
 			$this->dump($actual, '$actual');
 			throw new Exception("The expected and actual values are not the same (or not the same type).");
 		}
+	}
+
+	private function dump($o, $label = null){
+		$this->module->dump($o, $label);
 	}
 }
