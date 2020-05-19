@@ -429,6 +429,8 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 
 	public function getTimePeriodString($seconds)
 	{
+		$seconds = round($seconds);
+
 		$minutes = (int)($seconds/60);
 
 		$suffix = '';
@@ -484,7 +486,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		$firstSurveyLog = $logsToAnalyze[0];
 		$logsToAnalyze = array_merge($this->getPrecedingAvatarRecordLogs($firstSurveyLog), $logsToAnalyze);
 
-		$lastPageLoadLog = null;
+		$currentPage = null;
 		$lastSurveyLog = null;
 		$firstReviewModeLog = null;
 		$previousLog = null;
@@ -494,16 +496,15 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		$pageStats = [];
 
 		foreach($logsToAnalyze as $log){
-//			$this->dump($log, '$log');
-			
 			$message = $log['message'];
 			$isPageLoad = $message === 'survey page loaded';
-			if($isPageLoad || $message === 'survey complete'){
-				if($lastPageLoadLog){
-					$pageStats[$lastPageLoadLog['page']]['seconds'] += $log['timestamp'] - $lastPageLoadLog['timestamp'];
-				}
 
-				$lastPageLoadLog = $log;
+			if($currentPage){
+				$pageStats[$currentPage]['seconds'] += $log['timestamp'] - $previousLog['timestamp'];
+			}
+
+			if($isPageLoad){
+				$currentPage = $log['page'];
 			}
 
 			if(!$lastSurveyLog && $isPageLoad && $log['instrument'] !== $instrument){
@@ -1149,11 +1150,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 
 		foreach($sessions as $session){
 			$recordId = $session['record'];
-			$stats['records'][$recordId] = true;
-
 			$instrumentName = $session['instrument'];
-			$instrument = &$stats['instruments'][$instrumentName];
-			$instrument['records'][$recordId] = true;
 
 			list(
 				$firstReviewModeLog,
@@ -1165,6 +1162,14 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				$pageStats
 			) = $this->analyzeLogEntries($session['logs'], $instrumentName);
 			
+			if(empty($pageStats)){
+				throw new Exception("Page stats were empty for the session starting with log_id {$firstSurveyLog['log_id']}!");
+			}
+
+			$stats['records'][$recordId] = true;
+			$instrument = &$stats['instruments'][$instrumentName];
+			$instrument['records'][$recordId] = true;
+
 			foreach($pageStats as $pageNumber=>$details){
 				$seconds = $details['seconds'];
 

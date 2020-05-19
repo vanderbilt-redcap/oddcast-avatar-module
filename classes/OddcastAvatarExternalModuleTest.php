@@ -208,6 +208,7 @@ class OddcastAvatarExternalModuleTest{
 		$assert('0 seconds', 0);
 		$assert('1 second', 1);
 		$assert('2 seconds', 2);
+		$assert('3 seconds', 10/3); // should round to nearest second
 		$assert('59 seconds', 59);
 		$assert('1 minute, 0 seconds', 60);
 		$assert('1 minute, 1 second', 61);
