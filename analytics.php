@@ -146,7 +146,8 @@ $echoTableCells = function($items, $header = false){
 			'Instrument',
 			'Page Number(s)',
 			'Record Count',
-			'Average Time Spent Per Record'
+			'Average Time<br>Spent Per Record',
+			'Average Time<br>An Avatar Was Enabled',
 		], true);
 		?>
 	</tr>
@@ -161,7 +162,8 @@ $echoTableCells = function($items, $header = false){
 			$instrumentRowData[] = [
 				$pageNumber,
 				$pageRecordCount,
-				$module->getTimePeriodString($page['seconds']/$pageRecordCount)
+				$module->getTimePeriodString($page['seconds']/$pageRecordCount),
+				$module->getTimePeriodString($page['avatarSeconds']/$pageRecordCount),
 			];
 		}
 
@@ -169,7 +171,8 @@ $echoTableCells = function($items, $header = false){
 		$instrumentRowData[] = [
 			'All',
 			$instrumentRecordCount,
-			$module->getTimePeriodString($instrument['seconds']/$instrumentRecordCount)
+			$module->getTimePeriodString($instrument['seconds']/$instrumentRecordCount),
+			$module->getTimePeriodString($instrument['avatarSeconds']/$instrumentRecordCount)
 		];
 
 		$rowCount = count($instrumentRowData);

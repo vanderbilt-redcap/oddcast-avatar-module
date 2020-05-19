@@ -500,7 +500,21 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			$isPageLoad = $message === 'survey page loaded';
 
 			if($currentPage){
-				$pageStats[$currentPage]['seconds'] += $log['timestamp'] - $previousLog['timestamp'];
+				$page = &$pageStats[$currentPage];
+				
+				$seconds = $log['timestamp'] - $previousLog['timestamp'];
+				$page['seconds'] += $seconds;
+
+				$avatar = $avatarUsagePeriods[count($avatarUsagePeriods)-1];
+				if(
+					$avatar &&
+					$avatar['show id'] && // Make sure a show id is set, and this isn't a marker for initial dialog selector
+					empty($avatar['end']) &&
+					$avatar['disabled'] !== true && 
+					$log['log_id'] > $firstSurveyLog['log_id'] // Exclude any periods left over from previous instruments
+				){
+					$page['avatarSeconds'] += $seconds;
+				}
 			}
 
 			if($isPageLoad){
@@ -1171,13 +1185,14 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			$instrument['records'][$recordId] = true;
 
 			foreach($pageStats as $pageNumber=>$details){
-				$seconds = $details['seconds'];
-
-				$instrument['seconds'] += $seconds;		
-
 				$page = &$instrument['pages'][$pageNumber];
-				$page['seconds'] += $seconds;
 				$page['records'][$recordId] = true;
+
+				foreach(['seconds', 'avatarSeconds'] as $secondsKey){
+					$seconds = $details[$secondsKey];
+					$instrument[$secondsKey] += $seconds;		
+					$page[$secondsKey] += $seconds;
+				}
 			}
 		}
 

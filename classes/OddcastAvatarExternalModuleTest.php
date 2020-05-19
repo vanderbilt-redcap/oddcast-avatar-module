@@ -50,31 +50,37 @@ class OddcastAvatarExternalModuleTest{
 			'instruments' => [
 				'a' => [
 					'records' => $records,
-					'seconds' => 5,
 					'pages' => [
 						1 => [
-							'seconds' => 2,
 							'records' => $records,
+							'seconds' => 2,
+							'avatarSeconds' => 0,
 						],
 						2 => [
-							'seconds' => 3,
 							'records' => $records,
+							'seconds' => 3,
+							'avatarSeconds' => 0,
 						],
-					]
+					],
+					'seconds' => 5,
+					'avatarSeconds' => 0,
 				],
 				'b' => [
 					'records' => $records,
-					'seconds' => 9,
 					'pages' => [
 						1 => [
-							'seconds' => 4,
 							'records' => $records,
+							'seconds' => 4,
+							'avatarSeconds' => 0,
 						],
 						2 => [
-							'seconds' => 5,
 							'records' => $records,
+							'seconds' => 5,
+							'avatarSeconds' => 0,
 						],
-					]
+					],
+					'seconds' => 9,
+					'avatarSeconds' => 0,
 				],
 			]
 		];
@@ -108,31 +114,37 @@ class OddcastAvatarExternalModuleTest{
 			'instruments' => [
 				'a' => [
 					'records' => $records,
-					'seconds' => 9,
 					'pages' => [
 						1 => [
-							'seconds' => 4,
 							'records' => $records,
+							'seconds' => 4,
+							'avatarSeconds' => 0,
 						],
 						2 => [
-							'seconds' => 5,
 							'records' => $records,
+							'seconds' => 5,
+							'avatarSeconds' => 0,
 						],
-					]
+					],
+					'seconds' => 9,
+					'avatarSeconds' => 0,
 				],
 				'b' => [
 					'records' => $records,
-					'seconds' => 13,
 					'pages' => [
 						1 => [
-							'seconds' => 6,
 							'records' => $records,
+							'seconds' => 6,
+							'avatarSeconds' => 0,
 						],
 						2 => [
-							'seconds' => 7,
 							'records' => $records,
+							'seconds' => 7,
+							'avatarSeconds' => 0,
 						],
-					]
+					],
+					'seconds' => 13,
+					'avatarSeconds' => 0,
 				],
 			]
 		];
@@ -160,27 +172,32 @@ class OddcastAvatarExternalModuleTest{
 			'instruments' => [
 				'a' => [
 					'records' => [1 => true, 2 => true],
-					'seconds' => 3,
 					'pages' => [
 						1 => [
-							'seconds' => 1,
 							'records' => [1 => true],
+							'seconds' => 1,
+							'avatarSeconds' => 0,
 						],
 						2 => [
-							'seconds' => 2,
 							'records' => [2 => true],
+							'seconds' => 2,
+							'avatarSeconds' => 0,
 						],
-					]
+					],
+					'seconds' => 3,
+					'avatarSeconds' => 0,
 				],
 				'b' => [
 					'records' => [1 => true],
-					'seconds' => 3,
 					'pages' => [
 						1 => [
-							'seconds' => 3,
 							'records' => [1 => true],
+							'seconds' => 3,
+							'avatarSeconds' => 0,
 						],
-					]
+					],
+					'seconds' => 3,
+					'avatarSeconds' => 0,
 				],
 			]
 		];
@@ -261,7 +278,8 @@ class OddcastAvatarExternalModuleTest{
 					'startIndex' => 1,
 					'endIndex' => 2
 				]
-			]
+			],
+			1
 		);
 
 		// basic usage without survey complete event
@@ -282,7 +300,8 @@ class OddcastAvatarExternalModuleTest{
 					'startIndex' => 1,
 					'endIndex' => 2
 				]
-			]
+			],
+			1	
 		);
 
 		// different character selections
@@ -309,7 +328,8 @@ class OddcastAvatarExternalModuleTest{
 					'startIndex' => 2,
 					'endIndex' => 3
 				]
-			]
+			],
+			2
 		);
 
 		// repeated character selections
@@ -336,7 +356,8 @@ class OddcastAvatarExternalModuleTest{
 					'startIndex' => 2,
 					'endIndex' => 3
 				]
-			]
+			],
+			2
 		);
 
 		// disabling and enabling
@@ -370,7 +391,8 @@ class OddcastAvatarExternalModuleTest{
 					'startIndex' => 3,
 					'endIndex' => 4
 				]
-			]
+			],
+			2
 		);
 
 		// disabling to begin with
@@ -402,7 +424,8 @@ class OddcastAvatarExternalModuleTest{
 					'startIndex' => 3,
 					'endIndex' => 4,
 				]
-			]
+			],
+			1
 		);
 
 		// second of two instruments, and avatar left enabled from first
@@ -425,6 +448,7 @@ class OddcastAvatarExternalModuleTest{
 					'endIndex' => 3
 				]
 			],
+			3,
 			[
 				['message' => 'character selected', 'show id' => $showId]
 			]
@@ -450,6 +474,7 @@ class OddcastAvatarExternalModuleTest{
 					'endIndex' => 2
 				]
 			],
+			1,
 			[
 				['message' => 'character selected', 'show id' => $showId],
 				['message' => 'avatar disabled'],
@@ -476,13 +501,14 @@ class OddcastAvatarExternalModuleTest{
 					'endIndex' => 2
 				]
 			],
+			2,
 			[
 				['message' => 'character selected', 'show id' => $showId],
 			]
 		);
 	}
 
-	private function assertAvatarUsagePeriods($logs, $expectedPeriods, $spoofedPrecedingAvatarLogs = null)
+	private function assertAvatarUsagePeriods($logs, $expectedPeriods, $expectedAvatarSeconds, $spoofedPrecedingAvatarLogs = null)
 	{
 		$this->module->spoofedPrecedingAvatarLogs = $spoofedPrecedingAvatarLogs = $this->flushOutMockLogs($spoofedPrecedingAvatarLogs);
 		$logs = $this->flushOutMockLogs($logs, end($spoofedPrecedingAvatarLogs));
@@ -491,8 +517,13 @@ class OddcastAvatarExternalModuleTest{
 			$firstReviewModeLog,
 			$firstSurveyLog,
 			$lastSurveyLog,
-			$avatarUsagePeriods
+			$avatarUsagePeriods,
+			$videoStats,
+			$popupStats,
+			$pageStats
 		) = $this->module->analyzeLogEntries($logs, $logs[0]['instrument']);
+
+		$this->assertSame($expectedAvatarSeconds, $pageStats['1']['avatarSeconds']);
 
 		if(count($avatarUsagePeriods) !== count($expectedPeriods)){
 			$this->dump($expectedPeriods, '$expected');
@@ -569,7 +600,13 @@ class OddcastAvatarExternalModuleTest{
 		$nextId = $lastId+1;
 
 		$createLog = function($params) use (&$nextId, &$lastTimestamp){
-			$isVideoMessage = strpos($params['message'], 'video ') === 0;
+			$message = $params['message'];
+			
+			if($message === 'survey page loaded' && !isset($params['page'])){
+				$params['page'] = 1;
+			}
+
+			$isVideoMessage = strpos($message, 'video ') === 0;
 			if($isVideoMessage){
 				if(!isset($params['seconds'])){
 					$params['seconds'] = $nextId - 1;
