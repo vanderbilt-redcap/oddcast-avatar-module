@@ -74,10 +74,6 @@ $module->runReportUnitTests();
 		border-radius: 4px;
 		box-shadow: 0px 1px 4px -1px #cacaca;
 	}
-
-	table#stats tr:first-child th{
-		text-decoration: underline;
-	}
 </style>
 
 <div class="modal" tabindex="-1" role="dialog" id="characters-modal">
