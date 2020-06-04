@@ -1184,6 +1184,13 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			$instrument = &$stats['instruments'][$instrumentName];
 			$instrument['records'][$recordId] = true;
 
+			foreach($videoStats as $fieldName=>$details){
+				$video = &$stats['videos'][$fieldName];
+				$video['records'][$recordId] = true;
+				$video['playTime'] += $details['playTime'];
+				$video['playCount'] += $details['playCount'];
+			}
+
 			foreach($pageStats as $pageNumber=>$details){
 				$page = &$instrument['pages'][$pageNumber];
 				$page['records'][$recordId] = true;

@@ -16,6 +16,10 @@ $module->runReportUnitTests();
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
 
 <style>
+	table.stats{
+		width: auto;
+	}
+	
 	#analytics-table_wrapper{
 		margin-top: 30px;
 		max-width: 900px;
@@ -131,11 +135,10 @@ $echoTableCells = function($items, $header = false){
 
 ?>
 
+<p><?=count($stats['records'])?> record(s) were found in the specified date range.</p>
 <br>
-<h5>Stats For All Records</h5>
-<p><?=count($stats['records'])?> records were found in the specified date range.</p>
-
-<table id='stats' class="table table-striped table-bordered" style='width: auto'>
+<h5>Instrument & Page Stats</h5>
+<table class="table table-striped table-bordered stats">
 	<tr>
 		<?php
 		$echoTableCells([
@@ -187,10 +190,34 @@ $echoTableCells = function($items, $header = false){
 	}
 	?>
 </table>
+<br>
+<h5>Video Stats</h5>
+<table id='stats' class="table table-striped table-bordered stats">
+	<tr>
+		<?php
+		$echoTableCells([
+			'Field Name',
+			'Record Count',
+			'Average Play Time',
+			'Average Number of Times Played'
+		], true);
+		?>
+	</tr>
+	<?php
 
-<?php
-
-?>
+	foreach($stats['videos'] as $fieldName=>$details){
+		echo "<tr>";
+		$recordCount = count($details['records']);
+		$echoTableCells([
+			$fieldName,
+			$recordCount,
+			$module->getTimePeriodString($details['playTime']/$recordCount),
+			$details['playCount']/$recordCount,
+		]);
+		echo "</tr>";
+	}
+	?>
+</table>
 <br>
 <br>
 <h5>Sessions</h5>

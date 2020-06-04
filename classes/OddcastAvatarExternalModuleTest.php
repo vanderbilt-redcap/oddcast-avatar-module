@@ -19,6 +19,7 @@ class OddcastAvatarExternalModuleTest{
 		$this->testGetAggregateStats_mixedInstruments();
 		$this->testGetAggregateStats_mixedRecords();
 		$this->testGetAggregateStats_partials();
+		$this->testGetAggregateStats_videos();
 	}
 
 	private function testGetAggregateStats_mixedInstruments()
@@ -205,10 +206,55 @@ class OddcastAvatarExternalModuleTest{
 		$this->assertAggregateStats($logs, $expected);
 	}
 
+	private function testGetAggregateStats_videos(){
+		$logs = [
+			['message' => 'survey page loaded', 'record' => 1,  'instrument' => 'a'],
+			['message' => 'video played', 'record' => 1, 'field' => 'video_1', 'seconds' => 0],
+			['message' => 'video paused', 'record' => 1, 'field' => 'video_1', 'seconds' => 1],
+			['message' => 'video played', 'record' => 1, 'field' => 'video_2', 'seconds' => 1],
+			['message' => 'video paused', 'record' => 1, 'field' => 'video_2', 'seconds' => 2],
+			['message' => 'survey page loaded', 'record' => 2,  'instrument' => 'a'],
+			['message' => 'video played', 'record' => 2, 'field' => 'video_2', 'seconds' => 0],
+			[],
+			[],
+			[],
+			[],
+			[],
+			[],
+			['message' => 'video paused', 'record' => 2, 'field' => 'video_2', 'seconds' => 1],
+			['message' => 'video played', 'record' => 2, 'field' => 'video_2', 'seconds' => 0],
+			['message' => 'video paused', 'record' => 2, 'field' => 'video_2', 'seconds' => 1],
+		];
+
+		$expected = [
+			'videos' => [
+				'video_1' => [
+					'records' => [1 => true],
+					'playTime' => 1,
+					'playCount' => 1,
+				],
+				'video_2' => [
+					'records' => [1 => true, 2 => true],
+					'playTime' => 9,
+					'playCount' => 3,
+				]
+			]
+		];
+
+		$this->assertAggregateStats($logs, $expected);
+	}
+
 	private function assertAggregateStats($logs, $expected){
 		$logs = $this->flushOutMockLogs($logs);
 		$results = new MockMySQLResult($logs);
 		$actual = $this->module->getAggregateStats($this->module->getSessionsFromLogs($results));		
+		
+		foreach(['instruments', 'records'] as $optionalKey){
+			if(!isset($expected[$optionalKey])){
+				// This unit test isn't testing this key, so remove it.
+				unset($actual[$optionalKey]);
+			}
+		}
 		
 		$this->assertSame($expected, $actual);
 	}
@@ -1135,8 +1181,47 @@ class OddcastAvatarExternalModuleTest{
 
     private function assertSame($expected, $actual){
 		if($expected !== $actual){
-			$this->dump($expected, '$expected');
-			$this->dump($actual, '$actual');
+			?>
+			<p>A unit test did not return an expected value.  Below is a the actual output from the test with any incorrect values crossed out and replaced with their expected values (underlined):</p>
+			<script src="https://cdnjs.cloudflare.com/ajax/libs/jsdiff/4.0.1/diff.min.js"></script>
+			<pre id='a' style='display: none'><?=json_encode($expected, JSON_PRETTY_PRINT)?></pre>
+			<pre id='b' style='display: none'><?=json_encode($actual, JSON_PRETTY_PRINT)?></pre>
+			<pre id='result'></pre>
+			<script>
+				// This JS block was copied from: http://incaseofstairs.com/jsdiff/
+
+				var a = document.getElementById('a');
+				var b = document.getElementById('b');
+				var result = document.getElementById('result');
+
+				var diff = Diff.diffChars(a.textContent, b.textContent);
+				var fragment = document.createDocumentFragment();
+				for (var i=0; i < diff.length; i++) {
+
+					if (diff[i].added && diff[i + 1] && diff[i + 1].removed) {
+						var swap = diff[i];
+						diff[i] = diff[i + 1];
+						diff[i + 1] = swap;
+					}
+
+					var node;
+					if (diff[i].removed) {
+						node = document.createElement('del');
+						node.appendChild(document.createTextNode(diff[i].value));
+					} else if (diff[i].added) {
+						node = document.createElement('ins');
+						node.appendChild(document.createTextNode(diff[i].value));
+					} else {
+						node = document.createTextNode(diff[i].value);
+					}
+					fragment.appendChild(node);
+				}
+
+				result.textContent = '';
+				result.appendChild(fragment);				
+			</script>
+			<?php
+
 			throw new Exception("The expected and actual values are not the same (or not the same type).");
 		}
 	}
