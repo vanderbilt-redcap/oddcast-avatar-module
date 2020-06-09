@@ -309,6 +309,9 @@ OddcastAvatarExternalModule.addProperties({
 
 		OddcastAvatarExternalModule.callOnIFrame('initReviewMode')
 
+		// Disable the multilingual module in the parent so users don't have to select their language twice.
+		$('#p1000Overlay').hide()
+
 		OddcastAvatarExternalModule.hideLoadingOverlay()
 	},
 	onIFrameUnLoad: function(){
