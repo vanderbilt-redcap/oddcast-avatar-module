@@ -8,6 +8,8 @@ require_once 'header.php';
 $module->runReportUnitTests();
 ?>
 
+<div class="projhdr">Avatar Analytics</div>
+
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
@@ -16,17 +18,23 @@ $module->runReportUnitTests();
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
 
 <style>
+	#center{
+		/* prevent datatables page selector from hanging off to the side */
+		flex-grow: 0;
+		min-width: 650px;
+	}
+
 	table.stats{
 		width: auto;
 	}
 	
 	#analytics-table_wrapper{
-		margin-top: 30px;
 		max-width: 900px;
 	}
 
-	button{
-		cursor: pointer;
+	#analytics-table_wrapper button{
+		border: 1px solid gray;
+    	border-radius: 4px;
 	}
 
 	#analytics-table_wrapper .cell-timestamp{
@@ -108,10 +116,10 @@ $module->runReportUnitTests();
 <br>
 
 <form id="custom-controls" method="post">
-	<label>Start Date:</label>
+	<label><b>Start Date:</b></label>
 	<input class="flatpickr" name="start-date" value="<?=$module->getStartDate()?>">
 	<br>
-	<label>End Date:</label>
+	<label><b>End Date:</b></label>
 	<input class="flatpickr" name="end-date" value="<?=$module->getEndDate()?>">
 </form>
 
@@ -135,9 +143,10 @@ $echoTableCells = function($items, $header = false){
 
 ?>
 
+<br>
 <p><?=count($stats['records'])?> record(s) were found in the specified date range.</p>
 <br>
-<h5>Instrument & Page Stats</h5>
+<h6>Instrument & Page Stats</h6>
 <table class="table table-striped table-bordered stats">
 	<tr>
 		<?php
@@ -191,7 +200,7 @@ $echoTableCells = function($items, $header = false){
 	?>
 </table>
 <br>
-<h5>Video Stats</h5>
+<h6>Video Stats</h6>
 <table id='stats' class="table table-striped table-bordered stats">
 	<tr>
 		<?php
@@ -220,7 +229,7 @@ $echoTableCells = function($items, $header = false){
 </table>
 <br>
 <br>
-<h5>Sessions</h5>
+<h6>Sessions</h6>
 <table id="analytics-table" class="table table-striped table-bordered"></table>
 
 <script>
@@ -237,20 +246,19 @@ $echoTableCells = function($items, $header = false){
 			{
 				title: "Record ID",
 				data: 'record',
-				orderable: false
 			},
 			{
 				title: "Instrument",
 				data: 'instrument',
-				orderable: false
 			},
 			{
 				title: "Actions",
 				data: 'logs',
+				orderable: false,
 				render: function(logs){
 					var firstLog = logs[0]
 					var lastLog = logs.slice(-1)[0]
-					return "<a target='_blank' href='<?=$module->getUrl('analytics-instrument.php')?>&first-log-id=" + firstLog.log_id + "&last-log-id=" + lastLog.log_id + "'><button>View Session Report</button></a>"
+					return "<a href='<?=$module->getUrl('analytics-session.php')?>&first-log-id=" + firstLog.log_id + "&last-log-id=" + lastLog.log_id + "'><button>View Session Report</button></a>"
 				}
 			}
 		]
@@ -309,3 +317,7 @@ $echoTableCells = function($items, $header = false){
 		})
 	})
 </script>
+
+<?php
+
+require_once 'footer.php';

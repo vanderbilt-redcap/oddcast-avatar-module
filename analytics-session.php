@@ -29,6 +29,8 @@ if($firstReviewModeLog) {
 
 ?>
 
+<div class="projhdr">Avatar Analytics - Session Details</div>
+
 <style>
 	body{
 		max-width: 1200px;
@@ -67,6 +69,10 @@ if($firstReviewModeLog) {
 				<td><?=$firstSurveyLog['instrument']?></td>
 			</tr>
 			<tr>
+				<th>Session Start Time:</th>
+				<td><?=date('Y-m-d H:i:s', $firstSurveyLog['timestamp'])?></td>
+			</tr>
+			<tr>
 				<th>Time spent in review mode:</th>
 				<td><?=$timeSpentInReviewMode?></td>
 			</tr>
@@ -97,3 +103,7 @@ if($firstReviewModeLog) {
 		?>
 	</div>
 </div>
+
+<?php
+
+require_once 'footer.php';
