@@ -141,6 +141,16 @@ $echoTableCells = function($items, $header = false){
 	}
 };
 
+$echoTableHeaders = function($headers, $data) use ($echoTableCells){
+	$echoTableCells($headers, true);
+	if(empty($data)){
+		$headerCount = count($headers);
+		echo "<tr>";
+		echo "<td colspan='$headerCount'>None</td>";
+		echo "</tr>";
+	}
+}
+
 ?>
 
 <br>
@@ -150,13 +160,13 @@ $echoTableCells = function($items, $header = false){
 <table class="table table-striped table-bordered stats">
 	<tr>
 		<?php
-		$echoTableCells([
+		$echoTableHeaders([
 			'Instrument',
 			'Page Number(s)',
 			'Record Count',
 			'Average Time<br>Spent Per Record',
 			'Average Time<br>An Avatar Was Enabled',
-		], true);
+		], $stats['instruments']);
 		?>
 	</tr>
 	<?php
@@ -204,12 +214,12 @@ $echoTableCells = function($items, $header = false){
 <table id='stats' class="table table-striped table-bordered stats">
 	<tr>
 		<?php
-		$echoTableCells([
+		$echoTableHeaders([
 			'Field Name',
 			'Record Count',
 			'Average Play Time',
 			'Average Number of Times Played'
-		], true);
+		], $stats['videos']);
 		?>
 	</tr>
 	<?php
@@ -233,11 +243,11 @@ $echoTableCells = function($items, $header = false){
 <table id='stats' class="table table-striped table-bordered stats">
 	<tr>
 		<?php
-		$echoTableCells([
+		$echoTableHeaders([
 			'Popup Link Text',
 			'Total View Count',
 			'Average Views Per Record',
-		], true);
+		], $stats['popups']);
 		?>
 	</tr>
 	<?php
