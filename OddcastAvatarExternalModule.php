@@ -1201,6 +1201,12 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 					$page[$secondsKey] += $seconds;
 				}
 			}
+
+			foreach($popupStats as $fieldName=>$viewCount){
+				$popup = &$stats['popups'][$fieldName];
+				$popup['records'][$recordId] = true;
+				$popup['viewCount'] += $viewCount;
+			}
 		}
 
 		return $stats;

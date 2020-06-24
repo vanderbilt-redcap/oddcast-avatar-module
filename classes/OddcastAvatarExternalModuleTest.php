@@ -20,6 +20,7 @@ class OddcastAvatarExternalModuleTest{
 		$this->testGetAggregateStats_mixedRecords();
 		$this->testGetAggregateStats_partials();
 		$this->testGetAggregateStats_videos();
+		$this->testGetAggregateStats_popups();
 	}
 
 	private function testGetAggregateStats_mixedInstruments()
@@ -237,6 +238,34 @@ class OddcastAvatarExternalModuleTest{
 					'records' => [1 => true, 2 => true],
 					'playTime' => 9,
 					'playCount' => 3,
+				]
+			]
+		];
+
+		$this->assertAggregateStats($logs, $expected);
+	}
+
+	private function testGetAggregateStats_popups(){
+		$logs = [
+			['message' => 'survey page loaded', 'record' => 1,  'instrument' => 'a'],
+			['message' => 'popup opened', 'record' => 1, 'link text' => 'one'],
+			['message' => 'popup closed', 'record' => 1, 'link text' => 'one'],
+			['message' => 'survey page loaded', 'record' => 2,  'instrument' => 'a'],
+			['message' => 'popup opened', 'record' => 2, 'link text' => 'one'],
+			['message' => 'popup closed', 'record' => 2, 'link text' => 'one'],
+			['message' => 'popup opened', 'record' => 2, 'link text' => 'two'],
+			['message' => 'popup closed', 'record' => 2, 'link text' => 'two'],
+		];
+
+		$expected = [
+			'popups' => [
+				'one' => [
+					'records' => [1 => true, 2 => true],
+					'viewCount' => 2,
+				],
+				'two' => [
+					'records' => [2 => true],
+					'viewCount' => 1,
 				]
 			]
 		];

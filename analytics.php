@@ -221,7 +221,35 @@ $echoTableCells = function($items, $header = false){
 			$fieldName,
 			$recordCount,
 			$module->getTimePeriodString($details['playTime']/$recordCount),
-			$details['playCount']/$recordCount,
+			round($details['playCount']/$recordCount, 2),
+		]);
+		echo "</tr>";
+	}
+	?>
+</table>
+<br>
+<br>
+<h6>Popup Stats</h6>
+<table id='stats' class="table table-striped table-bordered stats">
+	<tr>
+		<?php
+		$echoTableCells([
+			'Popup Link Text',
+			'Total View Count',
+			'Average Views Per Record',
+		], true);
+		?>
+	</tr>
+	<?php
+
+	foreach($stats['popups'] as $text=>$details){
+		echo "<tr>";
+		$recordCount = count($details['records']);
+		$viewCount = $details['viewCount'];
+		$echoTableCells([
+			$text,
+			$viewCount,
+			round($viewCount/$recordCount, 2),
 		]);
 		echo "</tr>";
 	}
