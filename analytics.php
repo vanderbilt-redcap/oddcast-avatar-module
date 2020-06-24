@@ -156,7 +156,7 @@ $echoTableHeaders = function($headers, $data) use ($echoTableCells){
 <br>
 <p><?=count($stats['records'])?> record(s) were found in the specified date range.</p>
 <br>
-<h6>Instrument & Page Stats</h6>
+<h6>Instrument & Page Metrics</h6>
 <table class="table table-striped table-bordered stats">
 	<tr>
 		<?php
@@ -210,7 +210,7 @@ $echoTableHeaders = function($headers, $data) use ($echoTableCells){
 	?>
 </table>
 <br>
-<h6>Video Stats</h6>
+<h6>Video Metrics</h6>
 <table id='stats' class="table table-striped table-bordered stats">
 	<tr>
 		<?php
@@ -239,7 +239,7 @@ $echoTableHeaders = function($headers, $data) use ($echoTableCells){
 </table>
 <br>
 <br>
-<h6>Popup Stats</h6>
+<h6>Popup Metrics</h6>
 <table id='stats' class="table table-striped table-bordered stats">
 	<tr>
 		<?php
