@@ -1177,7 +1177,9 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			) = $this->analyzeLogEntries($session['logs'], $instrumentName);
 			
 			if(empty($pageStats)){
-				throw new Exception("Page stats were empty for the session starting with log_id {$firstSurveyLog['log_id']}!");
+				$timestampText = date('r', $firstSurveyLog['timestamp']);
+				echo "<p>Page stats were empty for the session starting on '$timestampText' for record {$firstSurveyLog['record']}.  If you do not know the cause for this, please report this error.</p>";
+				continue;
 			}
 
 			$stats['records'][$recordId] = true;
