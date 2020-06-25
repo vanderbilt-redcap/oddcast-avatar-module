@@ -15,6 +15,8 @@ const TEMPORARY_RECORD_ID_TO_DELETE = 'temporary-record-id-to-delete';
 
 class OddcastAvatarExternalModule extends AbstractExternalModule
 {
+	const ODDCAST_ACCOUNT_ID = 6267283;
+
 	const TIMESTAMP_COLUMN = 'UNIX_TIMESTAMP(timestamp) as timestamp';
 
 	const SECONDS_PER_MINUTE = 60;
@@ -96,6 +98,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 
 		<script src="//cdn.jsdelivr.net/npm/mobile-detect@1.4.1/mobile-detect.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.2.0/js.cookie.min.js" integrity="sha256-9Nt2r+tJnSd2A2CRUvnjgsD+ES1ExvjbjBNqidm9doI=" crossorigin="anonymous"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/spin.js/2.3.2/spin.min.js" integrity="sha256-PieqE0QdEDMppwXrTzSZQr6tWFX3W5KkyRVyF1zN3eg=" crossorigin="anonymous"></script>
 
 		<link rel="stylesheet" href="<?=$this->getUrl('css/style.css')?>">
 
@@ -105,6 +108,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 					<div class="modal-content">
 						<div class="modal-body">
 							<p class="top-section">Hello!  Thank you for your interest in volunteering for a research study.  At any time during the consent you can ask a study coordinator for help.  We also have our eStaff team members to guide you through the consent.  Please select an eStaff team member to take you through the consent:</p>
+							<div id='oddcast-character-list-loading'></div>
 							<div id="oddcast-character-list" class="text-center">
 								<?php
 								foreach (OddcastAvatarExternalModule::$SHOWS as $id => $gender) {
@@ -149,27 +153,6 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 						<i class="fa fa-comment" title="Click this icon to play the message for this page."></i>
 						<i class="fa fa-user"></i>
 					</div>
-					<script type="text/javascript" src="//vhss-d.oddcast.com/vhost_embed_functions_v2.php?acc=6267283&js=1"></script>
-					<script type="text/javascript">
-						(function(){
-							if(window.frameElement){
-								// We're inside an iFrame.  Return without initializing the avatar since it is already displayed in the parent page.
-								return;
-							}
-
-							// In order to prime audio on iOS, be must hook into the play() method BEFORE Oddcast's internal <audio> element is created
-							var originalPlay = Audio.prototype.play
-							Audio.prototype.play = function(){
-								if(!OddcastAvatarExternalModule.isAudioPrimed){
-									this.src =  <?=json_encode($this->getUrl('empty.mp3'))?>;
-								}
-
-								return originalPlay.apply(this, arguments)
-							}
-
-							AC_VHost_Embed(6267283, 300, 400, '', 1, 1, <?=array_keys(OddcastAvatarExternalModule::$SHOWS)[0]?>, 0, 1, 0, '709e320dba1a392fa4e863ef0809f9f1', 0);
-						})()
-					</script>
 				</div>
 			</div>
 			<div id="oddcast-content"></div>
@@ -178,7 +161,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		<script type="text/javascript" src="<?=$this->getUrl('js/OddcastAvatarExternalModule.base.js')?>"></script>
 
 		<script>
-			$(function(){
+			(function(){
 				<?php
 				$currentPageNumber = $_GET['__page__'];
 
@@ -203,11 +186,13 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				?>
 
 				OddcastAvatarExternalModule.settings = <?=json_encode([
+					'oddcastAccountId' => self::ODDCAST_ACCOUNT_ID,
 					'voices' => [
 						'female' => explode(',', $femaleVoice),
 						'male' => explode(',', $maleVoice),
 					],
 					'shows' => OddcastAvatarExternalModule::$SHOWS,
+					'firstShowId' => array_keys(OddcastAvatarExternalModule::$SHOWS)[0],
 					'isInitialLoad' => $_SERVER['REQUEST_METHOD'] == 'GET',
 					'avatarDisabled' => $avatarDisabled,
 					'reviewModeEnabled' => $this->isReviewModeEnabled($instrument),
@@ -223,7 +208,8 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 					'timeoutVerificationFieldName' => $this->getTimeoutVerificationFieldName(),
 					'loggingSupported' => $loggingSupported,
 					'temporaryRecordIdFieldName' => TEMPORARY_RECORD_ID_TO_DELETE,
-					'speechRate' => $this->getProjectSetting('speech-rate')
+					'speechRate' => $this->getProjectSetting('speech-rate'),
+					'emptyMP3Url' => $this->getUrl('empty.mp3'),
 				])?>
 
 				var jsObjectUrl
@@ -237,7 +223,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				OddcastAvatarExternalModule.addVorlon(<?=json_encode(file_get_contents(__DIR__ . '/.vorlon-url'))?>)
 
 				$.getScript(jsObjectUrl)
-			})
+			})()
 		</script>
 		<?php
 	}

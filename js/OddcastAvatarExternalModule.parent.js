@@ -5,6 +5,7 @@ OddcastAvatarExternalModule.addProperties({
 	iFrameLoaded: false,
 	isPaused: false,
 	initializeParent: function(){
+		OddcastAvatarExternalModule.loadOddcastCode()
 		OddcastAvatarExternalModule.loadIFrame()
 
 		$('#oddcast-maximize-avatar').click(function () {
@@ -113,6 +114,43 @@ OddcastAvatarExternalModule.addProperties({
 
 		// Prevent the user from scrolling the avatar and iframe container elements
 		$('body').append('<script src="https://cdnjs.cloudflare.com/ajax/libs/inobounce/0.1.6/inobounce.min.js" integrity="sha256-8Lv10+9kieliYluA+S5z1+KwnqLTX4J0FiDyx8FWM2s=" crossorigin="anonymous"></script>')
+	},
+	loadOddcastCode: function(){
+		var accountId = OddcastAvatarExternalModule.settings.oddcastAccountId
+
+		// This script must be loaded asynchronously because we've had issues where it's loading is delayed and it prevented surveys from loading.
+		// I tried every way I could find for loading the oddcast code asynchronously, and this was the only one that worked.
+		// The AC_VHost_Embed() call must come quickly after the oddcast code is loaded, or the call won't work (not sure why).
+		$.getScript("//vhss-d.oddcast.com/vhost_embed_functions_v2.php?acc=" + accountId + "&js=1", function(){
+			OddcastAvatarExternalModule.until(
+				function(){
+					return window.AC_VHost_Embed
+				},
+				function(){
+					// In order to prime audio on iOS, be must hook into the play() method BEFORE Oddcast's internal <audio> element is created
+					var originalPlay = Audio.prototype.play
+					Audio.prototype.play = function(){
+						if(!OddcastAvatarExternalModule.isAudioPrimed){
+							this.src = OddcastAvatarExternalModule.settings.emptyMP3Url
+						}
+		
+						return originalPlay.apply(this, arguments)
+					}
+		
+					var originalWrite = document.write
+		
+					// Temporarily override document.write() so that AC_VHost_Embed() doesn't replace the page content. 
+					document.write = function(content){
+						console.log(content)
+						OddcastAvatarExternalModule.getAvatar().append(content)
+					}
+		
+					AC_VHost_Embed(accountId, 300, 400, '', 1, 1, OddcastAvatarExternalModule.settings.firstShowId, 0, 1, 0, '709e320dba1a392fa4e863ef0809f9f1', 0)
+		
+					document.write = originalWrite
+				}
+			)  
+		})
 	},
 	// This method accounts for the view height changes on mobile
 	// due to the address bar (and bottom bar on iOS) sometimes
@@ -313,6 +351,38 @@ OddcastAvatarExternalModule.addProperties({
 		$('#p1000Overlay').hide()
 
 		OddcastAvatarExternalModule.hideLoadingOverlay()
+		OddcastAvatarExternalModule.initCharacterLoadingIndicator()
+	},
+	initCharacterLoadingIndicator: function(){
+		var opts = {
+			lines: 13, // The number of lines to draw
+			length: 38, // The length of each line
+			width: 17, // The line thickness
+			radius: 45, // The radius of the inner circle
+			scale: .5, // Scales overall size of the spinner
+			corners: 1, // Corner roundness (0..1)
+			color: 'gray', // CSS color or array of colors
+			fadeColor: 'transparent', // CSS color or array of colors
+			speed: 1, // Rounds per second
+			rotate: 0, // The rotation offset
+			animation: 'spinner-line-fade-quick', // The CSS animation name for the lines
+			direction: 1, // 1: clockwise, -1: counterclockwise
+			zIndex: 2e9, // The z-index (defaults to 2000000000)
+			className: 'spinner', // The CSS class to assign to the spinner
+			top: '48%', // Top position relative to parent
+			left: '50%', // Left position relative to parent
+			// shadow: '0 0 1px transparent', // Box-shadow for the lines
+			position: 'absolute' // Element positioning
+		}
+
+		var loadingIndicator = document.getElementById('oddcast-character-list-loading');
+		new Spinner(opts).spin(loadingIndicator);
+		
+		// Wait until the avatar is loaded in the background initially, or we could see a flash of the wrong character.
+		OddcastAvatarExternalModule.afterSceneLoaded(function(){
+			$(loadingIndicator).hide()
+			$('#oddcast-character-list').show()
+		})
 	},
 	onIFrameUnLoad: function(){
 		OddcastAvatarExternalModule.iFrameLoaded = false
@@ -341,18 +411,6 @@ OddcastAvatarExternalModule.addProperties({
 		if (typeof stopSpeech != 'undefined') {
 			stopSpeech()
 		}
-	},
-	until: function (condition, then) {
-		var timeoutFunction = function () {
-			if (!condition()) {
-				setTimeout(timeoutFunction, 100)
-				return
-			}
-
-			then()
-		}
-
-		timeoutFunction()
 	},
 	afterSceneLoaded: function (callback) {
 		OddcastAvatarExternalModule.until(
@@ -420,9 +478,6 @@ OddcastAvatarExternalModule.addProperties({
 
 		postInit(0)
 	},
-	getAvatar: function () {
-		return $('#oddcast-avatar')
-	},
 	getPlayer: function(){
 		return $('._html5Player')
 	},
@@ -450,44 +505,36 @@ OddcastAvatarExternalModule.addProperties({
 		var settings = OddcastAvatarExternalModule.settings
 		var textIntroModal = OddcastAvatarExternalModule.getTextIntroModal()
 
-		// Hide the dialog but leave the backdrop displayed until the scene is loaded.
-		textIntroModal.hide()
+		var showId = OddcastAvatarExternalModule.showId
+		if (!showId) {
+			// The user has not yet selected a character. Show the intro modal again instead.
+			textIntroModal.modal('show')
+			return
+		}
 
-		// Wait until the avatar is loaded in the background initially, or we could see a flash of the wrong character.
-		OddcastAvatarExternalModule.afterSceneLoaded(function () {
-			// The initial show is loaded, but we may not want to use this one so we load our own show later.
+		// Wait to hide the modal until a scene has been loaded to prevent the survey from shifting down on slow connections.
+		textIntroModal.modal('hide')
 
-			// Wait to hide the modal until a scene has been loaded to prevent the survey from shifting down on slow connections.
-			textIntroModal.modal('hide')
+		OddcastAvatarExternalModule.getPlayer().find('.character').remove()
 
-			OddcastAvatarExternalModule.getPlayer().find('.character').remove()
+		var gender = settings.shows[showId]
+		var voice = settings.voices[gender]
 
-			var showId = OddcastAvatarExternalModule.showId
-			if (!showId) {
-				// The user has not yet selected a character. Show the intro modal again instead.
-				textIntroModal.modal('show')
-				return
-			}
+		OddcastAvatarExternalModule.engine = voice[0];
+		OddcastAvatarExternalModule.person = voice[1];
 
-			var gender = settings.shows[showId]
-			var voice = settings.voices[gender]
+		// The initial show is loaded, but we may not want to use this one so we load our own show later.
+		OddcastAvatarExternalModule.loadShowByID(showId)
 
-			OddcastAvatarExternalModule.engine = voice[0];
-			OddcastAvatarExternalModule.person = voice[1];
+		OddcastAvatarExternalModule.getAvatar().fadeIn(OddcastAvatarExternalModule.fadeDuration, function(){
+			OddcastAvatarExternalModule.setEnabledOnIFrame()
+		});
 
-			// Load the show we want instead.
-			OddcastAvatarExternalModule.loadShowByID(showId)
+		// Handle the page message every time the avatar is maximized, in case the user hasn't heard the message for the current page
+		OddcastAvatarExternalModule.handlePageMessage()
 
-			OddcastAvatarExternalModule.getAvatar().fadeIn(OddcastAvatarExternalModule.fadeDuration, function(){
-				OddcastAvatarExternalModule.setEnabledOnIFrame()
-			});
-
-			// Handle the page message every time the avatar is maximized, in case the user hasn't heard the message for the current page
-			OddcastAvatarExternalModule.handlePageMessage()
-
-			$('#oddcast-minimize-avatar').show();
-			$('#oddcast-maximize-avatar').hide();
-		})
+		$('#oddcast-minimize-avatar').show();
+		$('#oddcast-maximize-avatar').hide();
 	},
 	setEnabledOnIFrame: function(){
 		if(OddcastAvatarExternalModule.iFrameLoaded){

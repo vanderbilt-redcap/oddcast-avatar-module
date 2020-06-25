@@ -166,9 +166,14 @@ body.modal-open #oddcast-content{
 	z-index: 2;
 }
 
+#oddcast-character-list-loading{
+	height: 425px;
+}
+
 #oddcast-character-list{
 	margin: 20px auto;
 	max-width: 550px;
+	display: none;
 }
 
 .oddcast-character{

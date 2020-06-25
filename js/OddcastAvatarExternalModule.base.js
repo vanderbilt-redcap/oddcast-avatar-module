@@ -50,6 +50,21 @@ var OddcastAvatarExternalModule = {
 		if(vorlonUrl && window.frameElement){
 			$('body').append('<script src="' + vorlonUrl + '/vorlon.js"></script>')
 		}
+	},
+	until: function (condition, then) {
+		var timeoutFunction = function () {
+			if (!condition()) {
+				setTimeout(timeoutFunction, 100)
+				return
+			}
+
+			then()
+		}
+
+		timeoutFunction()
+	},
+	getAvatar: function () {
+		return $('#oddcast-avatar')
 	}
 }
 
