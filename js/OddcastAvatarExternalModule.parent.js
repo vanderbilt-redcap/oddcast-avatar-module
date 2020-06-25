@@ -138,16 +138,35 @@ OddcastAvatarExternalModule.addProperties({
 					}
 		
 					var originalWrite = document.write
+					var originalAddEventListener = window.addEventListener
 		
 					// Temporarily override document.write() so that AC_VHost_Embed() doesn't replace the page content. 
 					document.write = function(content){
 						console.log(content)
 						OddcastAvatarExternalModule.getAvatar().append(content)
 					}
-		
+
+					// The window's onload event has most likely (but not necessarily) fired by now.
+					// Temporarily override addEventListener() to make sure oddcast's onload action happens, even that event has already fired.
+					window.addEventListener = function(eventName, action){
+						// Wrap in a jQuery function call in case window.onload hasn't fired yet.
+						// And to bypass our event listener for other event types
+						$(function(){
+							if(eventName === 'load'){
+								action()
+							}
+							else{
+								// As of 6/25/2020, oddcast doesn't add any other events.
+								// This was added as a precaution in case they do.
+								window.addEventListener(eventName, action)
+							}
+						})
+					}
+					
 					AC_VHost_Embed(accountId, 300, 400, '', 1, 1, OddcastAvatarExternalModule.settings.firstShowId, 0, 1, 0, '709e320dba1a392fa4e863ef0809f9f1', 0)
-		
+
 					document.write = originalWrite
+					window.addEventListener = originalAddEventListener
 				}
 			)  
 		})
