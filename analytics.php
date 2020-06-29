@@ -296,7 +296,7 @@ $echoTableHeaders = function($headers, $data) use ($echoTableCells){
 				render: function(logs){
 					var firstLog = logs[0]
 					var lastLog = logs.slice(-1)[0]
-					return "<a href='<?=$module->getUrl('analytics-session.php')?>&first-log-id=" + firstLog.log_id + "&last-log-id=" + lastLog.log_id + "'><button>View Session Report</button></a>"
+					return "<a href='<?=$module->getUrl('analytics-session.php')?>&first-log-id=" + firstLog.log_id + "&last-log-id=" + lastLog.log_id + "' target='_blank'><button>View Session Report</button></a>"
 				}
 			}
 		]
