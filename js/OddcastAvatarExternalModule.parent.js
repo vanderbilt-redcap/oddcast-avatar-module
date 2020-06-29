@@ -163,7 +163,12 @@ OddcastAvatarExternalModule.addProperties({
 						})
 					}
 					
-					AC_VHost_Embed(accountId, 300, 400, '', 1, 1, OddcastAvatarExternalModule.settings.firstShowId, 0, 1, 0, '709e320dba1a392fa4e863ef0809f9f1', 0)
+					try{
+						AC_VHost_Embed(accountId, 300, 400, '', 1, 1, OddcastAvatarExternalModule.settings.firstShowId, 0, 1, 0, '709e320dba1a392fa4e863ef0809f9f1', 0)
+					}
+					catch (error) {
+						console.log("The following error occurred while loading the oddcast code:", error)
+					}
 
 					document.write = originalWrite
 					window.addEventListener = originalAddEventListener
