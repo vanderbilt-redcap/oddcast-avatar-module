@@ -276,7 +276,12 @@ class OddcastAvatarExternalModuleTest{
 	private function assertAggregateStats($logs, $expected){
 		$logs = $this->flushOutMockLogs($logs);
 		$results = new MockMySQLResult($logs);
-		$actual = $this->module->getAggregateStats($this->module->getSessionsFromLogs($results));		
+		list($actual, $errors) = $this->module->getAggregateStats($this->module->getSessionsFromLogs($results));
+		
+		if(!empty($errors)){
+			$this->dump($errors);
+			throw new Exception("A unit test failed because incomplete log data was provided.");
+		}
 		
 		foreach(['instruments', 'records'] as $optionalKey){
 			if(!isset($expected[$optionalKey])){
