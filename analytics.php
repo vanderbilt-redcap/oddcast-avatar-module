@@ -19,26 +19,22 @@ $module->runReportUnitTests();
 
 <style>
 	#center{
-		/* prevent datatables page selector from hanging off to the side */
+		flex-basis: auto;
 		flex-grow: 0;
-		min-width: 650px;
+		width: auto;
 	}
 
 	table.stats{
 		width: auto;
 	}
-	
-	#analytics-table_wrapper{
-		max-width: 900px;
-	}
 
+	table.stats th{
+		vertical-align: bottom;
+	}
+	
 	#analytics-table_wrapper button{
 		border: 1px solid gray;
     	border-radius: 4px;
-	}
-
-	#analytics-table_wrapper .cell-timestamp{
-		width: 150px;
 	}
 
 	label{
@@ -165,7 +161,7 @@ $echoTableHeaders = function($headers, $data) use ($echoTableCells){
 			'Page Number(s)',
 			'Record Count',
 			'Average Time<br>Spent Per Record',
-			'Average Time<br>An Avatar Was Enabled',
+			'Average Avatar Enabled Time',
 		], $stats['instruments']);
 		?>
 	</tr>
@@ -270,6 +266,58 @@ $echoTableHeaders = function($headers, $data) use ($echoTableCells){
 <h6>Sessions</h6>
 <table id="analytics-table" class="table table-striped table-bordered"></table>
 
+<?php
+
+$sessionTableData = [];
+foreach($sessions as $session){
+	$logs = $session['logs'];
+	$firstLog =$logs[0];
+	$lastLog = $logs[count($logs)-1];
+
+	$sessionTime = $lastLog['timestamp'] - $firstLog['timestamp'];
+	
+	$sessionStats = $module->getAggregateStats([$session]);
+	$instrument = array_keys($sessionStats['instruments'])[0];
+
+	$timePerPage = '';
+	$avatarEnabledTime = 0;
+	foreach($sessionStats['instruments'][$instrument]['pages'] as $pageNumber=>$details){
+		$timePerPage .= "Page $pageNumber - " . $module->getTimePeriodString($details['seconds']) . '<br>';
+		$avatarEnabledTime += $details['avatarSeconds'];
+	}
+
+	$videoTime = 0;
+	foreach($sessionStats['videos'] as $fieldName=>$details){
+		$videoTime +=  $details['playTime'];
+	}
+
+	$popupViewCount = 0;
+	foreach($sessionStats['popups'] as $fieldName=>$details){
+		$popupViewCount +=  $details['viewCount'];
+	}
+
+	$session['instrument'] = \REDCap::getInstrumentNames($session['instrument']);
+
+	$sessionTableData[] = array_merge($session, [
+		'sessionTime' => [
+			'display' => $module->getTimePeriodString($sessionTime),
+			'sort' => $sessionTime,
+		],
+		'timePerPage' => $timePerPage, 
+		'avatarEnabledTime' => [
+			'display' => $module->getTimePeriodString($avatarEnabledTime),
+			'sort' => $avatarEnabledTime,
+		],
+		'videoTime' => [
+			'display' => $module->getTimePeriodString($videoTime),
+			'sort' => $videoTime,
+		],
+		'popupViewCount' => $popupViewCount,
+	]);
+}
+
+?>
+
 <script>
 	$(function() {
 		var table = $('#analytics-table')
@@ -282,21 +330,57 @@ $echoTableHeaders = function($headers, $data) use ($echoTableCells){
 				}
 			},
 			{
-				title: "Record ID",
-				data: 'record',
+				title: 'Record',
+				data: 'record'
 			},
 			{
-				title: "Instrument",
+				title: 'Instrument',
 				data: 'instrument',
 			},
 			{
-				title: "Actions",
+				title: 'Session Time',
+				data: 'sessionTime',
+				type: 'num',
+				render: {
+					_: 'display',
+					sort: 'sort'
+				}
+			},
+			{
+				title: 'Time Per Page',
+				data: 'timePerPage',
+				orderable: false
+			},
+			{
+				title: 'Avatar Enabled Time',
+				data: 'avatarEnabledTime',
+				type: 'num',
+				render: {
+					_: 'display',
+					sort: 'sort'
+				}
+			},
+			{
+				title: 'Video Play Time',
+				data: 'videoTime',
+				type: 'num',
+				render: {
+					_: 'display',
+					sort: 'sort'
+				}
+			},
+			{
+				title: 'Popup<br>View Count',
+				data: 'popupViewCount',
+			},
+			{
+				title: 'Actions',
 				data: 'logs',
 				orderable: false,
 				render: function(logs){
 					var firstLog = logs[0]
 					var lastLog = logs.slice(-1)[0]
-					return "<a href='<?=$module->getUrl('analytics-session.php')?>&first-log-id=" + firstLog.log_id + "&last-log-id=" + lastLog.log_id + "'><button>View Session Report</button></a>"
+					return "<a href='<?=$module->getUrl('analytics-session.php')?>&first-log-id=" + firstLog.log_id + "&last-log-id=" + lastLog.log_id + "' target='_blank'><button>View Session Report</button></a>"
 				}
 			}
 		]
@@ -308,7 +392,7 @@ $echoTableHeaders = function($headers, $data) use ($echoTableCells){
 		table.DataTable({
 			columns: columns,
 			order: [[0, 'desc']],
-			data: <?=json_encode($sessions)?>,
+			data: <?=json_encode($sessionTableData)?>,
 			searching: false,
 			dom: 'Blftip',
 			buttons: [
