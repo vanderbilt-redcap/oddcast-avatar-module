@@ -1161,6 +1161,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 
 	function getAggregateStats($sessions){
 		$stats = [];
+		$errors = [];
 
 		foreach($sessions as $session){
 			$recordId = $session['record'];
@@ -1178,7 +1179,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			
 			if(empty($pageStats)){
 				$timestampText = date('r', $firstSurveyLog['timestamp']);
-				echo "<p>Page stats were empty for the session starting on '$timestampText' for record {$firstSurveyLog['record']}.  If you do not know the cause for this, please report this error.</p>";
+				$errors[] = "The session starting on '$timestampText' for record {$firstSurveyLog['record']}.";
 				continue;
 			}
 
@@ -1211,6 +1212,6 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			}
 		}
 
-		return $stats;
+		return [$stats, $errors];
 	}
 }

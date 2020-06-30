@@ -122,7 +122,27 @@ $module->runReportUnitTests();
 <?php
 
 $sessions = $module->getSessionsForDateParams();
-$stats = $module->getAggregateStats($sessions);
+list($stats, $errors) = $module->getAggregateStats($sessions);
+
+if(!empty($errors)){
+	$errorHtml = '<p>' . implode('</p><p>', $errors) . '</p>';
+	?>
+	<br>
+	<div class='red'>
+		Page stats were empty for some sessions.
+		This is likely caused by inconsistent data, perhaps because the Analytics module was not enabled when it should have been.
+		<span>
+			<a href='#' style='text-decoration: underline'>Click here</a> to see the problematic sessions.
+			<script>
+				$(document.currentScript.parentElement).find('a').click(function(){
+					simpleDialog(<?=json_encode($errorHtml)?>, 'Sessions With Empty Page Stats')
+				})
+			</script>
+		</span>
+		If you do not know the cause for this, please report this error.
+	</div>
+	<?php
+}
 
 $echoTableCells = function($items, $header = false){
 	if($header){
@@ -276,7 +296,7 @@ foreach($sessions as $session){
 
 	$sessionTime = $lastLog['timestamp'] - $firstLog['timestamp'];
 	
-	$sessionStats = $module->getAggregateStats([$session]);
+	list($sessionStats, $errors) = $module->getAggregateStats([$session]);
 	$instrument = array_keys($sessionStats['instruments'])[0];
 
 	$timePerPage = '';
