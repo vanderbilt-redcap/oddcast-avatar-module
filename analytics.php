@@ -17,6 +17,8 @@ $module->runReportUnitTests();
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
 
+<script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
+
 <style>
 	#center{
 		flex-basis: auto;
@@ -188,7 +190,8 @@ $echoTableHeaders = function($headers, $data) use ($echoTableCells){
 	<?php
 
 	foreach($stats['instruments'] as $instrumentName=>$instrument){
-		$instrumentDisplayName = \REDCap::getInstrumentNames($instrumentName);
+		$instrumentDisplayName = $module->getInstrumentDisplayName($instrumentName);
+
 		$instrumentRowData = [];
 
 		foreach($instrument['pages'] as $pageNumber=>$page){
@@ -316,8 +319,8 @@ foreach($sessions as $session){
 		$popupViewCount +=  $details['viewCount'];
 	}
 
-	$session['instrument'] = \REDCap::getInstrumentNames($session['instrument']);
-
+	$session['instrument'] = $module->getInstrumentDisplayName($session['instrument']);
+	
 	$sessionTableData[] = array_merge($session, [
 		'sessionTime' => [
 			'display' => $module->getTimePeriodString($sessionTime),
@@ -398,9 +401,33 @@ foreach($sessions as $session){
 				data: 'logs',
 				orderable: false,
 				render: function(logs){
-					var firstLog = logs[0]
-					var lastLog = logs.slice(-1)[0]
-					return "<a href='<?=$module->getUrl('analytics-session.php')?>&first-log-id=" + firstLog.log_id + "&last-log-id=" + lastLog.log_id + "' target='_blank'><button>View Session Report</button></a>"
+					var firstLogId = ''
+					var lastLogId = ''
+					var firstLogEventId = ''
+					var lastLogEventId = ''
+
+					logs.forEach((log) => {
+						var parts = log.log_id.split('.')
+						var log_id = parts[0]
+						var log_event_id = parts[1]
+
+						if(log_event_id){
+							if(firstLogEventId === ''){
+								firstLogEventId = log_event_id
+							}
+
+							lastLogEventId = log_event_id
+						}
+						else{
+							if(firstLogId === ''){
+								firstLogId = log_id
+							}
+
+							lastLogId = log_id
+						}
+					})
+					
+					return "<a href='<?=$module->getUrl('analytics-session.php')?>&first-log-id=" + firstLogId + "&last-log-id=" + lastLogId + "&first-log-event-id=" + firstLogEventId + "&last-log-event-id=" + lastLogEventId + "' target='_blank'><button>View Session Report</button></a>"
 				}
 			}
 		]
@@ -457,6 +484,25 @@ foreach($sessions as $session){
 			customControlsForm.submit()
 			$('body').fadeOut() // poor man's loading indicator
 		})
+
+		var alternateEventsCookieName = <?=json_encode(ALTERNATE_EVENTS_COOKIE_NAME)?>;
+		var alternateEventsChecked = ''
+		if(Cookies.get(alternateEventsCookieName) === 'true'){
+			alternateEventsChecked = 'checked'
+		}
+
+		var alternateEventsCheckbox = $('<input type="checkbox" style="vertical-align: -1px;" ' + alternateEventsChecked + '>')
+		alternateEventsCheckbox.change(function(){
+			$('body').fadeOut()
+			Cookies.set(alternateEventsCookieName, alternateEventsCheckbox.is(':checked'))
+			location.reload()
+		})
+
+		var wrapper = $('<div style="clear: both; margin-bottom: 9px; margin-left: 5px" />')
+		wrapper.append
+		wrapper.append(alternateEventsCheckbox)
+		wrapper.append('<label style="display: inline"> <b>Alternate Analytics Event Detection</b> - This setting does not support all features and should only be used on time periods when the Analytics module was accidentally left disabled.</label>')
+		table.before(wrapper)
 	})
 </script>
 

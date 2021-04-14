@@ -8,19 +8,22 @@ class OddcastAvatarExternalModuleTest{
         $this->module = $module;
     }
 
-    function runReportUnitTests(){
-        $this->testGetTimePeriodString();
-        $this->testAnalyzeLogEntries_basics();
+	function runReportUnitTests(){
+		$this->testGetTimePeriodString();
+		$this->testAnalyzeLogEntries_basics();
 		$this->testAnalyzeLogEntries_avatar();
-        $this->testAnalyzeLogEntries_video();
-        $this->testGetSessionsFromLogs();
-        $this->testSetAvatarAnalyticsFields();
+		$this->testAnalyzeLogEntries_video();
+		$this->testGetSessionsFromLogs();
+		$this->testSetAvatarAnalyticsFields();
 		$this->testPageStats();
 		$this->testGetAggregateStats_mixedInstruments();
 		$this->testGetAggregateStats_mixedRecords();
 		$this->testGetAggregateStats_partials();
 		$this->testGetAggregateStats_videos();
 		$this->testGetAggregateStats_popups();
+		$this->testParseEventLogDataValues();
+		$this->testAreEventLogDataValuesTruncated();
+		$this->testMergeLogs();
 	}
 
 	private function testGetAggregateStats_mixedInstruments()
@@ -1216,7 +1219,7 @@ class OddcastAvatarExternalModuleTest{
     private function assertSame($expected, $actual){
 		if($expected !== $actual){
 			?>
-			<p>A unit test did not return an expected value.  Below is a the actual output from the test with any incorrect values crossed out and replaced with their expected values (underlined):</p>
+			<p>A unit test did not return an expected value.  Below is a the actual output from the test with any expected values that weren't present crossed out and replaced with what was actually present (underlined):</p>
 			<script src="https://cdnjs.cloudflare.com/ajax/libs/jsdiff/4.0.1/diff.min.js"></script>
 			<pre id='a' style='display: none'><?=json_encode($expected, JSON_PRETTY_PRINT)?></pre>
 			<pre id='b' style='display: none'><?=json_encode($actual, JSON_PRETTY_PRINT)?></pre>
@@ -1263,4 +1266,82 @@ class OddcastAvatarExternalModuleTest{
 	private function dump($o, $label = null){
 		$this->module->dump($o, $label);
 	}
+
+	private function getFirstFormName(){
+		$project = new \Project();
+		foreach($project->metadata as $fieldName=>$field){
+			return $field['form_name'];
+		}
+	}
+
+	private function testMergeLogs(){
+		$instrument = $this->getFirstFormName();
+
+		$moduleLogs = [
+            ['log_id' => '13', 'timestamp' => 1, 'record' => 1, 'message' => 'a'],
+			['log_id' => '17', 'timestamp' => 2, 'record' => 1, 'message' => 'b'],
+		];
+
+		$epoch = '19691231180000'; // In central time...
+
+		$completeFieldName = "{$instrument}_complete";
+
+		$eventLogs = [
+			['log_event_id' => '21', 'description' => CREATE_SURVEY_RESPONSE, 'ts' => $epoch+1, 'pk' => 1, 'data_values' => "testttt = '2',\nstateid = '20',\n{$instrument}_complete = '0'"],
+			['log_event_id' => '22', 'description' => UPDATE_SURVEY_RESPONSE, 'ts' => $epoch+2, 'pk' => 1, 'data_values' => "testttt = '2',\nstateid = '20',\n{$instrument}_complete = '0'"],
+			['log_event_id' => '23', 'description' => UPDATE_SURVEY_RESPONSE, 'ts' => $epoch+3, 'pk' => 1, 'data_values' => "$completeFieldName = '2'"],
+		];
+
+		$lastPage =$this->module->detectInstrumentAndPage([$completeFieldName => '2'])[1];
+		$expected = [
+			['log_id' => '12.21', 'timestamp' => 1, 'record' => 1, 'instrument' => $instrument, 'page' => 1, 'message' => 'survey page loaded'],
+			['log_id' => '13', 'timestamp' => 1, 'record' => 1, 'message' => 'a'],
+			['log_id' => '16.22', 'timestamp' => 1, 'record' => 1, 'instrument' => $instrument, 'page' => 1, 'message' => 'survey page loaded'],
+			['log_id' => '17', 'timestamp' => 2, 'record' => 1, 'message' => 'b'],
+            ['log_id' => '17.23', 'timestamp' => 2, 'record' => 1, 'instrument' => $instrument, 'page' => $lastPage, 'message' => 'survey complete'],
+		];
+
+		$actual = $this->module->mergeLogs(new MockMySQLResult($moduleLogs), new MockMySQLResult($eventLogs));
+	
+		$this->assertSame($expected, $actual);
+	}
+
+	function testParseEventLogDataValues(){
+        $expected = [
+			'a' => '1',
+			'b' => [1 => true, 2 => false],
+			'c' => "one\ntwo",
+			'd' => "e\nf = 'g'",
+			'underscores_and_numbers123' => ''
+		];
+        
+        $actual = $this->module->parseEventLogDataValues(implode("\n", [
+			"[instance = 1],", // should be ignored
+			"a = '1'",
+            "b(1) = checked",
+			"b(2) = unchecked",
+            "c = 'one\ntwo'",
+			"d = 'e\nf = 'g''",
+
+            "underscores_and_numbers123 = ''",
+        ]));
+
+        $this->assertSame($expected, $actual);
+
+		// TODO - Test the case where the context of a notes box (textarea) is interpretted as field changes
+    }
+    function testAreEventLogDataValuesTruncated(){
+		$assert = function($dataValues, $expected){
+			$this->assertSame($expected, $this->module->areEventLogDataValuesTruncated($dataValues));
+		};
+
+		$assert('some short string', false);
+
+        $dataValues = '';
+        while(strlen($dataValues) < $this->module->getMaxDataValuesLength()){
+            $dataValues .= ' ';
+        }
+
+        $assert($dataValues, true);
+    }
 }

@@ -3,6 +3,8 @@
 
 	"namespace": "Vanderbilt\\OddcastAvatarExternalModule",
 
+	"framework-version": 2,
+
 	"compatibility": {
         "redcap-version-min": "8.10.1"
     },

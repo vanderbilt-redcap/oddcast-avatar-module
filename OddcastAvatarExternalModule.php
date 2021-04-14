@@ -12,6 +12,9 @@ use stdClass;
 const REVIEW_MODE = 'review-mode';
 const TURNING_OFF = 'turning-off';
 const TEMPORARY_RECORD_ID_TO_DELETE = 'temporary-record-id-to-delete';
+const ALTERNATE_EVENTS_COOKIE_NAME = 'oddcast-avatar-module-alternate-navigation-event-detection';
+const CREATE_SURVEY_RESPONSE = 'Create survey response';
+const UPDATE_SURVEY_RESPONSE = 'Update survey response';
 
 class OddcastAvatarExternalModule extends AbstractExternalModule
 {
@@ -933,14 +936,54 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		// Bump the end date to the next day so all events on the day specified are include
 		$endDate = $this->formatDate(strtotime($endDate) + self::SECONDS_PER_DAY);
 
-		return $this->getSessionsForWhereClause("timestamp >= '$startDate' and timestamp < '$endDate'");
+		$eventLogs = null;
+		if($this->useAlternateNavigationEventDetection()){
+			$startTs = $this->toEventLogTimestamp($startDate);
+			$endTs = $this->toEventLogTimestamp($endDate);
+			$eventLogs = $this->getEventLogs("ts >= '$startTs' and ts < '$endTs'");
+		}
+
+		return $this->getSessionsForWhereClause("timestamp >= '$startDate' and timestamp < '$endDate'", $eventLogs);
 	}
 
 	function getSessionsForLogIdParams(){
 		$firstLogId = $this->getParam('first-log-id');
 		$lastLogId = $this->getParam('last-log-id');
+		$firstLogEventId = $this->getParam('first-log-event-id');
+		$lastLogEventId = $this->getParam('last-log-event-id');
 
-		return $this->getSessionsForWhereClause("log_id >= '$firstLogId' and log_id <= '$lastLogId'");
+		$eventLogs = null;
+		if(!empty($firstLogEventId)){
+			$eventLogs = $this->getEventLogs("log_event_id >= '$firstLogEventId' and log_event_id <= '$lastLogEventId'");
+		}
+
+		return $this->getSessionsForWhereClause("log_id >= '$firstLogId' and log_id <= '$lastLogId'", $eventLogs);
+	}
+
+	private function getEventLogs($whereClause){
+		$table = $this->framework->getProject()->getLogTable();
+		return $this->query("
+			select *
+			from $table
+			where
+				event in ('INSERT', 'UPDATE')
+				and project_id = ?
+				and description in (?, ?)
+				and $whereClause
+			order by log_event_id
+		", [
+			$this->getProjectId(),
+			CREATE_SURVEY_RESPONSE,
+			UPDATE_SURVEY_RESPONSE,
+		]);
+	}
+
+	private function toEventLogTimestamp($dateString){
+		return date('YmdHis', strtotime($dateString));
+	}
+
+	function useAlternateNavigationEventDetection(){
+		return $_COOKIE[ALTERNATE_EVENTS_COOKIE_NAME] === 'true';
 	}
 
 	private function queryLogsForWhereClause($whereClause){
@@ -974,9 +1017,170 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		return $this->queryLogs($sql);
 	}
 
-	private function getSessionsForWhereClause($whereClause){
-		$results = $this->queryLogsForWhereClause($whereClause);
-		return array_reverse($this->getSessionsFromLogs($results));
+	private function getSessionsForWhereClause($whereClause, $eventLogs){
+		$result = $this->queryLogsForWhereClause($whereClause);
+
+		if($this->useAlternateNavigationEventDetection()){
+			$result = new MockMySQLResult($this->mergeLogs($result, $eventLogs));
+		}
+
+		return array_reverse($this->getSessionsFromLogs($result));
+	}
+
+	function mergeLogs($moduleLogResult, $eventLogResult){
+		$moduleLogs = [];
+		while($log = $moduleLogResult->fetch_assoc()){
+			if(in_array($log['message'], ['survey page loaded', 'survey complete'])){
+				/**
+				 * Skip this log since we'll be recreating it from other events.
+				 * This is especially useful for testing by using periods where the Analytics module was actually enabled
+				 * and comparing output with and without alternate event detection.
+				 */
+				
+				continue;
+			}
+
+			$moduleLogs[] = $log;
+		}
+
+		$lastCreateOrUpdateByRecord = null;
+		while($log = $eventLogResult->fetch_assoc()){
+			$description = $log['description'];
+			
+			$isCreate = $description === CREATE_SURVEY_RESPONSE;
+			$isUpdate = $description === UPDATE_SURVEY_RESPONSE;
+
+			if($isCreate || $isUpdate){
+				$record = $log['pk'];
+				$dataValues = $this->parseEventLogDataValues($log);
+				
+				if(!empty($dataValues)){
+					list($instrument, $page) = $this->detectInstrumentAndPage($dataValues);	
+
+					/**
+					 * The empty values here will set below, but are specified to normalize order.
+					 */
+					$logToInsert = [
+						'log_id' => '',
+						'timestamp' => '',
+						'record' => $record,
+						'instrument' => $instrument,
+						'page' => $page,
+					];
+
+					if($isCreate){
+						$timestamp = strtotime($log['ts']);
+
+						$insertPosition = $this->getIndexOfFirstLogForRecord($moduleLogs, $record);
+						if($insertPosition === null){
+							// We likely started in the middle of a session,
+							// just pretend it starts with this log.
+							$insertPosition = $this->getInsertPositionByTimestamp($moduleLogs, $log);
+							if($insertPosition > 0){
+								$insertPosition--;
+							}
+						}
+						else{
+							$timestamp = min($timestamp, $moduleLogs[$insertPosition]['timestamp']);
+						}
+					}
+					else if($isUpdate){
+						$lastCreateOrUpdate = @$lastCreateOrUpdateByRecord[$record];
+						if(!$lastCreateOrUpdate){
+							// We likely started in the middle of a session,
+							// just pretend it starts with this log.
+							$lastCreateOrUpdate = $log;
+						}
+
+						$insertPosition = $this->getInsertPositionByTimestamp($moduleLogs, $lastCreateOrUpdate);
+						$timestamp = strtotime($lastCreateOrUpdate['ts']);
+					}
+
+					if($insertPosition === count($moduleLogs)){
+						$previousLogId = $moduleLogs[$insertPosition-1]['log_id'];
+					}
+					else{
+						$previousLogId = $moduleLogs[$insertPosition]['log_id'] - 1;
+					}
+
+					/**
+					 * Cast to an int in case the previous log ID already includes an event log decimal ID.
+					 */
+					$previousLogId = (int) $previousLogId;
+
+					/**
+					 * These decimal log IDs are convenient because they automatically work with
+					 * greater/less than checks in the code.
+					 */
+					$logToInsert['log_id'] = $previousLogId . '.' . $log['log_event_id'];
+					$logToInsert['timestamp'] = $timestamp;
+
+					if(@$dataValues["{$instrument}_complete"] === '2'){
+						$logToInsert['message'] = 'survey complete';
+					}
+					else{
+						$logToInsert['message'] = 'survey page loaded';
+					}
+
+					array_splice($moduleLogs, $insertPosition, 0, [$logToInsert]);
+				}
+
+				$lastCreateOrUpdateByRecord[$record] = $log;
+			}
+		}
+
+		return $moduleLogs;
+	}
+
+	private function getIndexOfFirstLogForRecord($logs, $record){
+		for($i=0; $i<count($logs); $i++){
+			if($logs[$i]['record'] === $record){
+				return $i;
+			}
+		}
+
+		return null;
+	}
+
+	private function getInsertPositionByTimestamp($logs, $log){
+		$timestamp = strtotime($log['ts']);
+
+		for($i=0; $i<count($logs); $i++){
+			if($timestamp < $logs[$i]['timestamp']){
+				break;
+			}
+		}
+
+		return $i;
+	}
+
+	function detectInstrumentAndPage($dataValues){
+		$firstDataFieldName = array_keys($dataValues)[0];
+		$p = new \Project();
+		
+		$page = 1;
+		$lastForm = '';
+		foreach($p->metadata as $fieldName=>$field){
+			$form = $field['form_name'];
+			if($form !== $lastForm){
+				if($firstDataFieldName === "{$lastForm}_complete"){
+					return [$lastForm, $page];
+				}
+
+				$page = 1;
+			}
+			else if($field['element_preceding_header'] !== null){
+				$page++;
+			}
+
+			if($fieldName === $firstDataFieldName){
+				return [$form, $page];
+			}
+
+			$lastForm = $form;
+		}
+		
+		throw new Exception("Unable to detect the instrument and page for the '$firstDataFieldName' field!");
 	}
 
 	private function isDebugLoggingEnabled(){
@@ -1199,5 +1403,101 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		}
 
 		return [$stats, $errors];
+	}
+
+	private function getDataValues($rowOrDataValues){
+		if(is_array($rowOrDataValues)){
+			return $rowOrDataValues['data_values'];
+		}
+		else{
+			return $rowOrDataValues;
+		}
+    }
+
+	function areEventLogDataValuesTruncated($rowOrDataValues){
+        $raw = $this->getDataValues($rowOrDataValues);
+        return strlen($raw) === $this->getMaxDataValuesLength();
+    }
+
+	function parseEventLogDataValues($rowOrDataValues){
+		$raw = $this->getDataValues($rowOrDataValues);
+		if($raw === null){
+			return [];
+		}
+		else if($this->areEventLogDataValuesTruncated($raw)){
+			// The data values were very likely truncated.
+			// This can be safely ignored for this project,
+			// but I wanted to include this check in case it's
+			// needed for future projects.
+		}
+
+		$lines = explode("\n", $raw);
+		
+		$data = [];
+		$fieldName = null;
+		$value = null;
+		foreach($lines as $line){
+			if(strpos($line, '[instance = ') === 0){
+				/**
+				 * These aren't really needed for this project, so we can skip them.
+				 * We should revisit this if we repurpose this code for another project.
+				 */
+				continue;
+			}
+
+			if($fieldName === null){
+				$parts = explode(' = ', $line);
+				if(count($parts) === 1){
+					throw new Exception("Error parsing data values: " . json_encode($rowOrDataValues, JSON_PRETTY_PRINT));
+				}
+
+				$fieldName = $parts[0];
+				$value = $parts[1];
+				$checkboxCode = null;
+
+				$parts = explode('(', $fieldName);
+				if(count($parts) === 1){
+					$value = substr($value, 1); // remove the leading single quote
+				}
+				else{ // This is a checkbox
+					$fieldName = $parts[0];
+					$checkboxCode = rtrim($parts[1], ')');
+					$value .= "'";  // Simulate a trailing single quote, so the following code can be re-used.
+				}
+			}
+			else{
+				// We're continuing a multiline value.
+				$value .= "\n$line";
+			}
+
+			if(substr($value, -1) === "'"){
+				$value = substr($value, 0, -1); // remove trailing quote
+				
+				if($checkboxCode === null){
+					$data[$fieldName] = $value;
+				}
+				else{
+					$data[$fieldName][$checkboxCode] = $value === 'checked';
+				}
+
+				$fieldName = null; // start the next field
+			}
+		}
+
+		return $data;
+    }
+
+	function getMaxDataValuesLength(){
+		return pow(2, 16) - 1;
+	}
+
+	function getInstrumentDisplayName($instrumentName){
+		$instrumentDisplayName = \REDCap::getInstrumentNames($instrumentName);
+		if(empty($instrumentDisplayName)){
+			// This instrument may have been renamed since this log entry.
+			$instrumentDisplayName = $instrumentName;
+		}
+
+		return $instrumentDisplayName;
 	}
 }
