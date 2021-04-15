@@ -1101,7 +1101,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 					 */
 					$logId = $previousLogId . '.' . $log['log_event_id'];
 
-					list($instrument, $page) = $this->detectInstrumentAndPage($dataValues, $moduleLogs, $insertPosition);
+					list($instrument, $page) = $this->detectInstrumentAndPage($dataValues);
 
 					if(@$dataValues["{$instrument}_complete"] === '2'){
 						$message = 'survey complete';
