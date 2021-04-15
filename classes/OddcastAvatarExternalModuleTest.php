@@ -1301,8 +1301,9 @@ class OddcastAvatarExternalModuleTest{
 	}
 
 	function testDetectInstrumentAndPage_unknownField(){
-		$actual = $this->module->detectInstrumentAndPage(['some_unknown_field' => 1]);
-		$this->assertSame(['Unknown', '?'], $actual);
+		$fieldName = 'some_unknown_field';
+		$actual = $this->module->detectInstrumentAndPage([$fieldName => 1]);
+		$this->assertSame(['Not Found: ' . $fieldName, '?'], $actual);
 	}
 
 	function testParseEventLogDataValues(){
