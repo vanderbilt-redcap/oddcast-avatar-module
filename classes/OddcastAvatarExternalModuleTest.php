@@ -9,6 +9,10 @@ class OddcastAvatarExternalModuleTest{
     }
 
 	function runReportUnitTests(){
+		if($_SERVER['HTTP_HOST'] !== 'localhost'){
+			return;
+		}
+
 		foreach(get_class_methods($this) as $method){
 			if(strpos($method, 'test') === 0){
 				$this->{$method}();
