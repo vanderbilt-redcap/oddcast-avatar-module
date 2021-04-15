@@ -1150,29 +1150,30 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 	}
 
 	function detectInstrumentAndPage($dataValues){
-		$firstDataFieldName = array_keys($dataValues)[0];
 		$p = new \Project();
 		
 		$page = 1;
 		$lastForm = '';
-		foreach($p->metadata as $fieldName=>$field){
-			$form = $field['form_name'];
-			if($form !== $lastForm){
-				if($firstDataFieldName === "{$lastForm}_complete"){
-					return [$lastForm, $page];
+		foreach($dataValues as $dataFieldName=>$dataValue){
+			foreach($p->metadata as $fieldName=>$field){
+				$form = $field['form_name'];
+				if($form !== $lastForm){
+					if($dataFieldName === "{$lastForm}_complete"){
+						return [$lastForm, $page];
+					}
+	
+					$page = 1;
 				}
-
-				$page = 1;
+				else if($field['element_preceding_header'] !== null){
+					$page++;
+				}
+	
+				if($fieldName === $dataFieldName){
+					return [$form, $page];
+				}
+	
+				$lastForm = $form;
 			}
-			else if($field['element_preceding_header'] !== null){
-				$page++;
-			}
-
-			if($fieldName === $firstDataFieldName){
-				return [$form, $page];
-			}
-
-			$lastForm = $form;
 		}
 		
 		return ['Unknown', '?'];
