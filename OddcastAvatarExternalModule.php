@@ -1055,19 +1055,6 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 				$dataValues = $this->parseEventLogDataValues($log);
 				
 				if(!empty($dataValues)){
-					list($instrument, $page) = $this->detectInstrumentAndPage($dataValues);	
-
-					/**
-					 * The empty values here will set below, but are specified to normalize order.
-					 */
-					$logToInsert = [
-						'log_id' => '',
-						'timestamp' => '',
-						'record' => $record,
-						'instrument' => $instrument,
-						'page' => $page,
-					];
-
 					if($isCreate){
 						$timestamp = strtotime($log['ts']);
 
@@ -1112,17 +1099,25 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 					 * These decimal log IDs are convenient because they automatically work with
 					 * greater/less than checks in the code.
 					 */
-					$logToInsert['log_id'] = $previousLogId . '.' . $log['log_event_id'];
-					$logToInsert['timestamp'] = $timestamp;
+					$logId = $previousLogId . '.' . $log['log_event_id'];
+
+					list($instrument, $page) = $this->detectInstrumentAndPage($dataValues, $moduleLogs, $insertPosition);
 
 					if(@$dataValues["{$instrument}_complete"] === '2'){
-						$logToInsert['message'] = 'survey complete';
+						$message = 'survey complete';
 					}
 					else{
-						$logToInsert['message'] = 'survey page loaded';
+						$message = 'survey page loaded';
 					}
 
-					array_splice($moduleLogs, $insertPosition, 0, [$logToInsert]);
+					array_splice($moduleLogs, $insertPosition, 0, [[
+						'log_id' => $logId,
+						'timestamp' => $timestamp,
+						'record' => $record,
+						'instrument' => $instrument,
+						'page' => $page,
+						'message' => $message,
+					]]);
 				}
 
 				$lastCreateOrUpdateByRecord[$record] = $log;
