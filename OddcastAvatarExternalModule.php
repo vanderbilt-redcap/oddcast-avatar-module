@@ -1175,7 +1175,11 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			$lastForm = $form;
 		}
 		
-		return ['Unknown', '?'];
+		return [
+			// Display the fieldname, so it can be added as a hidden field.
+			"Not Found: $firstDataFieldName",
+			'?'
+		];
 	}
 
 	private function isDebugLoggingEnabled(){
