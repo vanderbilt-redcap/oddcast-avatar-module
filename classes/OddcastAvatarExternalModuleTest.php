@@ -9,21 +9,11 @@ class OddcastAvatarExternalModuleTest{
     }
 
 	function runReportUnitTests(){
-		$this->testGetTimePeriodString();
-		$this->testAnalyzeLogEntries_basics();
-		$this->testAnalyzeLogEntries_avatar();
-		$this->testAnalyzeLogEntries_video();
-		$this->testGetSessionsFromLogs();
-		$this->testSetAvatarAnalyticsFields();
-		$this->testPageStats();
-		$this->testGetAggregateStats_mixedInstruments();
-		$this->testGetAggregateStats_mixedRecords();
-		$this->testGetAggregateStats_partials();
-		$this->testGetAggregateStats_videos();
-		$this->testGetAggregateStats_popups();
-		$this->testParseEventLogDataValues();
-		$this->testAreEventLogDataValuesTruncated();
-		$this->testMergeLogs();
+		foreach(get_class_methods($this) as $method){
+			if(strpos($method, 'test') === 0){
+				$this->{$method}();
+			}
+		}
 	}
 
 	private function testGetAggregateStats_mixedInstruments()
@@ -1306,6 +1296,11 @@ class OddcastAvatarExternalModuleTest{
 		$this->assertSame($expected, $actual);
 	}
 
+	function testDetectInstrumentAndPage_unknownField(){
+		$actual = $this->module->detectInstrumentAndPage(['some_unknown_field' => 1]);
+		$this->assertSame(['Unknown', '?'], $actual);
+	}
+
 	function testParseEventLogDataValues(){
         $expected = [
 			'a' => '1',
@@ -1330,6 +1325,7 @@ class OddcastAvatarExternalModuleTest{
 
 		// TODO - Test the case where the context of a notes box (textarea) is interpretted as field changes
     }
+
     function testAreEventLogDataValuesTruncated(){
 		$assert = function($dataValues, $expected){
 			$this->assertSame($expected, $this->module->areEventLogDataValuesTruncated($dataValues));

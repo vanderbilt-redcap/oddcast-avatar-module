@@ -1180,7 +1180,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 			$lastForm = $form;
 		}
 		
-		throw new Exception("Unable to detect the instrument and page for the '$firstDataFieldName' field!");
+		return ['Unknown', '?'];
 	}
 
 	private function isDebugLoggingEnabled(){
