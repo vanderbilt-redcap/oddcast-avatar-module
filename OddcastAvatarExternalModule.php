@@ -1141,7 +1141,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		$timestamp = strtotime($log['ts']);
 
 		for($i=0; $i<count($logs); $i++){
-			if($timestamp < $logs[$i]['timestamp']){
+			if($logs[$i]['timestamp'] > $timestamp){
 				break;
 			}
 		}
