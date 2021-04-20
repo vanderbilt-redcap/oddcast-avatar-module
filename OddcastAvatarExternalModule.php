@@ -1083,7 +1083,10 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 						$timestamp = strtotime($lastCreateOrUpdate['ts']);
 					}
 
-					if($insertPosition === count($moduleLogs)){
+					if(empty($moduleLogs)){
+						$previousLogId = $this->getPreviousLogId($timestamp);
+					}
+					else if($insertPosition === count($moduleLogs)){
 						$previousLogId = $moduleLogs[$insertPosition-1]['log_id'];
 					}
 					else{
@@ -1125,6 +1128,22 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		}
 
 		return $moduleLogs;
+	}
+
+	private function getPreviousLogId($timestamp){
+		// The "-1" clauses prevent the query from being limited to current module/project.
+		$result = $this->queryLogs('
+			select log_id
+			where
+				external_module_id != -1
+				and project_id != -1
+				and timestamp < from_unixtime(?)
+			order by log_id desc
+			limit 1
+		', $timestamp);
+
+		$row = $result->fetch_assoc();
+		return $row['log_id'];
 	}
 
 	private function getIndexOfFirstLogForRecord($logs, $record){

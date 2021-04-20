@@ -1268,7 +1268,7 @@ class OddcastAvatarExternalModuleTest{
 		}
 	}
 
-	private function testMergeLogs(){
+	function testMergeLogs(){
 		$instrument = $this->getFirstFormName();
 
 		$moduleLogs = [
@@ -1296,6 +1296,37 @@ class OddcastAvatarExternalModuleTest{
 		];
 
 		$actual = $this->module->mergeLogs(new MockMySQLResult($moduleLogs), new MockMySQLResult($eventLogs));
+	
+		$this->assertSame($expected, $actual);
+	}
+
+	function testMergeLogs_emptyModuleLogs(){
+		$instrument = $this->getFirstFormName();
+
+		$ts = '20210101000000';
+		$timestamp = strtotime($ts);
+
+		$completeFieldName = "{$instrument}_complete";
+
+		$eventLogs = [
+			['log_event_id' => '21', 'description' => CREATE_SURVEY_RESPONSE, 'ts' => $ts+1, 'pk' => 1, 'data_values' => "testttt = '2',\nstateid = '20',\n{$instrument}_complete = '0'"],
+			['log_event_id' => '22', 'description' => UPDATE_SURVEY_RESPONSE, 'ts' => $ts+2, 'pk' => 1, 'data_values' => "testttt = '2',\nstateid = '20',\n{$instrument}_complete = '0'"],
+			['log_event_id' => '23', 'description' => UPDATE_SURVEY_RESPONSE, 'ts' => $ts+3, 'pk' => 1, 'data_values' => "$completeFieldName = '2'"],
+		];
+
+		$lastPage =$this->module->detectInstrumentAndPage([$completeFieldName => '2'])[1];
+		$expected = [
+			['log_id' => '', 'timestamp' => $timestamp+1, 'record' => 1, 'instrument' => $instrument, 'page' => 1, 'message' => 'survey page loaded'],
+			['log_id' => '', 'timestamp' => $timestamp+1, 'record' => 1, 'instrument' => $instrument, 'page' => 1, 'message' => 'survey page loaded'],
+			['log_id' => '', 'timestamp' => $timestamp+2, 'record' => 1, 'instrument' => $instrument, 'page' => $lastPage, 'message' => 'survey complete'],
+		];
+
+		$actual = $this->module->mergeLogs(new MockMySQLResult([]), new MockMySQLResult($eventLogs));
+
+		$previousLogId = (int) $actual[0]['log_id'];
+		for($i=0; $i<count($actual); $i++){
+			$expected[$i]['log_id'] = $previousLogId . '.' . $eventLogs[$i]['log_event_id'];
+		}
 	
 		$this->assertSame($expected, $actual);
 	}
