@@ -1067,7 +1067,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 								$insertPosition--;
 							}
 						}
-						else{
+						else if (@$moduleLogs[$insertPosition]){
 							$timestamp = min($timestamp, $moduleLogs[$insertPosition]['timestamp']);
 						}
 					}
