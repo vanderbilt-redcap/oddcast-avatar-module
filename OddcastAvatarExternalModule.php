@@ -1531,7 +1531,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 
 		$emails = [];
 		foreach($users as $user){
-			if($user->isSuperUser()){
+			if($user->hasDesignRights()){
 				$emails[] = $user->getEmail();
 			}
 		}
