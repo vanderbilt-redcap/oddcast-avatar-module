@@ -501,7 +501,7 @@ foreach($sessions as $session){
 		var wrapper = $('<div style="clear: both; margin-bottom: 9px; margin-left: 5px" />')
 		wrapper.append
 		wrapper.append(alternateEventsCheckbox)
-		wrapper.append('<label style="display: inline"> <b>Alternate Analytics Event Detection</b> - This setting does not support all features and should only be used on time periods when the Analytics module was accidentally left disabled.</label>')
+		wrapper.append('<label style="display: inline"> <b>Alternate Analytics Event Detection</b> - This setting does not support all features, can be very slow, and is only intended to be used during time periods when the Analytics module was accidentally left disabled.</label>')
 		table.before(wrapper)
 	})
 </script>
