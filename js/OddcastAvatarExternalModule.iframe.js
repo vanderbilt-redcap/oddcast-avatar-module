@@ -10,6 +10,7 @@ OddcastAvatarExternalModule.addProperties({
 
 		if(!ExternalModules.Vanderbilt.AnalyticsExternalModule){
 			$('#container').prepend('<div class="red" style="margin: 5px; margin-top: -3px; margin-bottom: 13px">WARNING:<br>Analytics data is not being captured because the Analytics module is not enabled.<br>Please contact a REDCap administrator to fix this issue.</div>')
+			$.post(OddcastAvatarExternalModule.settings.analyticsModuleWarningUrl)
 		}
 
 		$(window).on('beforeunload', function(){

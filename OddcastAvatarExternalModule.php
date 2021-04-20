@@ -213,6 +213,7 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 					'temporaryRecordIdFieldName' => TEMPORARY_RECORD_ID_TO_DELETE,
 					'speechRate' => $this->getProjectSetting('speech-rate'),
 					'emptyMP3Url' => $this->getUrl('empty.mp3'),
+					'analyticsModuleWarningUrl' => $this->getUrl('analytics-module-warning.php')
 				])?>
 
 				var jsObjectUrl
@@ -1517,5 +1518,35 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 		}
 
 		return $instrumentDisplayName;
+	}
+
+	function sendErrorEmail($message){
+		if(!method_exists($this->framework, 'getProject')){
+			// This REDCap version is older and doesn't have the methods needed for error reporting.
+			return;
+		}
+
+		$project = $this->framework->getProject();
+		$users = $project->getUsers();
+
+		$emails = [];
+		foreach($users as $user){
+			if($user->isSuperUser()){
+				$emails[] = $user->getEmail();
+			}
+		}
+
+		global $homepage_contact_email;
+		if(empty($emails)){
+			// There aren't any super users on the project.  Send to the system admin instead.
+			$emails[] = $homepage_contact_email;
+		}
+
+		\REDCap::email(
+			implode(', ', $emails),
+			$homepage_contact_email,
+			"REDCap Oddcast Avatar Module Warning",
+			$message
+		);
 	}
 }
