@@ -5,7 +5,10 @@ OddcastAvatarExternalModule.addProperties({
 	iFrameLoaded: false,
 	isPaused: false,
 	initializeParent: function(){
-		OddcastAvatarExternalModule.loadOddcastCode()
+		if(!OddcastAvatarExternalModule.settings.avatarDisabled){
+			OddcastAvatarExternalModule.loadOddcastCode()
+		}
+
 		OddcastAvatarExternalModule.loadIFrame()
 
 		$('#oddcast-maximize-avatar').click(function () {
