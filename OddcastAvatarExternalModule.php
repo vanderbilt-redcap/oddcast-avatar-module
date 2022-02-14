@@ -363,12 +363,6 @@ class OddcastAvatarExternalModule extends AbstractExternalModule
 	}
 
 	// This method now exists in the External Modules core code, but is duplicated here for compatibility with older REDCap versions.
-	public function getFieldLabel($project_id, $fieldName){
-		$dictionary = \REDCap::getDataDictionary($project_id, 'array', false, [$fieldName]);
-		return $dictionary[$fieldName]['field_label'];
-	}
-	
-	// This method now exists in the External Modules core code, but is duplicated here for compatibility with older REDCap versions.
 	public function getPublicSurveyUrl(){
 		$instrumentNames = \REDCap::getInstrumentNames();
 		$formName = db_real_escape_string(key($instrumentNames));
